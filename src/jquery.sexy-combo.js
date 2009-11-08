@@ -1,6 +1,6 @@
 /***************************************************************************
  *                                                                         *
- *	sexy-combo @VERSION	: A jQuery date time picker.                       *
+ *	sexy-combo @VERSION	: A jQuery date time picker.
  *                                                                         *
  *	Authors:                                                               *
  *		Kadalashvili.Vladimir@gmail.com - Vladimir Kadalashvili            *
@@ -56,7 +56,7 @@
 	    separator: ",", //separator for values of multiple combos
 		key: "value", //key json name for key/value pair
 		value: "text", //value json for key/value pair
-		delayFilter: ($.support.style) ? 10 : 300, //msec to wait before re-filter; ie needs bigger for performance
+		delayFilter: ($.support.style) ? 15 : 300, //msec to wait before re-filter; ie needs bigger for performance
 		caseSensitive: false, //search
 		
 		//all callback functions are called in the scope of the current sexyCombo instance
@@ -362,7 +362,7 @@
 	
 	    //shows dropdown list
 	    showList: function() {
-	        if (!this.trie.matches.length) return;
+	        if (this.trie.matches && !this.trie.matches.length) return;
 
 	        this.listWrapper.removeClass("invisible").addClass("visible");
 	        this.wrapper.css("zIndex", "99999");
@@ -502,12 +502,15 @@
 	
 	    //adds / removes items to / from the dropdown list depending on combo's current value
 	    filter: function() {
-		    if ("yes" == this.wrapper.data("sc:optionsChanged")) {
-		        var self = this;
-		        this.listItems.remove();
-                this.options = this.selectbox.children().filter("option");
+	        var self = this;
+	    	
+			if(this.allOnTimeout) clearTimeout(self.allOnTimeout);
+
+	    	if ("yes" == self.wrapper.data("sc:optionsChanged")) {
+		        self.listItems.remove();
+                self.options = self.selectbox.children().filter("option");
                 
-	            this.options.each(function() {
+	            self.options.each(function() {
 	                var optionText = $.trim($(this).text());
 	                $("<li />").appendTo(self.list).
 		                text(optionText).
@@ -515,21 +518,20 @@
 	    
 	            }); 
 	
-	            this.listItems = this.list.children();
+	            self.listItems = self.list.children();
 	
-	            this.listItems.bind("mouseover", function(e) {
+	            self.listItems.bind("mouseover", function(e) {
 	                self.highlight(e.target);
 	            });
 	    
-	            this.listItems.bind("click", function(e) {
+	            self.listItems.bind("click", function(e) {
 	                self.listItemClick($(e.target));
 	            });
 			
 			    self.wrapper.data("sc:optionsChanged", "");
 		    }
 			
-	        var comboValue = this.input.val();
-	        var self = this;
+	        var comboValue = self.input.val();
 /*
 	        this.listItems.each(function() {
 	            var $this = $(this);
@@ -544,10 +546,10 @@
 	        });
 	   */  
 	        
-	        var mm = this.trie.findPrefixMatchesAndMisses(self.getCurrentTextValue());
+	        var mm = self.trie.findPrefixMatchesAndMisses(self.getCurrentTextValue());
 	        
-	        this.trie.matches = mm.matches;
-	        this.trie.misses = mm.misses;
+	        self.trie.matches = mm.matches;
+	        self.trie.misses = mm.misses;
 	        //console.log("matchesLength: " + mm.matches.length + " : " + self.getCurrentTextValue() );
 	        //console.log("missesLength: " + mm.misses.length + " : " + self.getCurrentTextValue() );
 	        
@@ -563,8 +565,8 @@
 	        setAttr(mm.misses, classAttr,"invisible" );
 	        setAttr(mm.matches, classAttr,"visible" );
 
-	        this.setOverflow();
-	        this.setListHeight();
+	        self.setOverflow();
+	        self.setListHeight();
 	    },
 		
 		//default dropdown list filtering function
@@ -658,7 +660,7 @@
 			 * a new keypress if it has occurred, and re-call this method, cancelling the cascade.
 			 */
 			var self = this;
-			var yieldTime = 10;
+			var yieldTime = 3;
 
 			//cancel any yielding timeouts
 			if(this.setOnTimeout) clearTimeout(self.setOnTimeout);
@@ -669,13 +671,15 @@
 			this.filterOnTimeout = setTimeout(function(){filter();}, this.config.delayFilter);
 			
 			var filter = function () {
-				console.log("Filter");
+//				console.time("Filter");
 				self.filter();
+//				console.timeEnd("Filter");
 				self.updateOnTimeout = setTimeout(function(){update();}, yieldTime); 
 			};
 
+
 			var update = function () {
-				console.log("Update");
+//				console.time("Update");
 			    if (self.liLen()) {
 			    	self.showList();
 			    	self.setOverflow();
@@ -683,14 +687,15 @@
 			    } else {
 			    	self.hideList();
 			    }
+//				console.timeEnd("Update");
 			    self.setOnTimeout = setTimeout(function(){set();}, yieldTime); 
 			};
 		
 			var set = function () {
-				console.log("Set");
+//				console.time("Set");
 			    self.setHiddenValue(self.input.val());
 			    self.notify("textChange");
-			    
+//				console.timeEnd("Set");
 			};
 		},
 		
