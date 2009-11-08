@@ -181,25 +181,83 @@
 	    //initializes all event listeners
         initEvents: function() {
 	        var self = this;
-			
-	        this.icon.bind("click", function(e) {
-	            if (!self.wrapper.data("sc:positionY"))	{
-		            self.wrapper.data("sc:positionY", e.pageY);	    	
-		        }
-	        });
-	
-	        this.input.bind("click", function(e) {
-	            if (!self.wrapper.data("sc:positionY"))	{
-		            self.wrapper.data("sc:positionY", e.pageY);	    	
-		        }								 
-	        });
+	        
+	        // wrapper
+	        this.wrapper.bind("click", function(e) {
+	        	if (!self.wrapper.data("sc:positionY"))	{
+	        		self.wrapper.data("sc:positionY", e.pageY);	 
+	        	}									   
+	        });					
 
 	        this.wrapper.bind("click", function(e) {
 	            if (!self.wrapper.data("sc:positionY"))	{
 		            self.wrapper.data("sc:positionY", e.pageY);	 
 		        }									   
-	        });					
-	    
+	        });		        
+
+	        this.wrapper.bind("click", function() {
+	            self.wrapper.data("sc:lastEvent", "click");								
+	        });
+	        
+	        this.wrapper.bind("keyup", function(e) {
+		        var k = e.keyCode;
+		        for (key in $sc.KEY) {
+		            if ($sc.KEY[key] == k) {
+			            return;	
+			        }
+		        }
+	            self.wrapper.data("sc:lastEvent", "key");	
+	        });	
+	
+	        // input
+	        this.input.bind("click", function(e) {
+	            if (!self.wrapper.data("sc:positionY"))	{
+		            self.wrapper.data("sc:positionY", e.pageY);	    	
+		        }								 
+	        });
+	        
+			this.input.bind("keyup", function(e) {
+				self.wrapper.data("sc:lastEvent", "key");							                
+				self.keyUp(e);
+			});		
+
+	        this.input.bind("keypress", function(e) {
+	            if ($sc.KEY.RETURN == e.keyCode) {
+	                e.preventDefault();
+			    }
+		        if ($sc.KEY.TAB == e.keyCode)
+			        e.preventDefault();
+	        });
+	        
+		    this.input.bind("click", function(e) {
+			    self.wrapper.data("sc:lastEvent", "click");	
+			    self.icon.trigger("click");
+		    });
+
+	        this.input.bind("keydown", function(e) {
+	            if (9 == e.keyCode) {
+		            e.preventDefault();
+		        }
+	        });
+	
+	        this.input.bind("click", function() {
+	            self.wrapper.data("sc:lastEvent", "click");		
+            });
+	
+
+	        this.input.bind("click", function(e) {
+	            if (!self.wrapper.data("sc:positionY"))	{
+		            self.wrapper.data("sc:positionY", e.pageY);	    	
+		        }								 
+	        });
+	
+	        // icon
+	        this.icon.bind("click", function(e) {
+	        	if (!self.wrapper.data("sc:positionY"))	{
+	        		self.wrapper.data("sc:positionY", e.pageY);	    	
+	        	}
+	        });
+	        
 	        this.icon.bind("click", function() {
 		        if (self.input.attr("disabled")) {
 			         self.input.attr("disabled", false);   
@@ -208,7 +266,14 @@
 		        self.filter();
 	            self.iconClick();
 	        }); 
+	        
+	        this.icon.bind("click", function(e) {
+	            if (!self.wrapper.data("sc:positionY"))	{
+		            self.wrapper.data("sc:positionY", e.pageY);	    	
+		        }
+	        });
 	    
+	        // list items
 	        this.listItems.bind("mouseover", function(e) {
 	            //self.highlight(e.target);
 				if ("LI" == e.target.nodeName.toUpperCase()) {
@@ -222,21 +287,7 @@
 	        this.listItems.bind("click", function(e) {
 	            self.listItemClick($(e.target));
 	        });
-		
-			this.input.bind("keyup", function(e) {
-				self.wrapper.data("sc:lastEvent", "key");							                
-				//$sc.log(self.wrapper.data("sc:lastEvent"));
-				self.keyUp(e);
-			});		
-
-	        this.input.bind("keypress", function(e) {
-	            if ($sc.KEY.RETURN == e.keyCode) {
-	                e.preventDefault();
-			    }
-		        if ($sc.KEY.TAB == e.keyCode)
-			        e.preventDefault();
-	        });
-	    
+	        
 	        $(document).bind("click", function(e) {
 	            if ((self.icon.get(0) == e.target) || (self.input.get(0) == e.target)) return;
 		        self.hideList();    
@@ -245,55 +296,6 @@
 	        this.triggerSelected();
 	        this.applyEmptyText();
 
-		    this.input.bind("click", function(e) {
-			    self.wrapper.data("sc:lastEvent", "click");	
-			    self.icon.trigger("click");
-		    });
-
-	        this.wrapper.bind("click", function() {
-	            self.wrapper.data("sc:lastEvent", "click");								
-	        });
-	
-	        this.input.bind("keydown", function(e) {
-	            if (9 == e.keyCode) {
-		            e.preventDefault();
-		        }
-	        });
-	
-	        this.wrapper.bind("keyup", function(e) {
-		        var k = e.keyCode;
-		        for (key in $sc.KEY) {
-		            if ($sc.KEY[key] == k) {
-			            return;	
-			        }
-		        }
-	            self.wrapper.data("sc:lastEvent", "key");	
-				//$sc.log("Last evt is key");
-	        });	
-	
-	        this.input.bind("click", function() {
-	            self.wrapper.data("sc:lastEvent", "click");		
-            });
-	
-	        this.icon.bind("click", function(e) {
-	            if (!self.wrapper.data("sc:positionY"))	{
-		            self.wrapper.data("sc:positionY", e.pageY);	    	
-		        }
-	        });
-	
-	        this.input.bind("click", function(e) {
-	            if (!self.wrapper.data("sc:positionY"))	{
-		            self.wrapper.data("sc:positionY", e.pageY);	    	
-		        }								 
-	        });
-	
-
-	        this.wrapper.bind("click", function(e) {
-	            if (!self.wrapper.data("sc:positionY"))	{
-		            self.wrapper.data("sc:positionY", e.pageY);	 
-		        }									   
-	        });				
-			
 			this.notify("initEvents");
 	    },
 
@@ -560,480 +562,434 @@
 	        this.setOverflow();
 	        this.setListHeight();
 	    },
-	
-	//default dropdown list filtering function
-	filterFn: function(currentComboValue, itemValue, allComboValues) {
-		if ("click" == this.wrapper.data("sc:lastEvent")) {
-		    return true;	
-		}
-
-	    if (!this.multiple) {
-	        return itemValue.toLowerCase().indexOf(currentComboValue.toLowerCase()) == 0;
-	    }
-	    else { //exclude values that are already selected
-			for (var i = 0, len = allComboValues.length; i < len; ++i) {
-			    if (itemValue == allComboValues[i]) {
-			        return false;
-			    }
-			}
-			return itemValue.toLowerCase().search(currentComboValue.toLowerCase()) == 0;
-	    }
-	},
-	
-	//just returns integer value of list wrapper's max-height property
-	getListMaxHeight: function() {
-		var result = parseInt(this.listWrapper.css("maxHeight"), 10);
-		if (isNaN(result)) {
-		    result = this.singleItemHeight * 10;	
-		}
-		return result;
-	},
-	
-	//corrects list wrapper's height depending on list items height
-	setListHeight: function() {
-	    var liHeight = this.getListItemsHeight();
-	    var maxHeight = this.getListMaxHeight();
-	    var listHeight = this.listWrapper.height();
-
-	    if (liHeight < listHeight) {
-	        this.listWrapper.height(liHeight); 
-			return liHeight;
-
-	    } else if (liHeight > listHeight) {
-	        this.listWrapper.height(Math.min(maxHeight, liHeight));
-			return Math.min(maxHeight, liHeight);
-	    }
-	},
-	
-	//returns active (hovered) element of the dropdown list
-	getActive: function() {
-	    return this.listItems.filter(".active");
-	},
-	
-	keyUp: function(e) {
-	    this.lastKey = e.keyCode;
-	    var k = $sc.KEY;
-	    switch (e.keyCode) {
-	        case k.RETURN:
-			case k.TAB:
-				//this.input.focus();
-			    this.setComboValue(this.getActive().text(), true, true);
-			    if (!this.multiple){
-			        //this.input.blur(); //
-			    }	
-				break;
-			case k.DOWN:
-			    this.highlightNext();
-			    break;
-			case k.UP:
-			    this.highlightPrev();
-			    break;
-			case k.ESC:
-			    this.hideList();
-			    break;
-			default:
-			    this.inputChanged();
-				break;
-	    }
-	},
-	
-	//returns number of currently visible list items
-	liLen: function() {
-	    //return this.listItems.filter(".visible").length;
-		return this.trie.matches.length;
-	},
-	
-	//triggered when the user changes combo value by typing
-	inputChanged: function() {
-	    if (this.liLen()) {
-	        this.showList();
-			this.setOverflow();
-			this.setListHeight();
-	    } else {
-	        this.hideList();
-	    }
-
-	    this.setHiddenValue(this.input.val());
-	    this.notify("textChange");
-	},
-	
-	//highlights first item of the dropdown list
-	highlightFirst: function() {
-	    //this.listItems.removeClass("active").filter(".visible:eq(0)").addClass("active");
-		$(this.trie.matches[0]).addClass("active");
-	    this.autoFill();
-	},
-	
-	highlightSelected: function() {
-        //already clobbered :) this.listItems.removeClass("active");
-		//var val = $.trim(this.input.val());
 		
-		try {
-			/*
-			this.listItems.each(function() {
-			    var $this = $(this);
-				if ($this.text() == val) {
-				    $this.addClass("active");	
+		//default dropdown list filtering function
+		filterFn: function(currentComboValue, itemValue, allComboValues) {
+			if ("click" == this.wrapper.data("sc:lastEvent")) {
+			    return true;	
+			}
+	
+		    if (!this.multiple) {
+		        return itemValue.toLowerCase().indexOf(currentComboValue.toLowerCase()) == 0;
+		    }
+		    else { //exclude values that are already selected
+				for (var i = 0, len = allComboValues.length; i < len; ++i) {
+				    if (itemValue == allComboValues[i]) {
+				        return false;
+				    }
+				}
+				return itemValue.toLowerCase().search(currentComboValue.toLowerCase()) == 0;
+		    }
+		},
+		
+		//just returns integer value of list wrapper's max-height property
+		getListMaxHeight: function() {
+			var result = parseInt(this.listWrapper.css("maxHeight"), 10);
+			if (isNaN(result)) {
+			    result = this.singleItemHeight * 10;	
+			}
+			return result;
+		},
+		
+		//corrects list wrapper's height depending on list items height
+		setListHeight: function() {
+		    var liHeight = this.getListItemsHeight();
+		    var maxHeight = this.getListMaxHeight();
+		    var listHeight = this.listWrapper.height();
+	
+		    if (liHeight < listHeight) {
+		        this.listWrapper.height(liHeight); 
+				return liHeight;
+	
+		    } else if (liHeight > listHeight) {
+		        this.listWrapper.height(Math.min(maxHeight, liHeight));
+				return Math.min(maxHeight, liHeight);
+		    }
+		},
+		
+		//returns active (hovered) element of the dropdown list
+		getActive: function() {
+		    return this.listItems.filter(".active");
+		},
+		
+		keyUp: function(e) {
+		    this.lastKey = e.keyCode;
+		    var k = $sc.KEY;
+		    switch (e.keyCode) {
+		        case k.RETURN:
+				case k.TAB:
+					//this.input.focus();
+				    this.setComboValue(this.getActive().text(), true, true);
+				    if (!this.multiple){
+				        //this.input.blur(); //
+				    }	
+					break;
+				case k.DOWN:
+				    this.highlightNext();
+				    break;
+				case k.UP:
+				    this.highlightPrev();
+				    break;
+				case k.ESC:
+				    this.hideList();
+				    break;
+				default:
+				    this.inputChanged();
+					break;
+		    }
+		},
+		
+		//returns number of currently visible list items
+		liLen: function() {
+		    //return this.listItems.filter(".visible").length;
+			return this.trie.matches.length;
+		},
+		
+		//triggered when the user changes combo value by typing
+		inputChanged: function() {
+			this.filter();
+			
+		    if (this.liLen()) {
+		        this.showList();
+				this.setOverflow();
+				this.setListHeight();
+		    } else {
+		        this.hideList();
+		    }
+	
+		    this.setHiddenValue(this.input.val());
+		    this.notify("textChange");
+		},
+		
+		//highlights first item of the dropdown list
+		highlightFirst: function() {
+		    //this.listItems.removeClass("active").filter(".visible:eq(0)").addClass("active");
+			$(this.trie.matches[0]).addClass("active");
+		    this.autoFill();
+		},
+		
+		highlightSelected: function() {
+	        //already clobbered :) this.listItems.removeClass("active");
+			//var val = $.trim(this.input.val());
+			
+			try {
+				/*
+				this.listItems.each(function() {
+				    var $this = $(this);
+					if ($this.text() == val) {
+					    $this.addClass("active");	
+						self.listWrapper.scrollTop(0);
+						self.scrollDown();
+					}
+				});
+				*/
+				
+				/*is this even needed? maybe combos
+				
+				var matches = this.trie.findPrefixMatches(val);
+				if(matches.length == 1) {
+					$(matches[0]).addClass("active");	
 					self.listWrapper.scrollTop(0);
 					self.scrollDown();
-				}
-			});
-			*/
-			
-			/*is this even needed? maybe combos
-			
-			var matches = this.trie.findPrefixMatches(val);
-			if(matches.length == 1) {
-				$(matches[0]).addClass("active");	
-				self.listWrapper.scrollTop(0);
-				self.scrollDown();
-				
-			} else{
-			*/
-
-			//no match, must be partial input string; highlight first item
-			this.highlightFirst();
-
-		} catch (e) {}
-	},
+					
+				} else{
+				*/
 	
-	//highlights item of the dropdown list next to the currently active item
-	highlightNext: function() {
-	    var $next = this.getActive().next();
-	    
-	    while ($next.hasClass("invisible") && $next.length) {
-	        $next = $next.next();
-	    }
-	    
-	    if ($next.length) {
-	        this.listItems.removeClass("active");
-		$next.addClass("active");
-		this.scrollDown();
-	    }
-	},
+				//no match, must be partial input string; highlight first item
+				this.highlightFirst();
 	
-	//scrolls list wrapper down when needed
-	scrollDown: function() {
-	    if ("scroll" != this.listWrapper.css(this.overflowCSS))
-	        return;
+			} catch (e) {}
+		},
 		
-            var beforeActive = this.getActiveIndex() + 1;
-			/*if ($.browser.opera)
-			    ++beforeActive;*/
-	    
-	    var minScroll = this.listItems.outerHeight() * beforeActive - this.listWrapper.height();
-        
-		if ($.browser.msie)
-            minScroll += beforeActive;
-	    
-	    if (this.listWrapper.scrollTop() < minScroll)
-	        this.listWrapper.scrollTop(minScroll);
-	},
-	
-	
-	//highlights list item before currently active item
-	highlightPrev: function() {
-	    var $prev = this.getActive().prev();
-	    
-	    while ($prev.length && $prev.hasClass("invisible"))
-	        $prev = $prev.prev();
-		
-            if ($prev.length) {
-	        this.getActive().removeClass("active");
-		$prev.addClass("active");
-		this.scrollUp();
-	    }
-	},
-	
-	//returns index of currently active list item
-	getActiveIndex: function() {
-	    return $.inArray(this.getActive().get(0), this.listItems.filter(".visible").get());
-	},
-	
-	
-	//scrolls list wrapper up when needed
-	scrollUp: function() {
-	    
-	    if ("scroll" != this.listWrapper.css(this.overflowCSS))
-	        return;
-		
-	    var maxScroll = this.getActiveIndex() * this.listItems.outerHeight();
-	    
-	    if (this.listWrapper.scrollTop() > maxScroll) {
-	        this.listWrapper.scrollTop(maxScroll);
-	    }     
-	},
-	
-	//emptyText stuff
-	applyEmptyText: function() {
-	    if (!this.config.emptyText.length)
-	        return;
-		
-	    var self = this;	
-	    this.input.bind("focus", function() {
-                self.inputFocus();
-	    }).
-	    bind("blur", function() {
-                self.inputBlur();
-	    });	
-	    
-	    if ("" == this.input.val()) {
-	        this.input.addClass("empty").val(this.config.emptyText);
-	    }
-	},
-	
-	inputFocus: function() {
-	    if (this.input.hasClass("empty")) {
-		this.input.removeClass("empty").
-		val("");
-        }
-	},
-	
-	inputBlur: function() {
-	    if ("" == this.input.val()) {
-		this.input.addClass("empty").
-		val(this.config.emptyText);
-	    }
-	    
-	},
-	
-	//triggerSelected stuff
-	triggerSelected: function() {
-	    if (!this.config.triggerSelected)
-	        return;
-		
-	    var self = this;	
-		try {
-	    this.options.each(function() {
-	        if ($(this).attr("selected")) {
-		        self.setComboValue($(this).text(), false, true);
-				throw new Error();
+		//highlights item of the dropdown list next to the currently active item
+		highlightNext: function() {
+		    var $next = this.getActive().next();
+		    
+		    while ($next.hasClass("invisible") && $next.length) {
+		        $next = $next.next();
 		    }
-	    });	
-		} catch (e) {
-		    return;	
-		}
+		    
+		    if ($next.length) {
+		        this.listItems.removeClass("active");
+			$next.addClass("active");
+			this.scrollDown();
+		    }
+		},
 		
-        self.setComboValue(this.options.eq(0).text(), false, false);
-	},
-	
-	//autofill stuff
-	autoFill: function() {
-	    if (!this.config.autoFill || ($sc.KEY.BACKSPACE == this.lastKey) || this.multiple)
-	        return;
-		    	
-	    var curVal = this.input.val();
-	    var newVal = this.getActive().text();
-	    this.input.val(newVal);
-	    this.selection(this.input.get(0), curVal.length, newVal.length);
-	   
-	    	
-	},
-	
-	//provides selection for autofilling
-	//borrowed from jCarousel
-	selection: function(field, start, end) {
-	    if( field.createTextRange ){
-		var selRange = field.createTextRange();
-		selRange.collapse(true);
-		selRange.moveStart("character", start);
-		selRange.moveEnd("character", end);
-		selRange.select();
-	    } else if( field.setSelectionRange ){
-		field.setSelectionRange(start, end);
-	    } else {
-		if( field.selectionStart ){
-			field.selectionStart = start;
-			field.selectionEnd = end;
-		}
-	    }
-	   // field.focus();	
-	},
-	
-	
-	//for internal use
-	updateDrop: function() {
-	    if (this.config.dropUp)
-	        this.listWrapper.addClass("list-wrapper-up");
-	    else 
-	        this.listWrapper.removeClass("list-wrapper-up");		
-	},
-	
-	//updates dropUp config option
-	setDropUp: function(drop) {
-        this.config.dropUp = drop;   
-	    this.updateDrop(); 
-	},
-	
-	notify: function(evt) {
-	    if (!$.isFunction(this.config[evt + "Callback"]))
-	        return;
+		//scrolls list wrapper down when needed
+		scrollDown: function() {
+		    if ("scroll" != this.listWrapper.css(this.overflowCSS))
+		        return;
+			
+	            var beforeActive = this.getActiveIndex() + 1;
+				/*if ($.browser.opera)
+				    ++beforeActive;*/
+		    
+		    var minScroll = this.listItems.outerHeight() * beforeActive - this.listWrapper.height();
+	        
+			if ($.browser.msie)
+	            minScroll += beforeActive;
+		    
+		    if (this.listWrapper.scrollTop() < minScroll)
+		        this.listWrapper.scrollTop(minScroll);
+		},
 		
-	    this.config[evt + "Callback"].call(this);	
-	}
+		
+		//highlights list item before currently active item
+		highlightPrev: function() {
+		    var $prev = this.getActive().prev();
+		    
+		    while ($prev.length && $prev.hasClass("invisible"))
+		        $prev = $prev.prev();
+			
+	            if ($prev.length) {
+		        this.getActive().removeClass("active");
+			$prev.addClass("active");
+			this.scrollUp();
+		    }
+		},
+		
+		//returns index of currently active list item
+		getActiveIndex: function() {
+		    return $.inArray(this.getActive().get(0), this.listItems.filter(".visible").get());
+		},
+		
+		
+		//scrolls list wrapper up when needed
+		scrollUp: function() {
+		    
+		    if ("scroll" != this.listWrapper.css(this.overflowCSS))
+		        return;
+			
+		    var maxScroll = this.getActiveIndex() * this.listItems.outerHeight();
+		    
+		    if (this.listWrapper.scrollTop() > maxScroll) {
+		        this.listWrapper.scrollTop(maxScroll);
+		    }     
+		},
+		
+		//emptyText stuff
+		applyEmptyText: function() {
+		    if (!this.config.emptyText.length)
+		        return;
+			
+		    var self = this;	
+		    this.input.bind("focus", function() {
+		    	self.inputFocus();
+		    }).bind("blur", function() {
+		    	self.inputBlur();
+		    });	
+		    
+		    if ("" == this.input.val()) {
+		        this.input.addClass("empty").val(this.config.emptyText);
+		    }
+		},
+		
+		inputFocus: function() {
+		    if (this.input.hasClass("empty")) {
+		    	this.input.removeClass("empty").val("");
+	        }
+		},
+		
+		inputBlur: function() {
+		    if ("" == this.input.val()) {
+		    	this.input.addClass("empty").val(this.config.emptyText);
+		    }
+		},
+		
+		triggerSelected: function() {
+		    if (!this.config.triggerSelected) return;
+			
+		    var self = this;	
+			try {
+			    this.options.each(function() {
+			        if ($(this).attr("selected")) {
+				        self.setComboValue($(this).text(), false, true);
+						throw new Error();
+				    }
+			    });	
+			} catch (e) {
+			    return;	
+			}
+			
+	        self.setComboValue(this.options.eq(0).text(), false, false);
+		},
+		
+		autoFill: function() {
+		    if (!this.config.autoFill || ($sc.KEY.BACKSPACE == this.lastKey) || this.multiple) return;
+			    	
+		    var curVal = this.input.val();
+		    var newVal = this.getActive().text();
+		    this.input.val(newVal);
+		    this.selection(this.input.get(0), curVal.length, newVal.length);
+		},
+		
+		//provides selection for autofilling
+		//borrowed from jCarousel
+		selection: function(field, start, end) {
+		    if( field.createTextRange ){
+				var selRange = field.createTextRange();
+				selRange.collapse(true);
+				selRange.moveStart("character", start);
+				selRange.moveEnd("character", end);
+				selRange.select();
+		    } else if( field.setSelectionRange ){
+		    	field.setSelectionRange(start, end);
+		    } else {
+				if( field.selectionStart ){
+					field.selectionStart = start;
+					field.selectionEnd = end;
+				}
+		    }
+		   // field.focus();	
+		},
+		
+		
+		//for internal use
+		updateDrop: function() {
+		    if (this.config.dropUp) {
+		        this.listWrapper.addClass("list-wrapper-up");
+		    } else {
+		        this.listWrapper.removeClass("list-wrapper-up");	
+		    }
+		},
+		
+		//updates dropUp config option
+		setDropUp: function(drop) {
+	        this.config.dropUp = drop;   
+		    this.updateDrop(); 
+		},
+		
+		notify: function(evt) {
+		    if (!$.isFunction(this.config[evt + "Callback"])) return;
+		    this.config[evt + "Callback"].call(this);	
+		}
+	
     });
     
     $sc.extend({
-        //key codes
-	//from jCarousel
-        KEY: {
-	    UP: 38,
-	    DOWN: 40,
-	    DEL: 46,
-	    TAB: 9,
-	    RETURN: 13,
-	    ESC: 27,
-	    COMMA: 188,
-	    PAGEUP: 33,
-	    PAGEDOWN: 34,
-	    BACKSPACE: 8	
-	},
-	
-	//for debugging
-	log: function(msg) {
-	    var $log = $("#log");
-	    $log.html($log.html() + msg + "<br />");
-	},
-	
-    createSelectbox: function(config) {
-	    var $selectbox = $("<select />").
-	    appendTo(config.container).
-	    attr({name: config.name, id: config.id, size: "1"});
-	    
-	    if (config.multiple)
-	        $selectbox.attr("multiple", true);
-	    
-	    var data = config.data;
-	    var selected = false;
-	    
-	    for (var i = 0, len = data.length; i < len; ++i) {
-	        selected = data[i].selected || false;
-	        $("<option />").appendTo($selectbox).
-			attr("value", data[i][config.key]).
-			text(data[i][config.value]).
-			attr("selected", selected);
-	    }
-	    
-	    return $selectbox.get(0);
-	},
-	
-	create: function(config) {
-            var defaults = {
-	        //the name of the selectbox
-	        name: "",
-		//the ID of the selectbox
-		id: "",
-		//data for the options
-		/*
-		This is an array of objects. The objects should contain the following properties:
-		(string)value - the value of the <option>
-		(string) text - text of the <option>
-		(bool) selected - if set to true, "selected" attribute of this <option> will be set to true
-		*/
-		data: [],
+    	KEY: { //key codes
+		    UP: 38,
+		    DOWN: 40,
+		    DEL: 46,
+		    TAB: 9,
+		    RETURN: 13,
+		    ESC: 27,
+		    COMMA: 188,
+		    PAGEUP: 33,
+		    PAGEDOWN: 34,
+		    BACKSPACE: 8	
+    	},
+
+		log: function(msg) {
+		    var $log = $("#log");
+		    $log.html($log.html() + msg + "<br />");
+		},
 		
-		//if true, combo with multiple choice will be created
-		multiple: false,
-		
-		//key json name for key/value pair
-		key: "value",
-		
-		//value json for key/value pair
-		value: "text",		
-		
-		//an element that will contain the widget
-		container: $(document),
-		//url that contains JSON object for options data
-		//format is the same as in data config option
-		//if passed, "data" config option will be ignored
-		url: "",
-		//params for AJAX request
-		ajaxData: {}
-	    };
-	    config = $.extend({}, defaults, config || {});
-	    
-            if (config.url) {
-	        return $.getJSON(config.url, config.ajaxData, function(data) {
-		    delete config.url;
-		    delete config.ajaxData;
-		    config.data = data;
-		    return $sc.create(config);
-		});
-	    }
-	    
-	    config.container = $(config.container);
-	    
-            var selectbox = $sc.createSelectbox(config);
-	    return new $sc(selectbox, config);
-	    
-	},
-	
-	deactivate: function($select) {
-	    $select = $($select);
-		$select.each(function() {
-		    if ("SELECT" != this.tagName.toUpperCase()) {
-			    return;	
-			}
-			var $this = $(this);
-			if (!$this.parent().is(".combo")) {
-			    return;	
-			}
-			//$this.parent().find("input[type='text']").attr("disabled", true);
-			
-		});
-	},
-	
-	activate: function($select) {
-	    $select = $($select);
-		$select.each(function() {
-		    if ("SELECT" != this.tagName.toUpperCase()) {
-			    return;	
-			}
-			var $this = $(this);
-			if (!$this.parent().is(".combo")) {
-			    return;	
-			}
-			$this.parent().find("input[type='text']").attr("disabled", false);
-		});		
-	},
-	
-	changeOptions: function($select) {
-		$select = $($select);
-        $select.each(function() {
-		    if ("SELECT" != this.tagName.toUpperCase()) {
-			    return;	
-			}
-			
-			var $this = $(this);
-			var $wrapper  = $this.parent();
-			var $input = $wrapper.find("input[type='text']");
-			var $listWrapper = $wrapper.find("ul").parent();
-			
-	        $listWrapper.removeClass("visible").
-	        addClass("invisible");
-	        $wrapper.css("zIndex", "0");
-	        $listWrapper.css("zIndex", "99999");			
-			
-			$input.val("");
-			$wrapper.data("sc:optionsChanged", "yes");
-			var $selectbox = $this;
-		    $selectbox.parent().find("input[type='text']").val($selectbox.find("option:eq(0)").text());
-		    $selectbox.parent().data("sc:lastEvent", "click");
-		    $selectbox.find("option:eq(0)").attr('selected','selected');
-		});
-	},
-	
-	normalizeArray: function(arr) {
-	    var result = [];
-	    for (var i = 0, len =arr.length; i < len; ++i) {
-	        if ("" == arr[i])
-		    continue;
+	    createSelectbox: function(config) {
+		    var $selectbox = $("<select />").
+			    appendTo(config.container).
+			    attr({name: config.name, id: config.id, size: "1"});
 		    
-		result.push(arr[i]);    
-	    }
-	    
-	    return result;
-	}
+		    if (config.multiple) $selectbox.attr("multiple", true);
+		    
+		    var data = config.data;
+		    var selected = false;
+		    
+		    for (var i = 0, len = data.length; i < len; ++i) {
+		        selected = data[i].selected || false;
+		        $("<option />").appendTo($selectbox).
+					attr("value", data[i][config.key]).
+					text(data[i][config.value]).
+					attr("selected", selected);
+		    }
+		    
+		    return $selectbox.get(0);
+		},
+		
+		create: function(config) {
+            var defaults = {
+		        name: "", //the name of the selectbox
+				id: "", //the ID of the selectbox
+				multiple: false, //if true, combo with multiple choice will be created
+				key: "value", //key json name for key/value pair
+				value: "text", //value json for key/value pair
+				container: $(document), //an element that will contain the widget
+				url: "",  // url giving JSON data object.  Overrides "data" config option 
+				ajaxData: {}, //params for AJAX request
+            	data: [] /* data array of objects. Each object is:
+					{value: <option> value, text: <option> text, selected: true|false}  */
+		    };
+            
+		    config = $.extend({}, defaults, config || {});
+		    
+	            if (config.url) {
+		        return $.getJSON(config.url, config.ajaxData, function(data) {
+				    delete config.url;
+				    delete config.ajaxData;
+				    config.data = data;
+				    return $sc.create(config);
+				});
+		    }
+		    config.container = $(config.container);
+	        var selectbox = $sc.createSelectbox(config);
+
+	        return new $sc(selectbox, config);
+		},
+		
+		deactivate: function($select) {
+		    $select = $($select);
+			$select.each(function() {
+			    if ("SELECT" != this.tagName.toUpperCase())  return;	
+			    var $this = $(this);
+				if (!$this.parent().is(".combo")) return;	
+				//$this.parent().find("input[type='text']").attr("disabled", true);
+			});
+		},
+		
+		activate: function($select) {
+		    $select = $($select);
+			$select.each(function() {
+			    if ("SELECT" != this.tagName.toUpperCase()) return;	
+				var $this = $(this);
+				if (!$this.parent().is(".combo")) return;	
+				$this.parent().find("input[type='text']").attr("disabled", false);
+			});		
+		},
+		
+		changeOptions: function($select) {
+			$select = $($select);
+	        $select.each(function() {
+			    if ("SELECT" != this.tagName.toUpperCase()) return;	
+				
+				var $this = $(this);
+				var $wrapper  = $this.parent();
+				var $input = $wrapper.find("input[type='text']");
+				var $listWrapper = $wrapper.find("ul").parent();
+				
+		        $listWrapper.removeClass("visible").
+			        addClass("invisible");
+			        $wrapper.css("zIndex", "0");
+			        $listWrapper.css("zIndex", "99999");			
+				
+				$input.val("");
+				$wrapper.data("sc:optionsChanged", "yes");
+				var $selectbox = $this;
+			    $selectbox.parent().find("input[type='text']").val($selectbox.find("option:eq(0)").text());
+			    $selectbox.parent().data("sc:lastEvent", "click");
+			    $selectbox.find("option:eq(0)").attr('selected','selected');
+			});
+		},
+		
+		normalizeArray: function(arr) {
+		    var result = [];
+		    for (var i = 0, len =arr.length; i < len; ++i) {
+		        if ("" == arr[i]) continue;
+		        result.push(arr[i]);    
+		    }
+		    return result;
+		}
+
     });
  
     
