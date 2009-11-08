@@ -30,15 +30,18 @@
 ;(function($) {
 
 	$.fn.sexyCombo = function(config) {
-        return this.each(function() {
+		console.time("init");
+        var chain = this.each(function() {
 			if ("SELECT" != this.tagName.toUpperCase()) {
 			    return;	
 			}
 		    new $sc(this, config);
 	    });  
+		console.timeEnd("init");
+        
+        return chain;
     };
     
-    //default config options
     var defaults = {
         skin: "sexy", //skin name
 	    suffix: "__sexyCombo", // suffix appended to selectbox name, will be text input's name
@@ -53,7 +56,9 @@
 	    separator: ",", //separator for values of multiple combos
 		key: "value", //key json name for key/value pair
 		value: "text", //value json for key/value pair
-
+		delayFilter: ($.support.style) ? 10 : 300, //msec to wait before re-filter; ie needs bigger for performance
+		caseSensitive: false, //search
+		
 		//all callback functions are called in the scope of the current sexyCombo instance
 	    showListCallback: null, //called after dropdown list appears
 	    hideListCallback: null, //called after dropdown list disappears
@@ -64,8 +69,7 @@
 		checkWidth: true
     };
     
-    //constructor
-    //creates initial markup and does some initialization
+    //constructor: create initial markup and initialize
     $.sexyCombo = function(selectbox, config) {
 		
         if (selectbox.tagName.toUpperCase() != "SELECT") return;
@@ -112,9 +116,9 @@
 	    this.list = $("<ul />").appendTo(this.listWrapper); 
 	    var self = this;
 		var optWidths = [];
-		var trie = new Trie();
-		this.trie = trie;
 
+		this.trie = new Trie(this.config.caseSensitive);
+		var trie = this.trie;
 		
 	    this.options.each(function() {					   
 	        var optionText = $.trim($(this).text());
@@ -641,24 +645,53 @@
 		
 		//returns number of currently visible list items
 		liLen: function() {
-		    //return this.listItems.filter(".visible").length;
 			return this.trie.matches.length;
 		},
 		
 		//triggered when the user changes combo value by typing
 		inputChanged: function() {
-			this.filter();
+			/*
+			 * For performance reasons, this has 3 blocks that cascade on timeouts;
+			 * Re-entry here will cancel after 1/3rd of method time, not whole method time. 
+			 * 
+			 * The "yield time" is enough for the program count to get back to sense and trigger 
+			 * a new keypress if it has occurred, and re-call this method, cancelling the cascade.
+			 */
+			var self = this;
+			var yieldTime = 10;
+
+			//cancel any yielding timeouts
+			if(this.setOnTimeout) clearTimeout(self.setOnTimeout);
+			if(this.updateOnTimeout) clearTimeout(self.updateOnTimeout);
+			if(this.filterOnTimeout) clearTimeout(self.filterOnTimeout);
 			
-		    if (this.liLen()) {
-		        this.showList();
-				this.setOverflow();
-				this.setListHeight();
-		    } else {
-		        this.hideList();
-		    }
-	
-		    this.setHiddenValue(this.input.val());
-		    this.notify("textChange");
+			// defer till no typing for "delayFilter" msec.
+			this.filterOnTimeout = setTimeout(function(){filter();}, this.config.delayFilter);
+			
+			var filter = function () {
+				console.log("Filter");
+				self.filter();
+				self.updateOnTimeout = setTimeout(function(){update();}, yieldTime); 
+			};
+
+			var update = function () {
+				console.log("Update");
+			    if (self.liLen()) {
+			    	self.showList();
+			    	self.setOverflow();
+			    	self.setListHeight();
+			    } else {
+			    	self.hideList();
+			    }
+			    self.setOnTimeout = setTimeout(function(){set();}, yieldTime); 
+			};
+		
+			var set = function () {
+				console.log("Set");
+			    self.setHiddenValue(self.input.val());
+			    self.notify("textChange");
+			    
+			};
 		},
 		
 		//highlights first item of the dropdown list
@@ -1002,15 +1035,30 @@
     /**
      * Constructor
      */
-    function Trie() {
+    function Trie(isCaseSensitive) {
+    	this.isCaseSensitive = isCaseSensitive || false;
         this.root = [null, {}]; //masterNode
     };
 
     /**
      * Add (String, Object) to store 
      */
+    Trie.prototype.cleanString = function( inStr ) {
+    	if(!this.isCaseSensitive){
+    		inStr = inStr.toLowerCase();
+    	}
+    	
+    	//invalid char clean here
+    	
+    	return inStr;
+    }
+    
+    /**
+     * Add (String, Object) to store 
+     */
     Trie.prototype.add = function( key, object ) {
-        var curNode = this.root;
+        key = this.cleanString(key);
+    	var curNode = this.root;
         var kLen = key.length; 
         
         for(var i = 0; i < kLen; i++) {
@@ -1048,6 +1096,7 @@
      * returns [trieNode, remainder]
      */
     Trie.prototype.findNodePartial = function(key) {
+        key = this.cleanString(key);
 		var curNode = this.root;
 		var remainder = key;
 		var kLen = key.length;
@@ -1095,7 +1144,7 @@
      * Get array of all objects exactly matching the key (String) 
      */
 	Trie.prototype.findPrefixMatches = function(key) { 
-		var trieNode = findNode(this, key);
+		var trieNode = findNode(key);
 		return this.getValues(trieNode);
 	}
 
@@ -1103,7 +1152,7 @@
      * Get array of all objects not matching entire key (String) 
      */
 	Trie.prototype.findPrefixMisses = function(key) { // string 
-		var trieNode = findNode(this, key);
+		var trieNode = findNode(key);
 		return this.getMissValues(this.root, trieNode);
 	};
 	
