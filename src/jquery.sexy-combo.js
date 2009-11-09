@@ -56,7 +56,7 @@
 
 		autoFill: false, //enable autofilling 
 		dropUp: false, //if true, the options list will be placed above text input
-		checkWidth: true, //
+		checkWidth: false, //
 		
 		separator: ",", //separator for values of multiple combos
 		key: "value", //key json name for key/value pair
@@ -90,7 +90,6 @@
         var suffixName = selectName + this.config.suffix;
         if(this.config.switchNames) this.selectbox.attr("name", suffixName);
 
-        this.options = this.selectbox.children("option");
 	    this.wrapper = this.selectbox.wrap("<div>").
 		    //hide().
 		    parent().
@@ -115,34 +114,20 @@
 	    this.list = $("<ul />").appendTo(this.listWrapper); 
 	    var self = this;
 		var optWidths = [];
-		this.trie = new Trie(this.config.caseSensitive);
-		this.trie.matches = [];
-		this.trie.misses = [];
 		
-	    // copy all rows
-		this.options.each(function() {					   
-	    	var optionText = $.trim($(this).text());
-            var newItem = $('<li class="visible"><span>' + optionText + '</span></li>').
-	            appendTo(self.list);
-
-            newItem.data("optionNode", this);
-            self.trie.add(optionText, newItem.get(0));
-
-            if (self.config.checkWidth) {
-			    optWidths.push(newItem.find("span").outerWidth());	
-			}
-	    });
+		
+		this.populateFromSelect();
+		
+		if (optWidths.length) {
+			optWidths = optWidths.sort(function(a, b) {
+				return a - b;									
+			});
+			var maxOptionWidth = optWidths[optWidths.length - 1];
+		}
 	    
 	    this.listItems = this.list.children();
 	    this.singleItemHeight = this.listItems.outerHeight();
 	    this.listWrapper.addClass("invisible");
-
-	    if (optWidths.length) {
-		    optWidths = optWidths.sort(function(a, b) {
-		        return a - b;									
-		    });
-		    var maxOptionWidth = optWidths[optWidths.length - 1];
-		}
 
         
 		 if ("function" == typeof this.listWrapper.bgiframe) {
@@ -164,8 +149,6 @@
 		    this.overflowCSS = "overflow";	
 		}
 		
-	    if(this.config.triggerSelected)this.triggerSelected();
-
 	    this.filter(); //prep in case icon clicked first
 	    
 	    this.notify("init");
@@ -504,6 +487,30 @@
         	for(nodePtr in array) {
         		array[nodePtr].setAttribute(attr, val);
         	}
+        },
+        
+        populateFromSelect: function() {
+    		this.options = this.selectbox.children("option");
+    		this.trie = new Trie(this.config.caseSensitive);
+    		this.trie.matches = [];
+    		this.trie.misses = [];
+    		var self = this;
+    		
+    	    // copy all rows
+    		this.options.each(function() {					   
+    	    	var optionText = $.trim($(this).text());
+                var newItem = $('<li class="visible"><span>' + optionText + '</span></li>').
+    	            appendTo(self.list);
+
+                newItem.data("optionNode", this);
+                self.trie.add(optionText, newItem.get(0));
+
+                if (self.config.checkWidth) {
+    			   // optWidths.push(newItem.find("span").outerWidth());	
+    			}
+    	    });
+    	    if(this.config.triggerSelected)this.triggerSelected();
+    		
         },
 	    
 	    //adds / removes items to / from the dropdown list depending on combo's current value
@@ -947,24 +954,21 @@
 		changeOptions: function($select) {
 			$select = $($select);
 	        $select.each(function() {
-			    if ("SELECT" != this.tagName.toUpperCase()) return;	
-				
-				var $this = $(this);
-				var $wrapper  = $this.parent();
-				var $input = $wrapper.find("input[type='text']");
-				var $listWrapper = $wrapper.find("ul").parent();
-				
-		        $listWrapper.removeClass("visible").
-			        addClass("invisible");
-			        $wrapper.css("zIndex", "0");
-			        $listWrapper.css("zIndex", "99999");			
-				
-				$input.val("");
-				$wrapper.data("sc:optionsChanged", "yes");
-				var $selectbox = $this;
-			    $selectbox.parent().find("input[type='text']").val($selectbox.find("option:eq(0)").text());
-			    $selectbox.parent().data("sc:lastEvent", "click");
-			    $selectbox.find("option:eq(0)").attr('selected','selected');
+			    var sc = $(this).data("sexy-combo");
+			    if(sc) {
+			    	//hidedropdown
+			        sc.listWrapper.removeClass("visible").
+				        addClass("invisible");
+				    sc.wrapper.css("zIndex", "0");
+				    sc.listWrapper.css("zIndex", "99999");			
+				    
+				    sc.disable();
+				    sc.populateFromSelect();
+				    sc.undisable();
+				    
+					sc.wrapper.data("sc:optionsChanged", "yes");
+			    }
+
 			});
 		},
 		
@@ -972,7 +976,7 @@
 		    $select = $($select);
 			$select.each(function() {
 			    var sc = $(this).data("sexy-combo");
-			    sc.undisable();
+			    if(sc) sc.undisable();
 			});
 
 		},
@@ -981,7 +985,7 @@
 		    $select = $($select);
 			$select.each(function() {
 			    var sc = $(this).data("sexy-combo");
-			    sc.disable();
+			    if(sc) sc.disable();
 			});
 		},
 		
@@ -989,7 +993,7 @@
 		    $select = $($select);
 			$select.each(function() {
 			    var sc = $(this).data("sexy-combo");
-			    sc.triggerSelected();
+			    if(sc) sc.triggerSelected();
 			});
 		},
 
