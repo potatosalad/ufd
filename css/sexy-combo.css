@@ -60,7 +60,9 @@ div.combo {
 }
 
 /*used when emptyText config opt is set. Applied to text input*/
-.combo input.empty {}
+.combo input.empty {
+	color: #ccc;
+}
 
 
 
