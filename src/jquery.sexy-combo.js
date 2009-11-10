@@ -57,6 +57,7 @@
 		autoFill: false, //enable autofilling 
 		dropUp: false, //if true, the options list will be placed above text input
 		checkWidth: false, //
+		zIndexPopup: 100, // dropdown z-index
 		
 		separator: ",", //separator for values of multiple combos
 		key: "value", //key json name for key/value pair
@@ -90,8 +91,8 @@
         var suffixName = selectName + this.config.suffix;
         if(this.config.switchNames) this.selectbox.attr("name", suffixName);
 
-	    this.wrapper = this.selectbox.wrap("<div>").
-		    //hide().
+	    this.wrapper = this.selectbox.wrap("<span>").
+		    //hide(). //in CSS
 		    parent().
 		    addClass("combo").
 		    addClass(this.config.skin); 
@@ -106,9 +107,7 @@
 	
 	    this.listWrapper = $('<div class="list-wrapper"/>').
 		    appendTo(this.wrapper);
-		    //addClass("invisible").
-		    //addClass("list-wrapper"); 
-	    	    
+
 	    this.updateDrop();
 	    this.isDisabled = false;
 	    this.list = $("<ul />").appendTo(this.listWrapper); 
@@ -125,20 +124,19 @@
 			var maxOptionWidth = optWidths[optWidths.length - 1];
 		}
 	    
-	    this.listItems = this.list.children();
+	    
 	    this.singleItemHeight = this.listItems.outerHeight();
 	    this.listWrapper.addClass("invisible");
 
         
 		 if ("function" == typeof this.listWrapper.bgiframe) {
-		    this.listWrapper.bgiframe(); // scrollbar still underlayed
+		    //this.listWrapper.bgiframe(); // scrollbar still underlayed?
 		}
        
 	    if ($.browser.opera) {
 	        this.wrapper.css({position: "relative", left: "0", top: "0"});
 	    } 
 	
-	    this.filterFn = ("function" == typeof(this.config.filterFn)) ? this.config.filterFn : this.filterFn;
 	    this.lastKey = null;
 	    this.multiple = this.selectbox.attr("multiple");
 	    var self = this;
@@ -176,7 +174,7 @@
 	        });					
 
 	        this.wrapper.bind("keyup", function(e) {
-		        var k = e.keyCode;
+		        var k = (e.keyCode) ? e.keyCode : e.which ;
 		        for (key in $sc.KEY) {
 		            if ($sc.KEY[key] == k) {
 			            return;	
@@ -195,8 +193,10 @@
 	        });
 	        
 			this.input.bind("keydown", function(e) {
-				//console.log("keydown: " + e.keyCode);
-				if ($sc.KEY.TAB == e.keyCode) {
+	        	////console.log("down" + e.keyCode);
+		        var k = (e.keyCode) ? e.keyCode : e.which ;
+				////console.log("keydown: " + k);
+				if ($sc.KEY.TAB == k) {
 					//e.preventDefault();
 					self.keyUp(e); //prepare for loosing focus
 					
@@ -204,19 +204,24 @@
 			});
 
 			this.input.bind("keypress", function(e) {
-				//console.log("keypress: " + e.keyCode);
+	        	////console.log("press" + e.keyCode);
+		        var k = (e.keyCode) ? e.keyCode : e.which ;
+				////console.log("keypress: " + k);
 	            return; //never needed
-				if ($sc.KEY.RETURN == e.keyCode) {
+				if ($sc.KEY.RETURN == k) {
 	               // e.preventDefault();
 			    }
-		        if ($sc.KEY.TAB == e.keyCode) {
+		        if ($sc.KEY.TAB == k) {
 			        //e.preventDefault();
 		        }
 	        });
 	
 			this.input.bind("keyup", function(e) {
-				//console.log("keyup: " + e.keyCode);
-				if ($sc.KEY.TAB != e.keyCode) { //don't propagate incoming tab press, as iE6 doesn't send
+	        	////console.log("up" + e.keyCode);
+				
+		        var k = (e.keyCode) ? e.keyCode : e.which ;
+				////console.log("keyup: " + k);
+				if ($sc.KEY.TAB != k) { //don't propagate incoming tab press, as iE6 doesn't send
 					self.wrapper.data("sc:lastEvent", "key");							                
 					self.keyUp(e);
 				}
@@ -231,6 +236,23 @@
 	            self.iconClick();
 	        }); 
 	    
+	        // click anywhere else
+	        $(document).bind("click", function(e) {
+	            if ((self.icon.get(0) == e.target) || (self.input.get(0) == e.target)) return;
+				
+	            self.hideList();    
+			    self.tryUpdateMaster(); //TODO
+				
+	        });
+			this.initListEvents();
+	        //final setup
+	        this.applyEmptyText();
+			this.notify("initEvents");
+	    },
+
+        initListEvents: function() { //initialize all event listeners
+			var self = this;
+			//console.log("initListEvents");
 	        // list items
 	        this.listItems.bind("mouseover", function(e) {
 				if ("LI" == e.target.nodeName.toUpperCase()) {
@@ -245,26 +267,14 @@
 	            self.listItemClick($(e.target));
 	            e.stopPropagation(); //prevent bubbling to document binding below
 	        });
-	        
-	        // click anywhere else
-	        $(document).bind("click", function(e) {
-	            if ((self.icon.get(0) == e.target) || (self.input.get(0) == e.target)) return;
-				
-	            self.hideList();    
-			    self.tryUpdateMaster(); //TODO
-				
-	        });
-
-	        //final setup
-	        this.applyEmptyText();
-			this.notify("initEvents");
-	    },
-	    
+		},
+			
 		keyUp: function(e) {
-		    this.lastKey = e.keyCode;
-		    //console.log(this.lastKey);
+		    this.lastKey = (e.keyCode) ? e.keyCode : e.which ;
+		    
+		    ////console.log(this.lastKey);
 		    var k = $sc.KEY;
-		    switch (e.keyCode) {
+		    switch (this.lastKey) {
 		        case k.RETURN:
 		        	this.tryUpdateMaster();
 		            this.selection(this.input.get(0), 0, this.input.val().length);
@@ -328,8 +338,8 @@
 	    },
 	
 	    iconClick: function() {
+	    	////console.log("clickIcon");
 	    	if(this.isDisabled) {
-	    		console.log("disabled");
 	    		return;
 	    	}
 	        if (this.listVisible()) { 
@@ -352,11 +362,11 @@
 	
 	    //shows dropdown list
 	    showList: function() {
+	    	console.log("rar" + this.config.zIndexPopup);
 	        if (this.trie.matches && !this.trie.matches.length) return;
-
 	        this.listWrapper.removeClass("invisible").addClass("visible");
-	        this.wrapper.css("zIndex", "99999");
-	        this.listWrapper.css("zIndex", "99999");
+	        this.wrapper.css("zIndex", this.config.zIndexPopup);
+	        this.listWrapper.css("zIndex", this.config.zIndexPopup);
 	        this.setListHeight();
 	        var listHeight = this.listWrapper.height();
 		    var inputHeight = this.wrapper.height();
@@ -387,7 +397,7 @@
 	        
 	        this.listWrapper.removeClass("visible").addClass("invisible");
 	        this.wrapper.css("zIndex", "0");
-	        this.listWrapper.css("zIndex", "99999");	
+	        this.listWrapper.css("zIndex", this.config.zIndexPopup);	
 	        this.notify("hideList");
 	    },
 	
@@ -423,15 +433,16 @@
         	if (active != null) {
         		var node = $(active).data("optionNode");
 		        if(node == null) { //shouldnt happen 
-		        	console.log("shouldnt happen");
+		        	//console.log("shouldnt happen");
 		        	return false;
 		        }
 		        this.hideList();
 		        this.input.removeClass("empty");
 
-		        console.log("updating selectbox");
+		        //console.log("updating selectbox");
 		        this.input.val(node.text);
 		        this.selectbox.val(node.value);
+		        this.selectbox.trigger("change");
 		        this.notify("textChange");
 		        
 		        return true;
@@ -497,6 +508,9 @@
     		var self = this;
     		
     	    // copy all rows
+    		
+			this.list.html(""); //delete old ones - ok considering nodes etc ?
+			
     		this.options.each(function() {					   
     	    	var optionText = $.trim($(this).text());
                 var newItem = $('<li class="visible"><span>' + optionText + '</span></li>').
@@ -509,46 +523,44 @@
     			   // optWidths.push(newItem.find("span").outerWidth());	
     			}
     	    });
-    	    if(this.config.triggerSelected)this.triggerSelected();
     		
+			this.listItems = this.list.children();
+			//console.log("listLength" + this.listItems.length);
+			this.initListEvents();
+			
+    	    if(this.config.triggerSelected)this.triggerSelected();
+
+    	    //match original width
+    	    var iconWidth = this.icon.outerWidth();
+    	    var selectboxWidth = this.selectbox.outerWidth(); //show first ?
+    	    var inputBP = this.input.outerWidth() - this.input.width();
+    	    var newWidth = selectboxWidth - iconWidth - inputBP;
+    	    //console.log(iconWidth + " : " + selectboxWidth + " : " + inputBP  + " : " + newWidth);
+    	    this.input.width(newWidth);
+    	    this.wrapper.width(selectboxWidth);
+    	    var borders = this.listWrapper.outerWidth() - this.listWrapper.width();
+    	    console.log("b " + borders);
+    	    this.listWrapper.width(selectboxWidth - borders);
+    	    
+    	    // copy original css properties to container
+    	    var props = ["marginLeft","marginTop","marginRight","marginBottom"];
+    	    for(propPtr in props){
+    	    	var prop = props[propPtr];
+    	    	console.log(prop + " : " + this.selectbox.css(prop));
+    	    	this.wrapper.css(prop, this.selectbox.css(prop));
+    	    }
+    	    
         },
 	    
 	    //adds / removes items to / from the dropdown list depending on combo's current value
 	    filter: function() {
 	        var self = this;
-
-	    	if ("yes" == self.wrapper.data("sc:optionsChanged")) {
-		        self.listItems.remove();
-                self.options = self.selectbox.children().filter("option");
-                
-	            self.options.each(function() {
-	                var optionText = $.trim($(this).text());
-	                $("<li />").appendTo(self.list).
-		                text(optionText).
-		                addClass("visible");
-	    
-	            }); 
-	
-	            self.listItems = self.list.children();
-	
-	            self.listItems.bind("mouseover", function(e) {
-	                self.highlight(e.target);
-	            });
-	    
-	            self.listItems.bind("click", function(e) {
-	                self.listItemClick($(e.target));
-	            });
-			
-			    self.wrapper.data("sc:optionsChanged", "");
-		    }
-			
 	        
 	        var mm = self.trie.findPrefixMatchesAndMisses(self.getCurrentTextValue());
 	        //2 x array of dom nodes
 	        self.trie.matches = mm.matches;
 	        self.trie.misses = mm.misses;
-	        //console.log(self.getCurrentTextValue() + ": matchesLength: " + mm.matches.length + " missesLength: " + mm.misses.length );
-	        console.log($sc.classAttr);
+	        ////console.log(self.getCurrentTextValue() + ": matchesLength: " + mm.matches.length + " missesLength: " + mm.misses.length );
 	        self.setAttr(mm.misses, $sc.classAttr,"invisible" );
 	        self.setAttr(mm.matches, $sc.classAttr,"visible" );
 
@@ -706,7 +718,7 @@
 	        	if ($next.length == 1) {
 	        		var node = $next.data("optionNode");
 			        if(node == null) { //shouldnt happen 
-			        	console.log("shouldnt happen");
+			        	//console.log("shouldnt happen");
 			        	return false;
 			        }
 			        this.input.val(node.text);
@@ -748,7 +760,7 @@
 		        	if ($prev.length == 1) {
 		        		var node = $prev.data("optionNode");
 				        if(node == null) { //shouldnt happen 
-				        	console.log("shouldnt happen");
+				        	//console.log("shouldnt happen");
 				        	return false;
 				        }
 				        this.input.val(node.text);
@@ -956,17 +968,12 @@
 	        $select.each(function() {
 			    var sc = $(this).data("sexy-combo");
 			    if(sc) {
-			    	//hidedropdown
-			        sc.listWrapper.removeClass("visible").
-				        addClass("invisible");
-				    sc.wrapper.css("zIndex", "0");
-				    sc.listWrapper.css("zIndex", "99999");			
-				    
-				    sc.disable();
+				    //sc.disable();
 				    sc.populateFromSelect();
-				    sc.undisable();
+				    sc.filter();
+				    //sc.undisable();
 				    
-					sc.wrapper.data("sc:optionsChanged", "yes");
+					//sc.wrapper.data("sc:optionsChanged", "yes");
 			    }
 
 			});

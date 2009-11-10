@@ -1,55 +1,53 @@
 /**
 	sexy-combo @VERSION : http://code.google.com/p/sexy-combo/
 	
-	This is the base structure, a skin css file is also needed
+	This is the structural base for the combo. Include a skin css file, else it won't be sexy.
 */
 
-/*wrapper of all elements*/
-div.combo {
-    position:relative;
-    left: 0px;
-    top: 0px;
+/* master wrapper; emulate select positioning */
+.combo {
+	display: -moz-inline-stack;
+	display: inline-block;
+	vertical-align: bottom;
+    position: relative;
+    overflow: visible; 
+    width: 20px; /* code will override */
 }
 
-
-/*text input*/
-.combo input {
-    position: absolute;
+/* hide original select */
+.combo select {
+	display: none;
 }
 
-
-/*icon*/
-.combo div.icon {
-    position:absolute;
+.combo input,
+.combo .icon {
+	float: left;
 }
 
-
-/*list wrapper*/
+/* list wrapper */
 .combo div.list-wrapper {
     position: absolute;
     overflow: hidden;
     /*we should set height and max-height explicitly*/
     height: 200px; 
     max-height: 200px;
-    /*should be always at the top*/
-    z-index: 99999;
-
 }
 
-/*"drop-up" list wrapper*/
+/* "drop-up" list wrapper */
 .combo div.list-wrapper-up {}
 
-/*dropdown list*/
+/*dropdown list, items*/
 .combo ul {}
 
-/*dropdown list item*/
-.combo  li {
+.combo li {
     height: 20px;
+    overflow: hidden;
 }
 
 /*active (hovered) list item*/
-.combo li.active {}
-
+.combo li.active {
+	background-color: highlight;
+}
 
 .combo .visible {
     display: block;
@@ -59,9 +57,9 @@ div.combo {
     display: none;
 }
 
-/*used when emptyText config opt is set. Applied to text input*/
+/* used when emptyText config opt is set. Applied to text input. */
 .combo input.empty {
-	color: #ccc;
+	color: graytext;
 }
 
 
