@@ -30,8 +30,12 @@
     top: 0px;
 }
 
-.sexy div.icon:hover {
+.sexy div.icon.hover {
 	background-position: -17px 0px;
+}
+
+.sexy div.icon.disabled {
+	background-position: 0px 0px !important; 
 }
 
 .sexy div.list-wrapper {
@@ -72,6 +76,5 @@
 .sexy input.empty {
 }
 
-a.to-highlight:hover {
-    background-color: rgb(223, 232, 246);
+.sexy input.disabled {
 }
