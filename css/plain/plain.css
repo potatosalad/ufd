@@ -1,27 +1,23 @@
 /**
 	sexy-combo @VERSION : http://code.google.com/p/sexy-combo/
 	
-	This is the default skin.
+	This is a plain skin.
 */
 
-.sexy {
+.plain {
     height: 22px;
 }
 
-.sexy input {
+.plain input {
     height: 18px;
     padding: 1px 3px;
-    background: #fff url(text-bg.gif) repeat-x 0 0;
     border: 1px solid #B5B8C8;
 }
 
-
-.sexy input.disabled {
-	background-color: gray;
+input.disabled {
 }
 
-
-.sexy div.icon {
+.plain div.icon {
     width: 17px;
     height: 21px;
     border: 0;
@@ -29,7 +25,7 @@
     border-bottom: 1px solid #B5B8C8;
 }
 
-.sexy div.icon.hover {
+.plain div.icon.hover {
 	background-position: -17px 0px;
 }
 
@@ -37,35 +33,34 @@
 	background-position: -34px 0px;
 }
 
-.sexy div.icon.disabled {
+.plain div.icon.disabled {
 	background-position: 0px 0px !important; 
 }
 
 /* dropdown */
 
-.sexy div.list-wrapper {
+.plain div.list-wrapper {
     border: 1px solid #B5B8C8;
     background-color: #FFFFFF;
-    
+
     /*we should set height and max-height explicitly*/
     height: 200px; 
     max-height: 200px;
-    
 }
 
-.sexy div.list-wrapper-up {
+.plain div.list-wrapper-up {
 }
 
-.sexy ul {
-    height: 200px;
+.plain ul {
+    list-style-type: none;
 }
 
-
-.sexy li {
+.plain li {
     padding-left: 5px;
     background-color: #FFFFFF;
 }
 
-.sexy li.active {
+.plain li.active {
     background-color: rgb(223, 232, 246);
 }
+

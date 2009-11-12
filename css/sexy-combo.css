@@ -5,6 +5,7 @@
 */
 
 /* master wrapper; emulate select positioning */
+
 .combo {
 	display: -moz-inline-stack;
 	display: inline-block;
@@ -12,6 +13,11 @@
     position: relative;
     overflow: visible; 
     width: 20px; /* code will override */
+    white-space: nowrap;
+    border: 0;
+    margin: 0;
+    padding: 0;
+        
 }
 
 /* hide original select */
@@ -21,46 +27,59 @@
 
 .combo input,
 .combo .icon {
+	position: relative;
 	float: left;
+    margin: 0;
 }
 
-/* list wrapper */
-.combo div.list-wrapper {
+.combo .icon {
+	cursor: pointer;
+}
+
+.combo input disabled {
+    color: graytext;
+}
+
+/* dropdown */
+
+#sexyComboDDC div.list-wrapper {
     position: absolute;
     overflow: hidden;
-    /*we should set height and max-height explicitly*/
-    height: 200px; 
-    max-height: 200px;
+    padding: 0;
+    margin: 0;
 }
 
 /* "drop-up" list wrapper */
-.combo div.list-wrapper-up {}
+#sexyComboDDC div.list-wrapper-up {}
 
 /*dropdown list, items*/
-.combo ul {}
+#sexyComboDDC ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
 
-.combo li {
+#sexyComboDDC li {
+    cursor: pointer;
     height: 20px;
     overflow: hidden;
+    padding: 0;
+    margin: 0;
 }
 
 /*active (hovered) list item*/
-.combo li.active {
+#sexyComboDDC li.active {
 	background-color: highlight;
 }
 
-.combo .visible {
+#sexyComboDDC .visible {
     display: block;
 }
 
-.combo .invisible {
+#sexyComboDDC .invisible {
     display: none;
 }
 
-/* used when emptyText config opt is set. Applied to text input. */
-.combo input.empty {
-	color: graytext;
-}
 
 
 

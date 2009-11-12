@@ -45,28 +45,24 @@
     var defaults = {
 
 		skin: "sexy", //skin name
-		suffix: "__sexyCombo", // original select name + suffix == pseudo-dropdown text input name (unless switchNames = false)  
-		switchNames: false, // if false, original select name preserved,  pseudo-dropdown text input gets name + suffix.  Good for (key,value)-> value submit
+		suffix: "__sexyCombo", // original select name + suffix == pseudo-dropdown text input name  
+		logSelector: "#log", // selector string to write log into
+		dropDownID: "sexyComboDDC", //if provided, value of text input when it has no value and focus
+
+		switchNames: false, // if false, original select name preserved,  pseudo-dropdown text input gets name + suffix. 
 		triggerSelected: true, //selected option of the selectbox will be the initial value of the combo
-		
-		emptyText: "", //if provided, value of text input when it has no value and focus
-		defaultValue: "", // selectbox value to select if no match found - can we unselect all?
-		delayFilter: ($.support.style) ? 0 : 150, //msec to wait before re-filter; ie needs bigger for performance
 		caseSensitive: false, // case sensitive search ?
 		autoFill: false, //enable autofilling 
 		dropUp: false, //if true, the options list will be placed above text input
-		zIndexPopup: 100, // dropdown z-index
+		AllowLR: false, //show horizontal scrollbar
+
+		delayFilter: ($.support.style) ? 0 : 150, //msec to wait before re-filter; ie needs bigger for performance
+		zIndexPopup: 101, // dropdown z-index
 		
 		key: "value", //key json name for key/value pair
 		value: "text", //value json for key/value pair
-	
-		//DEPRECATED
-		separator: ",", //separator for values of multiple combos
 		checkWidth: false, //DEPRECATED; auto width to match select
-		filterFn: null, //DEPRECATED; internal filter only ATM
-		hiddenSuffix: "__DEPRECaTED", //DEPRECATED; will now manipulate original select box
-		initialHiddenValue: "", //DEPRECATED initial / default hidden field value;  Also applied when no match typing
-		
+	
 		//all callback functions are called in the scope of the current sexyCombo instance
 		showListCallback: null, //called after dropdown list appears
 		hideListCallback: null, //called after dropdown list disappears
@@ -80,19 +76,16 @@
     $.sexyCombo = function(selectbox, config) {
 		
         if (selectbox.tagName.toUpperCase() != "SELECT") return;
-	    
-        //console.time("setup");
-	    
         this.config = $.extend({}, defaults, config || {}); 
 
+        // in place content
         this.selectbox = $(selectbox);
-
+        this.originalSelectboxWidth = this.selectbox.outerWidth(); //get size *before* its wrapped, in case of % width 
         var selectName = this.selectbox.attr("name");
         var suffixName = selectName + this.config.suffix;
         if(this.config.switchNames) this.selectbox.attr("name", suffixName);
 
-	    this.wrapper = this.selectbox.wrap("<span>").
-		    parent().
+	    this.wrapper = this.selectbox.wrap("<span>").parent().
 		    addClass("combo").
 		    addClass(this.config.skin); 
 
@@ -104,39 +97,32 @@
 	    
         this.icon = $('<div class="icon"/>').
 		    appendTo(this.wrapper); 
-	
+        
+        // drop down content
+        var ddc = this.getDropdownContainer();
+        
 	    this.listWrapper = $('<div class="list-wrapper"/>').
-		    appendTo(this.wrapper);
-
+	    	addClass("invisible").
+	    	appendTo(ddc);
 	    
-	    this.updateDrop();
+	    this.listWrapper.wrap("<div>").parent().
+	    addClass(this.config.skin);
+
+	    this.list = $("<ul />").appendTo(this.listWrapper); 
+
 	    this.isDisabled = false;
 	    this.internalFocus = false; 
-	    this.list = $("<ul />").appendTo(this.listWrapper); 
-	    var self = this;
-		
-		
-		this.populateFromSelect();
-	    
-	    this.singleItemHeight = this.listItems.outerHeight();
-	    this.listWrapper.addClass("invisible");
-
 	    this.lastKey = null;
-	    this.multiple = this.selectbox.attr("multiple");
-	    var self = this;
-
-	    this.wrapper.data("sc:lastEvent", "click");
-	    this.overflowCSS = "overflowY";
-	
-	    if ((this.config.checkWidth) && (this.listWrapper.innerWidth() < maxOptionWidth)) {
-		    this.overflowCSS = "overflow";	
-		}
-		
-	    this.filter(); //prep in case icon clicked first
+	    this.logNode = $(this.config.logSelector);
+	    this.overflowCSS = this.config.allowLR ? "overflow" : "overflowY";
 	    
+		this.populateFromMaster();
+		this.updateDrop();
+
+		
 	    this.notify("init");
 	    this.initEvents();
-	    //console.timeEnd("setup");
+        this.initListEvents();
     };
     
     //shortcuts
@@ -147,362 +133,252 @@
     // jquery functions
     $sc.fn.extend({
 	    
+		key: function(key, isKeyUp) {
+		    this.lastKey = key;
+		    var k = $sc.KEY;
+		    
+		    //only keyups excluding tab, and tab down only
+		    if(!isKeyUp == (key != k.TAB)) return;
+		    this.log("Key: " + key + " isKeyUp?: " + isKeyUp);
+		    
+		    switch (key) {
+		        case k.RETURN:
+		        	this.hideList();
+		        	this.tryToSetMaster();
+		        	break;
+		        	
+				case k.TAB: 
+					this.realLooseFocus();
+					break;
+					
+				case k.DOWN:
+				    this.selectNext();
+				    break;
+				    
+				case k.UP:
+				    this.selectPrev();
+				    break;
+				    
+				case k.ESC:
+				    this.hideList();
+				    this.revertSelected();
+				    break;
+				    
+				default:
+					var finish = this.filter(0);
+				    if (finish && this.listVisible()) {
+				    	this.setOverflow();
+				    	this.setListHeight();
+				    }
+					break;
+		    }
+		},
+
         initEvents: function() { //initialize all event listeners
 	        var self = this;
-	        
-	        // wrapper
-	        this.wrapper.bind("click", function(e) {
-	        	if (!self.wrapper.data("sc:positionY"))	{
-	        		self.wrapper.data("sc:positionY", e.pageY);	 
-	        	}									   
-	        	self.wrapper.data("sc:lastEvent", "click");								
-	        });					
+			this.log("initEvents");
 
-	        this.wrapper.bind("keyup", function(e) {
-		        var k = (e.keyCode) ? e.keyCode : e.which ;
-		        for (key in $sc.KEY) {
-		            if ($sc.KEY[key] == k) {
-			            return;	
-			        }
-		        }
-	            self.wrapper.data("sc:lastEvent", "key");	
-	        });	
-	
-	        // input
+	        this.selectbox.bind("change", function(e) {
+	        	self.log("master changed; reverting");
+	        	self.revertSelected();
+	        });
+			
+			
 	        this.input.bind("click", function(e) {
-	            if (!self.wrapper.data("sc:positionY"))	{
-		            self.wrapper.data("sc:positionY", e.pageY);	    	
-		        }								 
-	            self.wrapper.data("sc:lastEvent", "click");	
-	            self.icon.trigger("click");
+	        	self.log("input click");
+	            if(!self.internalFocus) {
+	            	self.realFocusEvent();
+	            }
 	        });
 
 	        this.input.bind("focus", function(e) {
-	        	console.log("input focus");
+	        	self.log("input focus");
 	            if(!self.internalFocus){
-	            	self.justGotRealFocus();
+	            	self.realFocusEvent();
 	            }
-	           	self.internalFocus = true;
 	        });
-	        
-	        
-			this.input.bind("keydown", function(e) {
-	        	//console.log("down" + e.keyCode);
-		        var k = (e.keyCode) ? e.keyCode : e.which ;
-				//console.log("keydown: " + k);
-				if ($sc.KEY.TAB == k) {
-					//e.preventDefault();
-					self.keyUp(e); //prepare for loosing focus
-					
-				}
-			});
 
-			this.input.bind("keypress", function(e) {
-	        	//console.log("press" + e.keyCode);
-		        var k = (e.keyCode) ? e.keyCode : e.which ;
-				//console.log("keypress: " + k);
-	            return; //never needed
-				if ($sc.KEY.RETURN == k) {
-	               // e.preventDefault();
-			    }
-		        if ($sc.KEY.TAB == k) {
-			        //e.preventDefault();
-		        }
-	        });
+			this.input.bind("keydown", function(e) {
+		        var k = self.getKeyCode(e);
+				self.key(k, false);
+			});
 	
 			this.input.bind("keyup", function(e) {
-	        	//console.log("up" + e.keyCode);
-				
-		        var k = (e.keyCode) ? e.keyCode : e.which ;
-				//console.log("keyup: " + k);
-				if ($sc.KEY.TAB != k) { //don't propagate incoming tab press, as iE6 doesn't send
-					self.wrapper.data("sc:lastEvent", "key");							                
-					self.keyUp(e);
-				}
+		        var k = self.getKeyCode(e, true);
+				self.key(k, true);
 			});	
 			
-		
-			
-	        // icon
-	        this.icon.bind("mouseover", function(e) {
-	            self.icon.addClass("hover");
-	        }); 
-
-	        this.icon.bind("mouseout", function(e) {
-	            self.icon.removeClass("hover");
-	        }); 
-	        
-	        
+	        this.icon.bind("mouseover", function(e) { self.icon.addClass("hover"); }); 
+	        this.icon.bind("mouseout",  function(e) { self.icon.removeClass("hover"); }); 
+	        this.icon.bind("mousedown", function(e) { self.icon.addClass("mouseDown"); }); 
+	        this.icon.bind("mouseup",   function(e) { self.icon.removeClass("mouseDown"); }); 
 			this.icon.bind("click", function(e) {
-	        	console.log("icon click");
-				
-	        	if (!self.wrapper.data("sc:positionY"))	{
-	        		self.wrapper.data("sc:positionY", e.pageY);	    	
-	        	}
-		        self.wrapper.data("sc:lastEvent", "click");
+	        	self.log("icon click: " + e.target);
 	            self.iconClick();
 	        }); 
 	    
 	        // click anywhere else
 	        $(document).bind("click", function(e) {
-	            if ((self.icon.get(0) == e.target) || (self.input.get(0) == e.target)) return;
-				
-	            self.aboutToLooseFocus();
-				
+	            if ((self.icon.get(0) == e.target) || (self.input.get(0) == e.target)){
+	            	return false;
+	            }
+	            if(self.internalFocus) {
+					self.log("unfocus document click : " + e.target);
+		            self.realLooseFocus();
+	            }
 	        });
 	        
-	        //final setup
-	        this.initListEvents();
-	        this.applyEmptyText();
 			this.notify("initEvents");
 	    },
 	    
-	    justGotRealFocus: function() {
-        	console.log("real input focus");
-	    	
-	    	this.showList();
-	    },
-
-	    aboutToLooseFocus: function() {
-        	console.log("loosing focus");
-	    	
-			if (this.tryUpdateMaster()){
-				//do nothing
-			} else {
-        		this.revertSelected(); //revert to old value
-			}
-
-	    	this.hideList();    
-	    	this.internalFocus = false;
-	    },
-	    
-        initListEvents: function() { //initialize all event listeners
+        initListEvents: function() { 
 			var self = this;
-			//console.log("initListEvents");
-	        // list items
+			this.log("initListEvents");
+
 	        this.listItems.bind("mouseover", function(e) {
-				if ("LI" == e.target.nodeName.toUpperCase()) {
-				    self.highlight(e.target);	
+	        	var item = $(e.target);
+				if ("LI" != e.target.nodeName.toUpperCase()) { //child span click
+					item = item.parent();
 				}
-				else { //span click
-				    self.highlight($(e.target).parent());	
-				}
+				self.highlight(item);	
 	        });
 	    
 	        this.listItems.bind("click", function(e) {
-	            self.listItemClick($(e.target));
-	            e.stopPropagation(); //prevent bubbling to document binding below
+	        	self.log("item click");
+	            self.listItemClick($(e.target)); //TODO can be span or LI ?
+	            self.stopEvent(e); //prevent bubbling to document onclick binding etc
 	        });
+	        
 		},
-			
-		keyUp: function(e) {
-		    this.lastKey = (e.keyCode) ? e.keyCode : e.which ;
-		    
-		    //console.log(this.lastKey);
-		    var k = $sc.KEY;
-		    switch (this.lastKey) {
-		        case k.RETURN:
-		        	if( this.tryUpdateMaster() ) {
-		        		// do nothing
-		        	} else {
-		        		this.revertSelected(); //revert to old value
-		        	}
-		        	
-		        	this.resetItemVisibility();
-					this.hideList();
-		        	break;
-				case k.TAB: //only outgoing, ie6 doesn't signal incoming TAB
-					this.aboutToLooseFocus();
-					break;
-				case k.DOWN:
-				    this.highlightNext();
-				    break;
-				case k.UP:
-				    this.highlightPrev();
-				    break;
-				case k.ESC:
-				    this.hideList();
-				    break;
-				default:
-				    this.inputChanged();
-					break;
-		    }
-		},
-
-	    getCurrentTextValue: function() {
-            return this.__getCurrentValue("input");
+	    
+	    realFocusEvent: function() {
+        	this.log("real input focus");
+	    	this.internalFocus = true;
+	    	this.filter(1); //show all even tho one is selected
+	    	this.showList();
+		    this.inputFocus();
+	    	
 	    },
 
-	    __getCurrentValue: function(prop) {
-	        prop = this[prop];
-	        if (!this.multiple)  return $.trim(prop.val());
+	    realLooseFocus: function() {
+        	this.log("real loose focus (blur)");
+        	this.tryToSetMaster();
+        	this.hideList();  
+	    	this.internalFocus = false;
 	    },
-	
+
+		inputFocus: function() {
+        	this.log("inputFocus: restore input component focus");
+        	this.input.focus();
+
+            if (this.getCurrentTextValue().length) {
+	            this.selectAll();    	
+	        }			
+        	
+            /* 
+ 		    if (this.input.hasClass("empty")) {
+		    	this.input.removeClass("empty").val("");
+	        } */
+		},
+		
+		inputBlur: function() {
+        	this.log("inputBlur: loose input component focus");
+        	this.input.blur();
+		},	    
+	    
 	    iconClick: function() {
-	    	//console.log("clickIcon");
-	    	if(this.isDisabled) {
-	    		return;
-	    	}
+	    	this.log("clickIcon");
+	    	if(this.isDisabled) return;
+
 	        if (this.listVisible()) { 
 	            this.hideList();
-			    this.input.blur();
-		    }
-	        else {	
+			    this.inputFocus();
+			    
+		    } else {	
+		    	this.filter(1); //show all even tho one is selected
 	            this.showList();
-			    this.input.focus();
-	            if (this.input.val().length) {
-		            this.selection(this.input.get(0), 0, this.input.val().length);    	
-		        }			
+			    this.inputFocus();
 		    }          
 	    },
 	
-	    //returns true when dropdown list is visible
 	    listVisible: function() {
-        	console.log("is list visible?");
-	    	
-	        return this.listWrapper.hasClass("visible");
+	        var isVisible = this.listWrapper.hasClass("visible");
+	        this.log("is list visible?: " + isVisible);
+	        return isVisible;
 	    },
 	
-	    //shows dropdown list
 	    showList: function() {
-        	console.log("showlist");
-	    	
-	        if (this.trie.matches && !this.trie.matches.length);
-	        
+        	this.log("showlist");
+        	if(this.listVisible()) return;
+        	
+        	var offset = this.input.offset(); 
+        	this.listWrapper.css("left",offset.left);
+        	
+        	if(this.config.dropUp) {
+	        	this.listWrapper.css("top", (offset.top - this.listWrapper.height()) );
+        	} else {
+	        	this.listWrapper.css("top", (offset.top + this.input.outerHeight()) );
+	    	}
+	    
 	        this.listWrapper.removeClass("invisible").addClass("visible");
-	        this.wrapper.css("zIndex", this.config.zIndexPopup);
-	        this.listWrapper.css("zIndex", this.config.zIndexPopup);
 	        this.setListHeight();
-	        
+
+	        /*
 	        var listHeight = this.listWrapper.height();
 		    var inputHeight = this.wrapper.height();
 		    var bottomPos = parseInt(this.wrapper.data("sc:positionY")) + inputHeight + listHeight;
 		    var maxShown = $(window).height() + $(document).scrollTop();
-		    if (bottomPos > maxShown) {
-		        this.setDropUp(true); 
-		    }
-		    else {
-		        this.setDropUp(false);	
-		    }
-
-		    
-		    if ("" == $.trim(this.input.val())) {
-	            this.resetActive();
-	            this.listWrapper.scrollTop(0);
-			}
-			else {
-			    this.highlightSelected();	
-			}
-		    
+	        this.config.dropUp = (bottomPos > maxShown) ;
+		    this.updateDrop(); 
+		    */ 
+			
 		    this.notify("showList");
 	    },
 	
-	    //hides dropdown list
 	    hideList: function() {
-        	console.log("hide list");
-	    	
-	        if (this.listWrapper.hasClass("invisible")) return;
+        	this.log("hide list");
+        	if(!this.listVisible()) return;
 	        
 	        this.listWrapper.removeClass("visible").addClass("invisible");
-	        this.wrapper.css("zIndex", "0");
-	        this.listWrapper.css("zIndex", this.config.zIndexPopup);	
+	        this.listItems.removeClass("invisible"); //slow?  
+	        
+
 	        this.notify("hideList");
 	    },
-	
-	    //returns sum of all visible items height
-	    getListItemsHeight: function() {
-        	console.log("get items height");
-	    	
-			var itemHeight = this.singleItemHeight;
-	        return itemHeight * this.listLength();
-	    },
-	
-	    //changes list wrapper's overflow from hidden to scroll and vice versa (depending on list items height))
-	    setOverflow: function() {
-        	console.log("set overflow");
 
-	    	var maxHeight = this.getListMaxHeight();
-		    
-	        if (this.getListItemsHeight() > maxHeight) {
-	            this.listWrapper.css(this.overflowCSS, "scroll");
-	        } else {
-	            this.listWrapper.css(this.overflowCSS, "hidden");
-	        }
-	    },
-	
-	    //highlights active item of the dropdown list
-	    highlight: function(activeItem) {
-        	console.log("hilight");
-	    	
-	        if (($sc.KEY.DOWN == this.lastKey) || ($sc.KEY.UP == this.lastKey)) return;
-	        this.listItems.removeClass("active"); //slow?  
-	        $(activeItem).addClass("active");
-	    },
+	    
 
 	    // attempt update; clear input or set default if fail:
-	    tryUpdateMaster: function() {
-	    	console.log("t.u.m");
+	    tryToSetMaster: function() {
+	    	this.log("t.s.m");
 
-	    	if(this.trie.matches.length == 0) {
-	    		return false;
-	    	} 
+	    	if(this.trie.matches.length == 0) return false; // no match
 	    	
-	    	var active = this.getActive().get(0);
-	    	
-        	if (active != null) {
-        		var node = $(active).data("optionNode");
-		        if(node == null) { //shouldnt happen 
-		        	console.log("shouldnt happen");
-		        	return false;
-		        }
-		        this.hideList();
-		        this.input.removeClass("empty");
-
-		        var curVal = this.selectbox.val();
-		        console.log("updating selectbox from: " + curVal);
-		        this.selectbox.val([node.value]);
-		        if(this.selectbox.val() != node.value){ //set failed
-			        this.selectbox.val([curVal]); 
-			        console.log("fail");
-			        return false;
-		        }
-
-		        
-		        this.input.val(node.text);
-		        this.selectAll();
-
-		        this.selectbox.trigger("change");
-		        this.notify("textChange");
-		        
-		        return true;
+	    	var active = this.getActive().get(0);  //get match
+        	if (active == null) {
+    	    	this.log("Bad! coudn't locate active item");
+    	    	return false; 
         	}
-	        	
-	    },
-	    
-	    //sets hidden select value, takes text input's value as a param
-	    OLDsetHiddenSelect: function(val) {
-        	console.log("setHidden");
+    		var node = $(active).data("optionNode");
+	        if(node == null) { 
+	        	this.log("Bad! no associated master option node");
+	        	return false;
+	        }
 
-	        var set = false;
-	        val = $.trim(val);
-	        var oldVal = this.selectbox.val();
+	        var curVal = this.selectbox.val();
+	        this.selectbox.val([node.value]);
+	        if(this.selectbox.val() != node.value){ //set failed
+		        this.selectbox.val([curVal]); 
+		        this.log("set new master selected failed.");
+		        return false;
+	        }
 	        
-        	if(this.trie.matches.length == 1) {
-        		var val = $(this.trie.matches[0]).data("optionNode").value;
-        		console.log("hideenselect");
-        		console.trace();
-        		this.selectbox.val( val );
-        		set = true;
-        	}
-	    
-		    //if (!set) this.selectbox.val(this.config.defaultValue);
+	        this.log("master selectbox set to: " + node.value);
+	        this.selectbox.trigger("change");
 
-		    if (oldVal != this.selectbox.val()){ 
-			    this.notify("change");
-				this.selectbox.trigger("change");
-		    }
-			
-		},
+	        this.notify("textChange");
+	        return true;
+	    },
 
 	    
 	    selectAll: function() {
@@ -511,59 +387,72 @@
 
 
 	    listItemClick: function(item) {
-        	console.log("listitemclick: more work");
-	    	//TODO set item
-	        this.tryUpdateMaster();
+        	this.log("listitemclick");
+        	var activeNode = this.getActiveOptionNode();
+        	if(! activeNode) {
+        		this.log("bad! couldn't find active item");
+    	        this.inputFocus();
+    	        return;
+        	}
+        	var value = $.trim($(activeNode).html());
+        	this.input.val(value);
+	        if(this.tryToSetMaster() ) {
+	        	this.filter(1);
+	        	this.hideList();
+	        }
 	        this.inputFocus();
 	    },
 	
-        setAttr: function(array, attr, val ) { //fast attribute setting
+        setAttr: function(array, attr, val ) { //fast attribute OVERWRITE
         	for(nodePtr in array) {
         		array[nodePtr].setAttribute(attr, val);
         	}
         },
         
-        populateFromSelect: function() {
-        	console.log("p.o.s");
+        populateFromMaster: function() {
+        	this.log("populate from master select");
         	
+        	var self = this;
+        	this.disable();
     		this.options = this.selectbox.children("option");
+    		
     		this.trie = new Trie(this.config.caseSensitive);
     		this.trie.matches = [];
     		this.trie.misses = [];
-    		var self = this;
-    		
-    	    // copy all rows
-    		
-			this.list.html(""); //delete old ones - ok considering nodes etc ?
-			
-    		this.options.each(function() {					   
-    	    	var optionText = $.trim($(this).text());
-                var newItem = $('<li class="visible"><span>' + optionText + '</span></li>').
-    	            appendTo(self.list);
 
+    		this.list.html(""); //delete old ones - consider bound objects TODO
+			
+    		this.options.each(function() {	
+    			var opt = $(this);
+    	    	var optionText = $.trim(opt.text());
+                var newItem = $('<li class="visible"><span>' + optionText + '</span></li>').appendTo(self.list);
                 newItem.data("optionNode", this);
                 self.trie.add(optionText, newItem.get(0));
-
-                if (self.config.checkWidth) {
-    			   // optWidths.push(newItem.find("span").outerWidth());	
-    			}
     	    });
     		
 			this.listItems = this.list.children();
 			this.initListEvents();
 			
-    	    if(this.config.triggerSelected)this.revertSelected();
-
+    	    if(this.config.triggerSelected){
+    	    	this.revertSelected();
+    	    } else {
+    	    	this.input.val(""); //better tecqnique?
+    	    }
+    	    
     	    //match original width
     	    var iconWidth = this.icon.outerWidth();
-    	    var selectboxWidth = this.selectbox.outerWidth(); //show first for FF ?
+    	    // this.selectbox.show();
+    	    var originalSelectboxWidth = this.originalSelectboxWidth; 
+    	    // this.selectbox.hide();
     	    var inputBP = this.input.outerWidth() - this.input.width();
-    	    var inputWidth = selectboxWidth - iconWidth - inputBP;
+    	    var inputWidth = originalSelectboxWidth - iconWidth - inputBP;
     	    var listWrapBP = this.listWrapper.outerWidth() - this.listWrapper.width();
 
     	    this.input.width(inputWidth);
-    	    this.wrapper.width(selectboxWidth);
-    	    this.listWrapper.width(selectboxWidth - listWrapBP);
+    	    this.wrapper.width(originalSelectboxWidth);
+    	    this.listWrapper.width(originalSelectboxWidth - listWrapBP);
+    	    
+    	    this.log(originalSelectboxWidth + " : " + inputWidth + " : " + iconWidth + " : " + (originalSelectboxWidth - listWrapBP));
     	    
     	    // copy listed css properties from select to container
     	    var props = ["marginLeft","marginTop","marginRight","marginBottom"];
@@ -571,34 +460,45 @@
     	    	var prop = props[propPtr];
     	    	this.wrapper.css(prop, this.selectbox.css(prop));
     	    }
+
+    	    //update height;
+    	    this.listWrapper.removeClass("invisible");
+    	    this.singleItemHeight = this.listItems.outerHeight();
+    	    this.listWrapper.addClass("invisible");
+    	    
+    	    
+    	    this.undisable();
     	    
         },
 	    
 	    //adds / removes items to / from the dropdown list depending on combo's current value
-	    filter: function() {
-        	console.log("filter");
+	    filter: function(showAllLength) {
+        	this.log("filter: " + showAllLength);
         	
 	        var self = this;
-	        
-	        var mm = self.trie.findPrefixMatchesAndMisses(self.getCurrentTextValue());
-	        //2 x array of dom nodes
+	        var mm = self.trie.findPrefixMatchesAndMisses(self.getCurrentTextValue()); // search!
+
+	        // mm has 2 x array of dom nodes
 	        self.trie.matches = mm.matches;
 	        self.trie.misses = mm.misses;
-	        //console.log(self.getCurrentTextValue() + ": matchesLength: " + mm.matches.length + " missesLength: " + mm.misses.length );
+	        
+	        this.log(self.getCurrentTextValue() + ": matchesLength: " + mm.matches.length + " missesLength: " + mm.misses.length );
+	        
 	        self.setAttr(mm.matches, $sc.classAttr,"visible" );
-	        if(mm.matches.length) {
-		        self.setAttr(mm.misses, $sc.classAttr,"invisible" );
-	        } else { //no matches, show all
-		        self.setAttr(mm.misses, $sc.classAttr,"visible" );
+	        if(mm.matches.length <= showAllLength) { //
+	        	self.setAttr(mm.misses, $sc.classAttr,"visible" );
+	        } else {
+	        	self.setAttr(mm.misses, $sc.classAttr,"invisible" );
 	        }
 
 	        self.setOverflow();
 	        self.setListHeight();
+	        return true; // finished !
 	    },
 		
 		//just returns integer value of list wrapper's max-height property
 		getListMaxHeight: function() {
-        	console.log("get listmaxheight");
+        	this.log("get listmaxheight");
 	    	
 			var result = parseInt(this.listWrapper.css("maxHeight"), 10);
 			if (isNaN(result)) {
@@ -609,8 +509,8 @@
 		
 		//corrects list wrapper's height depending on list items height
 		setListHeight: function() {
-        	console.log("set list height");
-			
+        	this.log("set list height");
+			return;
 		    var liHeight = this.getListItemsHeight();
 		    var maxHeight = this.getListMaxHeight();
 		    var listHeight = this.listWrapper.height();
@@ -627,113 +527,92 @@
 		
 		//returns active (hovered) element of the dropdown list
 		getActive: function() {
-        	console.log("get active");
+        	this.log("get active");
 			
 			return this.listItems.filter(".active:first"); //TODO used cached visible list
 		},
 
 		getActiveOptionNode: function() {
-        	console.log("get activeOptionNode");
+        	this.log("get activeOptionNode");
 
-	    	var active = this.getActive().get(0);
-	    	if (active != null) {
+	    	var active = this.getActive();
+	    	if (active.length) {
 	    		return $(active).data("optionNode");
 	        }
     	},
     	
     	resetItemVisibility: function() {
-        	console.log("resetitemvisibility");
+        	this.log("resetitemvisibility");
     		this.listItems.removeClass("invisible").addClass("visible");
     	},
 
     	resetActive: function() {
-        	console.log("resetActive");
+        	this.log("resetActive");
     		this.listItems.removeClass("active").filter(".visible:first").addClass("active");
     	},
 		
+    	
+	    //returns sum of all visible items height
+	    getListItemsHeight: function() {
+        	this.log("get items height");
+	    	
+			var itemHeight = this.singleItemHeight;
+			this.log("heights: " + itemHeight + " : " + this.singleItemHeight);
+	        return itemHeight * this.listLength();
+	    },
+	
+	    //changes list wrapper's overflow from hidden to scroll and vice versa (depending on list items height))
+	    setOverflow: function() {
+        	this.log("set overflow");
+
+	    	var maxHeight = this.getListMaxHeight();
+	        this.log(this.getListItemsHeight() + "  :  " + maxHeight);
+		    
+	        if (this.getListItemsHeight() > maxHeight) {
+	        	this.log("scroll");
+	            this.listWrapper.css(this.overflowCSS, "scroll");
+	        } else {
+	        	this.log("hidden");
+	            this.listWrapper.css(this.overflowCSS, "hidden");
+	        }
+	    },
 		
 		//returns number of currently visible list items
 		listLength: function() {
 			var length = (this.trie.matches.length) ? this.trie.matches.length : this.trie.misses.length;
-        	console.log("list len " + length);
+        	this.log("list len " + length);
 			return length;
 		},
 		
-		//triggered when the user changes combo value by typing
-		inputChanged: function() {
-        	console.log("inputChanged");
-			
-			/*
-			 * For performance reasons, this has 22 blocks that cascade on timeouts;
-			 * Re-entry here will cancel after 1/2rd of method time, not whole method time. 
-			 * 
-			 * The "yield time" is enough for the program count to get back to sense and trigger 
-			 * a new keypress if it has occurred, and re-call this method, cancelling the cascade.
-			 */
-			var self = this;
-			var yieldTime = 3;
 
-			//cancel any yielding timeouts
-			if(this.updateOnTimeout) clearTimeout(self.updateOnTimeout);
-			if(this.filterOnTimeout) clearTimeout(self.filterOnTimeout);
-			
-			// defer till no typing for "delayFilter" msec.
-			this.filterOnTimeout = setTimeout(function(){filter();}, this.config.delayFilter);
-			
-			var filter = function () {
-//				console.time("Filter");
-				self.filter();
-//				console.timeEnd("Filter");
-				self.updateOnTimeout = setTimeout(function(){update();}, yieldTime); 
-			};
-			var update = function () {
-//				console.time("Update");
-			    if (self.listLength()) {
-			    	self.setOverflow();
-			    	self.setListHeight();
-			    }
-//				console.timeEnd("Update");
-			};
+		
+		revertSelected: function() {
+			var option = this.selectbox.children("option:selected");
+			var val = option.text();
+			this.log("reverting to: " + val);
+			this.input.val(val);
+			this.filter(1);
 		},
 		
-		highlightSelected: function() {
-        	console.log("hilightselected");
+		
+		//returns index of currently active list item
+		getActiveIndex: function() {
+        	this.log("get activeindex");
 			
-	        //already clobbered :) this.listItems.removeClass("active");
-			//var val = $.trim(this.input.val());
-			
-			try {
-				/*
-				this.listItems.each(function() {
-				    var $this = $(this);
-					if ($this.text() == val) {
-					    $this.addClass("active");	
-						self.listWrapper.scrollTop(0);
-						self.scrollDown();
-					}
-				});
-				*/
-				
-				/*is this even needed? maybe combos
-				
-				var matches = this.trie.findPrefixMatches(val);
-				if(matches.length == 1) {
-					$(matches[0]).addClass("active");	
-					self.listWrapper.scrollTop(0);
-					self.scrollDown();
-					
-				} else{
-				*/
-	
-				//no match, must be partial input string; highlight first item
-				this.resetActive();
-	
-			} catch (e) {}
+		    return $.inArray(this.getActive().get(0), this.listItems.filter(".visible").get());
 		},
+		
+	    //highlights the item given
+	    highlight: function(activeItem) {
+        	//this.log("highlight");
+	        this.listItems.removeClass("active"); //slow?  
+	        $(activeItem).addClass("active");
+	    },
+	    
 		
 		//highlights list item before currently active item
-		highlightPrev: function() {
-        	console.log("hilightprev");
+		selectPrev: function() {
+        	this.log("hilightprev");
 			
 		    var $prev = this.getActive().prev();
 		    
@@ -747,7 +626,7 @@
 					
 	        		var node = $prev.data("optionNode");
 			        if(node == null) {  
-			        	console.log("shouldnt happen");
+			        	this.log("shouldnt happen");
 			        	return;
 			        }
 			        this.input.val(node.text);
@@ -758,8 +637,8 @@
 		},		
 		
 		//highlights item of the dropdown list next to the currently active item
-		highlightNext: function() {
-        	console.log("hilightnext");
+		selectNext: function() {
+        	this.log("hilightnext");
 			
 		    var $next = this.getActive().next();
 		    
@@ -774,7 +653,7 @@
 			
         		var node = $next.data("optionNode");
 		        if(node == null) { 
-		        	console.log("shouldnt happen");
+		        	this.log("shouldnt happen");
 		        	return false;
 		        }
 		        this.input.val(node.text);
@@ -786,37 +665,25 @@
 		
 		//scrolls list wrapper down when needed
 		scrollDown: function() {
-        	console.log("scrollldown");
+        	this.log("scrollldown");
 			
 		    if ("scroll" != this.listWrapper.css(this.overflowCSS))
 		        return;
 			
 	            var beforeActive = this.getActiveIndex() + 1;
-				/*if ($.browser.opera)
-				    ++beforeActive;*/
+				/*if ($.browser.opera) ++beforeActive;*/
 		    
 		    var minScroll = this.listItems.outerHeight() * beforeActive - this.listWrapper.height();
 	        
-			if ($.browser.msie)
-	            minScroll += beforeActive;
+			if ($.browser.msie) minScroll += beforeActive;
 		    
 		    if (this.listWrapper.scrollTop() < minScroll)
 		        this.listWrapper.scrollTop(minScroll);
 		},
-		
 
-		
-		//returns index of currently active list item
-		getActiveIndex: function() {
-        	console.log("get activeindex");
-			
-		    return $.inArray(this.getActive().get(0), this.listItems.filter(".visible").get());
-		},
-		
-		
 		//scrolls list wrapper up when needed
 		scrollUp: function() {
-        	console.log("scrollup");
+        	this.log("scrollup");
 
 		    if ("scroll" != this.listWrapper.css(this.overflowCSS))
 		        return;
@@ -827,50 +694,42 @@
 		        this.listWrapper.scrollTop(maxScroll);
 		    }     
 		},
-		
-		//emptyText stuff
-		applyEmptyText: function() {
-        	console.log("appplyempty");
-			
-		    if (!this.config.emptyText.length)
-		        return;
-			
-		    var self = this;	
-		    this.input.bind("focus", function() {
-		    	self.inputFocus();
-		    }).bind("blur", function() {
-		    	self.inputBlur();
-		    });	
-		    
-		    if ("" == this.input.val()) {
-		        this.input.addClass("empty").val(this.config.emptyText);
-		    }
-		},
-		
-		inputFocus: function() {
-        	console.log("inputFocus torename");
-			
-		    if (this.input.hasClass("empty")) {
-		    	this.input.removeClass("empty").val("");
-	        }
-		},
-		
-		inputBlur: function() {
-        	console.log("inputblur torename");
-		    if ("" == this.input.val()) {
-		    	this.input.addClass("empty").val(this.config.emptyText);
-		    }
-		},
-		
-		revertSelected: function() {
-			var val = this.selectbox.children("option:selected").text();
-			console.log("reverting to: " + val);
-			//TODO need to call update 
-			this.input.val(val);
-		},
 
+
+	    getCurrentTextValue: function() {
+	        return $.trim(this.input.val());
+	    },
+		
+		
+	    stopEvent: function(e) {
+            e.cancelBubble = true;
+            e.returnValue = false;
+
+            if (e.stopPropagation) {
+                    e.stopPropagation();
+                    e.preventDefault();
+            }
+	    },
+	    
+	    getKeyCode: function(event, isKeyUp) {
+    		var key = (event.keyCode) ? event.keyCode : event.which ? event.which : event.charCode;
+    		this.log("key: " + key);
+    		return key;
+	    },
+		
+	    getDropdownContainer: function() {
+	    	var ddc = $(this.config.dropDownID);
+	    	if(!ddc.length) { //create
+	    		ddc = $("<div></div>").appendTo("body").
+	    		css("height", 0).
+	    		css("z-index", this.config.zIndexPopup).
+	    		attr("id", this.config.dropDownID);
+	    	}
+	    	return ddc;
+	    },
+	    
 		disable: function() {
-        	console.log("dissable");
+        	this.log("disable");
 			
 			this.hideList();
 			this.isDisabled = true;
@@ -880,23 +739,12 @@
 		},
 		
 		undisable: function() {
-        	console.log("undisable");
+        	this.log("undisable");
 			
 			this.isDisabled = false;
 			this.icon.removeClass("disabled");
 			this.input.removeClass("disabled");
 			this.input.removeAttr("disabled");
-		},
-		
-		autoFill: function() {
-			
-		    if (!this.config.autoFill || ($sc.KEY.BACKSPACE == this.lastKey) || this.multiple) return;
-		    console.log("autofill");
-			    	
-		    var curVal = this.input.val();
-		    var newVal = this.getActive().text();
-		    this.input.val(newVal);
-		    this.selection(this.input.get(0), curVal.length, newVal.length);
 		},
 		
 		/*
@@ -919,7 +767,6 @@
 		    }
 		},
 		
-		//for internal use
 		updateDrop: function() {
 		    if (this.config.dropUp) {
 		        this.listWrapper.addClass("list-wrapper-up");
@@ -928,15 +775,27 @@
 		    }
 		},
 		
-		//updates dropUp config option
-		setDropUp: function(drop) {
-	        this.config.dropUp = drop;   
-		    this.updateDrop(); 
+		log: function(msg) {
+    		if(window.console && console.log) {  // firebug logger
+    			console.log(msg);
+    		}
+		    if(this.logNode && this.logNode.length) {
+		    	this.logNode.append("<div>" + msg + "</div>");
+		    }
 		},
 		
 		notify: function(evt) {
 		    if (!$.isFunction(this.config[evt + "Callback"])) return;
 		    this.config[evt + "Callback"].call(this);	
+		},
+
+		autoFill: function() {
+		    if (!this.config.autoFill || ($sc.KEY.BACKSPACE == this.lastKey) ) return;
+		    this.log("autofill");
+			    	
+		    var curVal = this.getCurrentTextValue();
+		    var newVal = this.getActive().text();
+		    this.input.val(newVal);
 		}
 	
     });
@@ -959,10 +818,6 @@
     	
     	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
 
-		log: function(msg) {
-		    var $log = $("#log");
-		    $log.html($log.html() + msg + "<br />");
-		},
 		/* TODO ?
 	    createSelectbox: function(config) {
 		    var $selectbox = $("<select />").
@@ -1016,17 +871,15 @@
 	        return new $sc(selectbox, config);
 		},
 		*/
+    	
 		changeOptions: function($select) {
 			$select = $($select);
 	        $select.each(function() {
 			    var sc = $(this).data("sexy-combo");
 			    if(sc) {
 				    sc.disable();
-				    sc.populateFromSelect();
-				    sc.filter();
+				    sc.populateFromMaster();
 				    sc.undisable();
-				    
-					sc.wrapper.data("sc:optionsChanged", "yes");
 			    }
 
 			});
@@ -1055,17 +908,6 @@
 			    var sc = $(this).data("sexy-combo");
 			    if(sc) sc.revertSelected();
 			});
-		},
-
-		
-		__normalizeArray: function(arr) {
-		    var result = [];
-		    var len = arr.length;
-		    for (var i = 0; i < len; ++i) {
-		        if ("" == arr[i]) continue;
-		        result.push(arr[i]);    
-		    }
-		    return result;
 		}
 
     });
@@ -1213,10 +1055,153 @@
 		var matches = this.getValues(trieNode);
 		var misses = this.getMissValues(this.root, trieNode);
 
-		return {
-			matches : matches,
-			misses : misses
-		};
+		return { matches : matches, misses : misses };
 	};
 	
 })(jQuery); 
+
+/* END */
+
+/*
+
+OLD stuff in case i need it
+
+Apply to filter(0) :)
+
+inputChanged: function() {
+        	this.log("inputChanged");
+			
+			
+			 * For performance reasons, this has 2 blocks that cascade on timeouts;
+			 * Re-entry here can cancel after 1/2 method, not whole method time. 
+			 * 
+			 * The "yield time" is enough for the program count to get back to sense and trigger 
+			 * a new keypress if it has occurred, and re-call this method, cancelling the cascade.
+			 
+			var self = this;
+			var yieldTime = 3;
+
+			//cancel any yielding timeouts
+			if(this.updateOnTimeout) clearTimeout(self.updateOnTimeout);
+			if(this.filterOnTimeout) clearTimeout(self.filterOnTimeout);
+			
+			// defer till no typing for "delayFilter" msec.
+			this.filterOnTimeout = setTimeout(function(){filter();}, this.config.delayFilter);
+			
+			var filter = function () {
+//				console.time("Filter");
+				self.filter(0);
+//				console.timeEnd("Filter");
+				self.updateOnTimeout = setTimeout(function(){update();}, yieldTime); 
+			};
+			var update = function () {
+//				console.time("Update");
+			    if (self.listLength()) {
+			    	self.setOverflow();
+			    	self.setListHeight();
+			    }
+//				console.timeEnd("Update");
+			};
+		},
+	    
+
+
+
+		
+		
+		
+		highlightSelected: function() {
+        	this.log("hilightselected");
+			
+	        //already clobbered :) this.listItems.removeClass("active");
+			//var val = $.trim(this.input.val());
+			
+			try {
+				
+				this.listItems.each(function() {
+				    var $this = $(this);
+					if ($this.text() == val) {
+					    $this.addClass("active");	
+						self.listWrapper.scrollTop(0);
+						self.scrollDown();
+					}
+				});
+				
+				
+				is this even needed? maybe combos
+				
+				var matches = this.trie.findPrefixMatches(val);
+				if(matches.length == 1) {
+					$(matches[0]).addClass("active");	
+					self.listWrapper.scrollTop(0);
+					self.scrollDown();
+					
+				} else{
+				
+	
+				//no match, must be partial input string; highlight first item
+				this.resetActive();
+	
+			} catch (e) {}
+		},
+		
+
+
+
+	    //sets hidden select value, takes text input's value as a param
+	    OLDsetHiddenSelect: function(val) {
+        	this.log("setHidden");
+
+	        var set = false;
+	        val = $.trim(val);
+	        var oldVal = this.selectbox.val();
+	        
+        	if(this.trie.matches.length == 1) {
+        		var val = $(this.trie.matches[0]).data("optionNode").value;
+        		this.log("hideenselect");
+        		this.selectbox.val( val );
+        		set = true;
+        	}
+	    
+		    //if (!set) this.selectbox.val(this.config.defaultValue);
+
+		    if (oldVal != this.selectbox.val()){ 
+			    this.notify("change");
+				this.selectbox.trigger("change");
+		    }
+			
+		},
+
+
+		
+		//emptyText stuff
+		applyEmptyText: function() {
+        	this.log("appplyempty");
+			
+		    if (!this.config.emptyText.length)
+		        return;
+			
+		    var self = this;	
+		    this.input.bind("focus", function() {
+		    	self.inputFocus();
+		    }).bind("blur", function() {
+		    	self.inputBlur();
+		    });	
+		    
+		    if ("" == this.getCurrentTextValue()) {
+		        this.input.addClass("empty").val(this.config.emptyText);
+		    }
+		}
+
+		//DEPRECATED
+		defaultValue: "", // selectbox value to select if no match found - now reverts to current setting
+		separator: ",", //separator for values of multiple combos
+		filterFn: null, //DEPRECATED; internal filter only ATM
+		hiddenSuffix: "__DEPRECaTED", //DEPRECATED; will now manipulate original select box
+		initialHiddenValue: "", //DEPRECATED initial / default hidden field value;  Also applied when no match typing
+		emptyText: "", //if provided, value of text input when it has no value and focus
+		
+		
+		
+		
+	*/
