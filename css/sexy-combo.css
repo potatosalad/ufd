@@ -1,5 +1,5 @@
 /**
-	sexy-combo @VERSION : http://code.google.com/p/sexy-combo/
+	sexy-combo @VERSION: http://code.google.com/p/sexy-combo/
 	
 	This is the structural base for the combo. Include a skin css file, else it won't be sexy.
 */
@@ -36,6 +36,10 @@
 	cursor: pointer;
 }
 
+.combo .icon.disabled {
+	cursor: default;
+}
+
 .combo input disabled {
     color: graytext;
 }
@@ -46,6 +50,12 @@
     position: absolute;
     overflow: hidden;
     padding: 0;
+    margin: 0;
+}
+
+#sexyComboDDC div.list-scroll {
+    overflow: hidden;
+	padding: 0;
     margin: 0;
 }
 
@@ -69,7 +79,6 @@
 
 /*active (hovered) list item*/
 #sexyComboDDC li.active {
-	background-color: highlight;
 }
 
 #sexyComboDDC .visible {

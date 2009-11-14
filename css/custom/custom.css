@@ -1,7 +1,8 @@
 /**
 	sexy-combo @VERSION : http://code.google.com/p/sexy-combo/
 	
-	This is a template skin for you to customise
+	This is a template skin; a basic pure CSS for you to build from for your own needs.
+	
 */
 
 
@@ -43,7 +44,8 @@
 
 .custom div.list-wrapper {
     border: 1px solid black;
-
+}
+.custom div.list-scroll {
     /*we should set height and max-height explicitly*/
     height: 200px; 
     max-height: 200px;
@@ -53,13 +55,14 @@
 }
 
 .custom ul {
+    height: 200px;
 }
 
 .custom li {
     padding-left: 5px;
-    background-color: #FFFFFF;
+    background-color: white;
 }
 
 .custom li.active {
-    background-color: rgb(223, 232, 246);
+    background-color: highlight;
 }

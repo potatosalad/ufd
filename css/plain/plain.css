@@ -1,27 +1,29 @@
 /**
 	sexy-combo @VERSION : http://code.google.com/p/sexy-combo/
 	
-	This is a plain skin.
+	This is a plain skin.  Similar to sexy, but less height, 
+	and no background gradient on input
 */
 
 .plain {
-    height: 22px;
+    height: 20px;
 }
 
 .plain input {
-    height: 18px;
+    height: 16px;
     padding: 1px 3px;
     border: 1px solid #B5B8C8;
 }
 
-input.disabled {
+.plain input.disabled {
+    background-color: gray !important;
 }
 
 .plain div.icon {
     width: 17px;
-    height: 21px;
+    height: 19px;
     border: 0;
-    background: transparent url(trigger.gif) no-repeat 0 0;
+    background: transparent url(icon.gif) no-repeat 0 0;
     border-bottom: 1px solid #B5B8C8;
 }
 
@@ -29,20 +31,22 @@ input.disabled {
 	background-position: -17px 0px;
 }
 
-.sexy div.icon.mouseDown {
+.plain div.icon.mouseDown {
 	background-position: -34px 0px;
 }
 
 .plain div.icon.disabled {
-	background-position: 0px 0px !important; 
+	background-position: -51px 0px !important; 
 }
 
 /* dropdown */
 
 .plain div.list-wrapper {
     border: 1px solid #B5B8C8;
-    background-color: #FFFFFF;
+    background-color: #FFF;
+}
 
+.plain div.list-scroll {
     /*we should set height and max-height explicitly*/
     height: 200px; 
     max-height: 200px;
@@ -52,15 +56,15 @@ input.disabled {
 }
 
 .plain ul {
-    list-style-type: none;
+    height: 200px;
 }
 
 .plain li {
     padding-left: 5px;
-    background-color: #FFFFFF;
+    background-color: #FFF;
 }
 
 .plain li.active {
-    background-color: rgb(223, 232, 246);
+	background-color: highlight;
 }
 
