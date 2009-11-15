@@ -154,21 +154,31 @@
     			return; //special key
     		}
     		
-		    // only process keyups excluding tab/return, and only tab/return keydown 
+		    // only process: keyups excluding tab/return; and only tab/return keydown 
     		// Only some browsers fire keyUp on tab in, ignore if it happens 
 		    if(!isKeyUp == ((key != k.TAB) && (key != k.ENTER)) ) return;
 
 		    //this.log("Key: " + key + " isKeyUp?: " + isKeyUp + " isKeyPress?: " + isKeyUp);
 		    this.lastKey = key;
-
+		    
 		    switch (key) {
-			    case k.DOWN:
+		    	case k.SHIFT:
+		    	case k.CTRL:
+		    	case k.ALT:
+		    		//don't refilter 
+		    		break;
+		    		
+		    	case k.END: //TODO
+		    	case k.DOWN:
+			    case k.PAGEDOWN:
 			    	//this.log("down pressed");
 					this.showList();
 			    	this.selectNext();
 			    	break;
 			    	
+			    case k.HOME: //TODO
 			    case k.UP:
+			    case k.PAGEUP:
 			    	//this.log("up pressed");
 					this.showList();
 			    	this.selectPrev();
@@ -292,7 +302,7 @@
 	    	this.filter(1); //show all even tho one is selected
 	    	this.inputFocus();
 	    	this.showList();
-	    	
+	    	this.scrollTo();	    	
 	    },
 
 	    realLooseFocus: function() {
@@ -329,6 +339,7 @@
 		    	this.filter(1); //show all even tho one is selected
 		    	this.inputFocus();
 	            this.showList();
+		    	this.scrollTo();	    	
 		    }          
 	    },
 
@@ -545,7 +556,7 @@
 	    //highlights the item given
 	    highlight: function(activeItem) {
         	//this.log("highlight");
-	        this.listItems.removeClass("active"); //slow?  
+			this.getActive().removeClass("active");  
 	        $(activeItem).addClass("active");
 	    },
 	    
@@ -573,7 +584,7 @@
 	        active.removeClass("active");
 			$prev.addClass("active");
 			this.tryToSetMaster();
-			this.scrollUp();
+			this.scrollTo();
 			
     		var node = $prev.data("optionNode");
 	        if(node == null) {  
@@ -608,8 +619,7 @@
 	        active.removeClass("active");
 			next.addClass("active");
 			this.tryToSetMaster();
-			
-			this.scrollDown();
+			this.scrollTo();
 		
     		var node = next.data("optionNode");
 	        if(node == null) { 
@@ -622,8 +632,6 @@
 	        return;
 		    
 		},
-		
-		
 		
 		//corrects list wrapper's height depending on list items height
 		setListDisplay: function() {
@@ -666,10 +674,7 @@
 		    }
         	this.listWrapper.css("left", offset.left);
         	this.listWrapper.css("top", top );			
-			
-			
-		    
-		    
+
 		    return height;
 		},
 
@@ -689,7 +694,6 @@
 		//returns active (hovered) element of the dropdown list
 		getActive: function() {
         	this.log("get active");
-			
 			return this.listItems.filter(".active:first"); //TODO used cached visible list
 		},
 
@@ -702,11 +706,6 @@
 	        }
     	},
     	
-    	resetItemVisibility: function() {
-        	this.log("resetitemvisibility");
-    		this.listItems.removeClass("invisible").addClass("visible");
-    	},
-
     	setActive: function(node) {
         	this.log("setActive");
     		this.listItems.removeClass("active");
@@ -720,39 +719,41 @@
     		this.setActive( active );
     		return active;
     	},
-		
     	
-		//scrolls list wrapper down when needed
-		scrollDown: function() {
-        	this.log("scrollldown");
-			
-		    if ("scroll" != this.listScroll.css(this.overflowCSS))
-		        return;
-			
-	            var beforeActive = this.getActiveIndex() + 1;
-				/*if ($.browser.opera) ++beforeActive;*/
-		    
-		    var minScroll = this.listItems.outerHeight() * beforeActive - this.listScroll.height();
-	        
-			if ($.browser.msie) minScroll += beforeActive;
-		    
-		    if (this.listScroll.scrollTop() < minScroll)
-		        this.listScroll.scrollTop(minScroll);
-		},
+		
+		//scrolls list wrapper to active
+		scrollTo: function() {
+        	this.log("scrollTo");
 
-		//scrolls list wrapper up when needed
-		scrollUp: function() {
-        	this.log("scrollup");
-
-		    if ("scroll" != this.listScroll.css(this.overflowCSS))
-		        return;
-			
-		    var maxScroll = this.getActiveIndex() * this.listItems.outerHeight();
+		    if ("scroll" != this.listScroll.css(this.overflowCSS)) return;
 		    
-		    if (this.listScroll.scrollTop() > maxScroll) {
-		        this.listScroll.scrollTop(maxScroll);
-		    }     
-		},
+			var active = this.getActive();
+			if(!active) return;
+			
+		    var activePos = active.position().top;
+		    var activeHeight = active.outerHeight(true);
+		    var listHeight = this.listWrapper.height();
+		    var scrollTop = this.listScroll.scrollTop();
+		    /*
+		    console.log("APT: " + activePos);
+		    console.log("AH: " + activeHeight);
+		    console.log("LH: " + listHeight);
+		    console.log("ST: " + scrollTop);
+		    */
+		    var top = 0;
+		    if (activePos <= activeHeight) { // nearly off top
+		    	top = scrollTop + activePos - activeHeight;
+		    } else if((activePos + activeHeight) >= listHeight ) { //nearly off bottom
+		    	top = scrollTop + activePos + activeHeight - activePos  ;
+		    }
+		    else {
+		    	return; // no need to scroll
+		    }
+		    this.log("top: " + top);
+		    this.listScroll.scrollTop(top);
+		    
+		},		
+		
 
 
 	    getCurrentTextValue: function() {
@@ -784,17 +785,6 @@
 	        return isVisible;
 	    },
 			
-	    getDropdownContainer: function() {
-	    	var ddc = $(this.config.dropDownID);
-	    	if(!ddc.length) { //create
-	    		ddc = $("<div></div>").appendTo("body").
-	    		css("height", 0).
-	    		css("z-index", this.config.zIndexPopup).
-	    		attr("id", this.config.dropDownID);
-	    	}
-	    	return ddc;
-	    },
-	    
 		disable: function() {
         	this.log("disable");
 			
@@ -812,15 +802,6 @@
 			this.icon.removeClass("disabled");
 			this.input.removeClass("disabled");
 			this.input.removeAttr("disabled");
-		},
-		
-		autoFill: function() {
-		    if (!this.config.autoFill || ($sc.KEY.BACKSPACE == this.lastKey) ) return;
-		    this.log("autofill");
-			    	
-		    var curVal = this.getCurrentTextValue();
-		    var newVal = this.getActive().text();
-		    this.input.val(newVal);
 		},
 		
 		/*
@@ -845,48 +826,25 @@
 
 		selectAll: function() {
 			this.log("Select All");
-	        this.selection(this.input.get(0), 0, this.input.val().length);
+			this.input.get(0).select();
+	        //this.selection(this.input.get(0), 0, this.input.val().length);
 	    },
-		
+	    
+	    getDropdownContainer: function() {
+	    	var ddc = $(this.config.dropDownID);
+	    	if(!ddc.length) { //create
+	    		ddc = $("<div></div>").appendTo("body").
+	    		css("height", 0).
+	    		css("z-index", this.config.zIndexPopup).
+	    		attr("id", this.config.dropDownID);
+	    	}
+	    	return ddc;
+	    },
+	    		
 		notify: function(evt) {
 		    if (!$.isFunction(this.config[evt + "Callback"])) return;
 		    this.config[evt + "Callback"].call(this);	
 		},
-
-		
-		
-		
-		
-		/*
-	    //returns sum of all visible items height
-	    getListItemsHeight: function() {
-        	
-			var height = 
-			this.log("get items height: " + height);
-			return height;
-	    	/
-			var itemHeight = this.singleItemHeight;
-			this.log("heights: " + itemHeight + " : " + this.singleItemHeight);
-	        return itemHeight * this.listLength();
-	        
-	    },
-		  */
-		/*
-		//returns number of currently visible list items
-		listLength: function() {
-			var length = this.listItems.filter(".visible").length;
-			// (this.trie.matches.length) ? this.trie.matches.length : this.trie.misses.length;
-        	this.log("list len " + length);
-			return length;
-		},
-		*/
-
-		
-		
-		
-		
-		
-		
 		
 		log: function(msg) {
 			if(!this.config.log) return;
@@ -904,14 +862,24 @@
     // static $.sexycombo functions
     $sc.extend({
     	KEY: { //key codes
-		    UP: 38,
+    		LEFT: 37,
+    		UP: 38,
+    		RIGHT: 39,
 		    DOWN: 40,
+		    PAGEUP: 33,
+		    PAGEDOWN: 34,
+		    HOME: 36,
+		    END: 35,
+		    
 		    TAB: 9,
 		    RETURN: 13,
 		    ESC: 27,
+
+		    SHIFT: 16,
+		    CTRL: 17,
+		    ALT: 18,
+
 		    COMMA: 188,
-		    PAGEUP: 33,
-		    PAGEDOWN: 34,
 		    DEL: 46,
 		    BACKSPACE: 8	
     	},
