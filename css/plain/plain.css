@@ -44,12 +44,10 @@
 .plain div.list-wrapper {
     border: 1px solid #B5B8C8;
     background-color: #FFF;
+    max-height: 200px; /* must set this explicitly, as height is manipulated */ 
 }
 
 .plain div.list-scroll {
-    /*we should set height and max-height explicitly*/
-    height: 200px; 
-    max-height: 200px;
 }
 
 .plain div.list-wrapper-up {

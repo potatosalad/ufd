@@ -44,11 +44,10 @@
 
 .custom div.list-wrapper {
     border: 1px solid black;
+    max-height: 160px; /* must set this explicitly, as height is manipulated */ 
+    
 }
 .custom div.list-scroll {
-    /*we should set height and max-height explicitly*/
-    height: 200px; 
-    max-height: 200px;
 }
 
 .custom div.list-wrapper-up {
