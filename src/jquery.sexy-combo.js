@@ -6,7 +6,7 @@
  *		Kadalashvili.Vladimir@gmail.com - Vladimir Kadalashvili            *
  *		thetoolman@gmail.com                                               * 
  *                                                                         *
- *	Version: @VERSION
+ *	Version: 3.0.0-Alpha
  *                                                                         *
  *	Website: http://code.google.com/p/sexy-combo/                          *
  *                                                                         *
@@ -156,7 +156,7 @@
     		
 		    // only process: keyups excluding tab/return; and only tab/return keydown 
     		// Only some browsers fire keyUp on tab in, ignore if it happens 
-		    if(!isKeyUp == ((key != k.TAB) && (key != k.ENTER)) ) return;
+		    if(!isKeyUp == ((key != k.TAB) && (key != k.RETURN)) ) return;
 
 		    //this.log("Key: " + key + " isKeyUp?: " + isKeyUp + " isKeyPress?: " + isKeyUp);
 		    this.lastKey = key;
@@ -225,6 +225,10 @@
 			
 			
 	        this.input.bind("click", function(e) {
+		    	if(self.isDisabled){
+		    		self.stopEvent(e);
+		    		return;
+		    	}
 	        	self.log("input click");
 	            if(!self.internalFocus) {
 	            	self.realFocusEvent();
@@ -232,6 +236,10 @@
 	        });
 
 	        this.input.bind("focus", function(e) {
+		    	if(self.isDisabled){
+		    		self.stopEvent(e);
+		    		return;
+		    	}
 	        	self.log("input focus");
 	            if(!self.internalFocus){
 	            	self.realFocusEvent();
@@ -255,7 +263,11 @@
 	        this.icon.bind("mousedown", function(e) { self.icon.addClass("mouseDown"); }); 
 	        this.icon.bind("mouseup",   function(e) { self.icon.removeClass("mouseDown"); }); 
 			this.icon.bind("click", function(e) {
-	        	self.log("icon click: " + e.target);
+		    	if(self.isDisabled){
+		    		self.stopEvent(e);
+		    		return;
+		    	}
+				self.log("icon click: " + e.target);
 	            self.iconClick();
 	        }); 
 	    
@@ -329,7 +341,6 @@
 	    
 	    iconClick: function() {
 	    	this.log("clickIcon");
-	    	if(this.isDisabled) return;
 
 	        if (this.listVisible()) { 
 	            this.hideList();
@@ -363,8 +374,8 @@
 	    //sexy combo methods
 	    
 	    showList: function() {
-        	this.log("showlist");
         	if(this.listVisible()) return;
+        	this.log("showlist");
         	
         	this.listWrapper.removeClass("invisible").addClass("visible");
         	this.setListDisplay();
@@ -373,8 +384,8 @@
 	    },
 	
 	    hideList: function() {
-        	this.log("hide list");
         	if(!this.listVisible()) return;
+        	this.log("hide list");
 	        
 	        this.listWrapper.removeClass("visible").addClass("invisible");
 	        this.listItems.removeClass("invisible"); //slow?  
@@ -404,10 +415,18 @@
 	        	return false;
 	        }
 
-	        this.isUpdatingMaster = true;
+	        var nodeVal = (node.val != null && node.val != "") ? node.val : node.text;
+	        var option = this.selectbox.children("option:selected");
+	        if(option.text() == node.text){
+	        	this.log("already set correctly." + option.text()  + " : " + node.text);
+	        	return true;
+	        }
+	        
 	        var curVal = this.selectbox.val();
-	        this.selectbox.val([node.value]);
-	        if(this.selectbox.val() != node.value){ //set failed
+	        this.isUpdatingMaster = true;
+	        this.selectbox.val([nodeVal]);
+	        this.log(" update: " + this.selectbox.val() + " : "+ nodeVal);
+	        if(this.selectbox.val() != nodeVal){ //set failed
 		        this.selectbox.val([curVal]); 
 		        this.log("set new master selected failed.");
 		        if(!this.config.submitFreeText) {
@@ -417,7 +436,7 @@
 		        return false;
 	        }
 	        this.input.val(node.text);
-	        this.log("master selectbox set to: " + node.value);
+	        this.log("master selectbox set to: " + nodeVal);
 	        this.selectbox.trigger("change");
 	        this.notify("textChange");
 	        return true;
@@ -439,9 +458,14 @@
     		this.options.each(function() {	
     			var opt = $(this);
     	    	var optionText = $.trim(opt.text());
-                var newItem = $('<li class="visible"><span>' + optionText + '</span></li>').appendTo(self.list);
+                var newItem = $('<li class="visible"><span>' + optionText + '</span></li>');
                 newItem.data("optionNode", this);
-                self.trie.add(optionText, newItem.get(0));
+                var addOK = self.trie.add(optionText, newItem.get(0));
+                if(addOK){
+                	self.list.append(newItem);
+                } else {
+                	self.log(optionText + " already added, not rendering item twice.");
+                }
     	    });
     		
 			this.listItems = this.list.children();
@@ -471,8 +495,8 @@
     	    this.wrapper.width(newSelectWidth);
     	    this.listWrapper.width(newSelectWidth - listWrapBP);
     	    
-    	    this.log(newSelectWidth + " : " + inputWidth + " : " + 
-    	    		iconWidth + " : " + (newSelectWidth - listWrapBP));
+    	    //this.log(newSelectWidth + " : " + inputWidth + " : " + 
+    	    //		iconWidth + " : " + (newSelectWidth - listWrapBP));
     	    
     	    // copy listed css properties from select to container
     	    var props = ["marginLeft","marginTop","marginRight","marginBottom"];
@@ -526,8 +550,10 @@
 
 	        	self.setAttr(self.trie.matches, $sc.classAttr,"visible" );
 		        if(self.trie.matches.length <= showAllLength) {
+		        	self.log("showing all");
 		        	self.setAttr(self.trie.misses, $sc.classAttr,"visible" );
 		        } else {
+		        	self.log("hiding");
 		        	self.setAttr(self.trie.misses, $sc.classAttr,"invisible" );
 		        }
 		        if(self.trie.matches.length == 1) {
@@ -728,7 +754,7 @@
 		    if ("scroll" != this.listScroll.css(this.overflowCSS)) return;
 		    
 			var active = this.getActive();
-			if(!active) return;
+			if(!active.length) return;
 			
 		    var activePos = active.position().top;
 		    var activeHeight = active.outerHeight(true);
@@ -831,7 +857,7 @@
 	    },
 	    
 	    getDropdownContainer: function() {
-	    	var ddc = $(this.config.dropDownID);
+	    	var ddc = $("#" + this.config.dropDownID);
 	    	if(!ddc.length) { //create
 	    		ddc = $("<div></div>").appendTo("body").
 	    		css("height", 0).
@@ -1002,9 +1028,7 @@
     	if(!this.isCaseSensitive){
     		inStr = inStr.toLowerCase();
     	}
-    	
     	//invalid char clean here
-    	
     	return inStr;
     }
     
@@ -1025,7 +1049,9 @@
                 curNode = node[char] = [null, {}];
             }
         }
+        if(curNode[0]) return false;
         curNode[0] = object;
+        return true;
     };
 
     /**

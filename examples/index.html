@@ -37,8 +37,8 @@
 	
 		<script type='text/javascript' 
 	        src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
-	<script type='text/javascript' src='firebug-lite-compressed.js'></script>
 	 -->
+	<script type='text/javascript' src='firebug-lite-compressed.js'></script>
 	
 	
 	<style type="text/css">
@@ -236,7 +236,7 @@
 		<script type="text/javascript" >
 		$(function () {
 			$("select.sizeDemo1").sexyCombo({minimumSize: 20});
-			$("select.sizeDemo2").sexyCombo({log: true});
+			$("select.sizeDemo2").sexyCombo({log: false});
 			$("select.sizeDemo3").sexyCombo({manualWidth: 300});
 		});    
 	    </script>
@@ -264,7 +264,7 @@
     	<h2>Free text</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("#freetext-combo").sexyCombo({submitFreeText:true, log: true});
+			$("#freetext-combo").sexyCombo({submitFreeText:true, log: false});
 		});    
 	    </script>
 
@@ -496,6 +496,73 @@
 		<br/>
 		<hr/>
 	</div>
+    
+ 
+    
+    <div>
+		<h2>Performance test</h2>
+		
+		<script type="text/javascript" >
+		$(function () {
+			
+			$("#charButton").click(function(){
+
+
+				var pc = $("#perfContainer").html("");
+				var select = $("<select>").appendTo(pc);
+				var charCount = $("#charCount").val(); //should be a number
+
+				var start = new Date().getTime();
+				
+				for (;charCount > 0; charCount--){
+					var rs = randomString();
+					select.append('<option>' + rs + "</option>");
+				} 			
+
+				var mid = new Date().getTime();
+				select.sexyCombo({log:true});
+				var end = new Date().getTime();
+				
+				alert("Randoms strings in a select built in " + (mid-start) + 
+						" msec.  SexyCobmo constructed from select in: " +  (end-mid) + " msec.");
+				
+				return;
+			});
+
+			
+			function randomString(length) {
+			    var chars = 'abcdefghilmnoprstu'.split('');
+			    var vowels = 'aeiou'.split('');
+			    
+			    if (! length) {
+			        length = Math.floor(Math.random() * (chars.length-1) ) + 1;
+			    }
+			    
+			    var str = '';
+			    for (var i = 0; i < length; i++) {
+				    if(i%2 == 0) str += vowels[Math.floor(Math.random() * vowels.length)];
+				    else str += chars[Math.floor(Math.random() * chars.length)];
+			    }
+			    return str;
+			}
+			
+		});    
+	    </script>
+
+	    <p>Test...</p>
+	    
+	    Number of random strings:
+	    <input type="text" id="charCount" value="500"/>
+	    
+	    <button type="button" id="charButton">Click to build a new sexycombo</button>
+	    <br/>
+	    <br/>
+	    <br/>
+
+	    <div id="perfContainer">SELECT-PLACEHOLDER</div>
+      <hr/>
+	</div>
+        
     
     
     <div>
