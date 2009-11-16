@@ -415,7 +415,7 @@
 	        	return false;
 	        }
 
-	        var nodeVal = (node.val != null && node.val != "") ? node.val : node.text;
+	        var nodeVal = (node.value != null && node.value != "") ? node.value : node.text;
 	        var option = this.selectbox.children("option:selected");
 	        if(option.text() == node.text){
 	        	this.log("already set correctly." + option.text()  + " : " + node.text);
