@@ -1,0 +1,719 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us">
+
+<head>
+	<title>Sexy Combo @VERSION demonstration page</title>
+	
+	<!-- required dependency -->
+	<script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+	
+	<!--  if you want iE6 not to poke select boxes thru your dropdowns, you need ... -->
+	<script type="text/javascript" src="jquery.bgiframe.min.js"></script>
+	
+	<!-- Plugin source development location, distribution location: only 1 of 2 is there.. -->
+	<script type="text/javascript" src="../src/jquery.sexy-combo.js"></script>
+	<script type="text/javascript" src="../jquery.sexy-combo.js"></script>
+	
+	<!--  development, distribution: base structure css  -->    
+	<link href="../css/sexy-combo.css" rel="stylesheet" type="text/css" />
+	<link href="css/sexy-combo.css" rel="stylesheet" type="text/css" />
+	
+	<!--  development, distribution: sexy css skin (default)  -->    
+	<link href="../css/sexy/sexy.css" rel="stylesheet" type="text/css" />
+	<link href="css/sexy/sexy.css" rel="stylesheet" type="text/css" />
+	
+	<!--  development, distribution: plain css skin  -->    
+	<link href="../css/plain/plain.css" rel="stylesheet" type="text/css" />
+	<link href="css/plain/plain.css" rel="stylesheet" type="text/css" />
+	
+	<!--  development, distribution: custom css skin; basic pure CSS for you to build from  -->    
+	<link href="../css/custom/custom.css" rel="stylesheet" type="text/css" />
+	<link href="css/custom/custom.css" rel="stylesheet" type="text/css" />
+	
+	<!-- 
+		Firebug lite for iE: 
+		Useful to see logging in iE. Can also create a DOM node matching the logSelector option.
+	
+		<script type='text/javascript' 
+	        src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
+	 -->
+	<script type='text/javascript' src='firebug-lite-compressed.js'></script>
+	
+	
+	<style type="text/css">
+	
+	select {
+		margin: 2px;
+	}
+	
+	#log {
+		height: 100px;
+		overflow: scroll;
+	}
+	
+	#insideLog {
+		border: 1px solid gray;
+		width: 300px;
+		height: 150px;
+		overflow: scroll;
+		position: relative;
+		left: 500px;
+		top: -40px;
+	}
+	</style>
+ </head>
+ <body>
+    
+	<h1>Sexy Combo base demonstration page</h1>
+    
+    
+    <div>
+		<h2>basic combo</h2>
+		<script type="text/javascript" >
+		$(function () {
+			$("#basic-combo").sexyCombo();
+		});    
+	    </script>
+
+	    <p>The combobox below is a very basic example of using <em>Sexy Combo</em>.  </p>
+	    
+      <label for="basic-combo">Choose the state:</label><br />
+      <select id="basic-combo" name="basic-combo">
+        <option value="AL">Alabama</option>
+        <option value="AK">Alaska Alaska Alaska Alaska Alaska</option>
+        <option value="AZ">Arizona</option>
+        <option value="AR">Arkansas</option>
+        <option value="CA">California</option>
+        <option value="CO">Colorado</option>
+        <option value="CT">Connecticut</option>
+
+        <option value="DE">Delaware</option>
+        <option value="FL">Florida</option>
+        <option value="GA">Georgia</option>
+        <option value="HI">Hawaii</option>
+        <option value="ID">Idaho</option>
+        <option value="IL">Illinois</option>
+        <option value="IN">Indiana</option>
+        <option value="IA">Iowa</option>
+        <option value="KS">Kansas</option>
+
+        <option value="KY">Kentucky</option>
+        <option value="LA">Louisiana</option>
+        <option value="ME">Maine</option>
+        <option value="MD">Maryland</option>
+        <option value="MA">Massachusetts</option>
+        <option value="MI">Michigan</option>
+        <option value="MN">Minnesota</option>
+        <option value="MS">Mississippi</option>
+        <option value="MO">Missouri</option>
+
+        <option value="MT">Montana</option>
+        <option value="NE">Nebraska</option>
+        <option value="NV">Nevada</option>
+        <option value="NH">New Hampshire</option>
+        <option value="NJ">New Jersey</option>
+        <option value="NM">New Mexico</option>
+        <option value="NY">New York</option>
+        <option value="NC">North Carolina</option>
+        <option value="ND">North Dakota</option>
+
+        <option value="OH">Ohio</option>
+        <option value="OK">Oklahoma</option>
+        <option value="OR">Oregon</option>
+        <option value="PA">Pennsylvania</option>
+        <option value="RI">Rhode Island</option>
+        <option value="SC">South Carolina</option>
+        <option value="SD">South Dakota</option>
+        <option value="TN">Tennessee</option>
+        <option value="TX">Texas</option>
+
+        <option value="UT">Utah</option>
+        <option value="VT">Vermont</option>
+        <option value="VA">Virginia</option>
+        <option value="WA">Washington</option>
+        <option value="WV">West Virginia</option>
+        <option value="WI">Wisconsin</option>
+        <option value="WY">Wyoming</option>
+      </select>
+      <hr/>
+	</div>
+    
+    <div>
+		<h2>inside combo</h2>
+    
+		<script type="text/javascript" >
+		$(function () {
+			var insideCombo = $("#inside-combo");
+			var log = $("#insideLog").attr("tabindex", -10);
+			insideCombo.sexyCombo({log:false});
+
+			//reveal master to the right except in iE6
+			if($.support.style) insideCombo.css("position", "absolute").css("left", 250).attr("tabindex", -10).show(); 
+			var logEvent = function(event){
+				log.prepend(event.type + "<br/>");
+			};
+			insideCombo.bind("blur focus change ", logEvent);
+					 //  error ready, click, dblclick, select submit keydown keypress keyup  
+					 // mousedown, mouseup, mousemove, mouseover, mouseout, mouseenter, mouseleave,  
+			
+			
+		});    
+	    </script>
+
+	    <p>This is another basic combobox.  The events logged on the far right are events mounted 
+	    TO THE ORIGINAL SELECT BOX.  You can see the master select in between two 2 unless on iE6.</p>
+	    <p> If set visible in iE6, it interferes with event focus and tabbing order. Try in a different browser, or edit this demo to see it.    
+	    It *does* work fine in iE6 when hidden, this is exposed as a demonstration of its internals.</p>
+	      
+	    <p>Sexy Combo triggers some but not all events so that original events take place: namelt the focus, change and blur events.</p>
+	    
+      <label for="inside-combo">Choose the state:</label><br />
+      <select id="inside-combo" name="inside-combo">
+        <option value="AL">Alabama</option>
+        <option value="AK">Alaska Alaska Alaska Alaska Alaska</option>
+        <option value="AZ">Arizona</option>
+        <option value="AR">Arkansas</option>
+        <option value="CA">California</option>
+        <option value="CO">Colorado</option>
+        <option value="CT">Connecticut</option>
+
+        <option value="DE">Delaware</option>
+        <option value="FL">Florida</option>
+        <option value="GA">Georgia</option>
+        <option value="HI">Hawaii</option>
+        <option value="ID">Idaho</option>
+        <option value="IL">Illinois</option>
+        <option value="IN">Indiana</option>
+        <option value="IA">Iowa</option>
+        <option value="KS">Kansas</option>
+
+        <option value="KY">Kentucky</option>
+        <option value="LA">Louisiana</option>
+        <option value="ME">Maine</option>
+        <option value="MD">Maryland</option>
+        <option value="MA">Massachusetts</option>
+        <option value="MI">Michigan</option>
+        <option value="MN">Minnesota</option>
+        <option value="MS">Mississippi</option>
+        <option value="MO">Missouri</option>
+
+        <option value="MT">Montana</option>
+        <option value="NE">Nebraska</option>
+        <option value="NV">Nevada</option>
+        <option value="NH">New Hampshire</option>
+        <option value="NJ">New Jersey</option>
+        <option value="NM">New Mexico</option>
+        <option value="NY">New York</option>
+        <option value="NC">North Carolina</option>
+        <option value="ND">North Dakota</option>
+
+        <option value="OH">Ohio</option>
+        <option value="OK">Oklahoma</option>
+        <option value="OR">Oregon</option>
+        <option value="PA">Pennsylvania</option>
+        <option value="RI">Rhode Island</option>
+        <option value="SC">South Carolina</option>
+        <option value="SD">South Dakota</option>
+        <option value="TN">Tennessee</option>
+        <option value="TX">Texas</option>
+
+        <option value="UT">Utah</option>
+        <option value="VT">Vermont</option>
+        <option value="VA">Virginia</option>
+        <option value="WA">Washington</option>
+        <option value="WV">West Virginia</option>
+        <option value="WI">Wisconsin</option>
+        <option value="WY">Wyoming</option>
+      </select>
+      <div id="insideLog"></div>
+      <hr/>
+	</div>
+    
+    
+    <div >
+		<h2>width control</h2>
+		<script type="text/javascript" >
+		$(function () {
+			$("select.sizeDemo1").sexyCombo({minimumSize: 20});
+			$("select.sizeDemo2").sexyCombo({log: false});
+			$("select.sizeDemo3").sexyCombo({manualWidth: 300});
+		});    
+	    </script>
+
+	    <p>Sizing defaults to autosize.  SexyCombo sets the exact same width as the master select, unless the original is below the "minWidth" option, or manualWidth is set.</p>
+	  <label>Below minimum size</label>  
+      <select class="sizeDemo1">
+        <option value=""></option>
+      </select>
+      <br/>
+	  <label>autosize</label>  
+      <select class="sizeDemo2">
+        <option value="AL">Alabamaramapajamasbananas</option>
+      </select>
+      <br/>
+	  <label>manualWidth</label>  
+      <select class="sizeDemo3">
+        <option value="AL">Alabama</option>
+      </select>
+      <br/>
+	<hr/>
+	</div>
+    
+    <div>
+    	<h2>Free text</h2>
+		<script type="text/javascript" >
+		$(function () {
+			$("#freetext-combo").sexyCombo({submitFreeText:true, log: false});
+		});    
+	    </script>
+
+	    <p>The combobox below allows freetext, submitting the text back using the original selects' name. All events are still propagated back to master (including attempt to set if matched) even though it has been renamed (suffixed).</p>
+	    
+      <label for="freetext-combo">Choose the state:</label><br />
+      <select id="freetext-combo" name="basic-freetext">
+        <option value="AL">Alabama</option>
+        <option value="AK">Alaska Alaska Alaska Alaska Alaska</option>
+        <option value="AZ">Arizona</option>
+        <option value="AR">Arkansas</option>
+        <option value="CA">California</option>
+        <option value="CO">Colorado</option>
+        <option value="CT">Connecticut</option>
+
+        <option value="DE">Delaware</option>
+        <option value="FL">Florida</option>
+        <option value="GA">Georgia</option>
+        <option value="HI">Hawaii</option>
+        <option value="ID">Idaho</option>
+        <option value="IL">Illinois</option>
+        <option value="IN">Indiana</option>
+        <option value="IA">Iowa</option>
+        <option value="KS">Kansas</option>
+
+        <option value="KY">Kentucky</option>
+        <option value="LA">Louisiana</option>
+        <option value="ME">Maine</option>
+        <option value="MD">Maryland</option>
+        <option value="MA">Massachusetts</option>
+        <option value="MI">Michigan</option>
+        <option value="MN">Minnesota</option>
+        <option value="MS">Mississippi</option>
+        <option value="MO">Missouri</option>
+
+        <option value="MT">Montana</option>
+        <option value="NE">Nebraska</option>
+        <option value="NV">Nevada</option>
+        <option value="NH">New Hampshire</option>
+        <option value="NJ">New Jersey</option>
+        <option value="NM">New Mexico</option>
+        <option value="NY">New York</option>
+        <option value="NC">North Carolina</option>
+        <option value="ND">North Dakota</option>
+
+        <option value="OH">Ohio</option>
+        <option value="OK">Oklahoma</option>
+        <option value="OR">Oregon</option>
+        <option value="PA">Pennsylvania</option>
+        <option value="RI">Rhode Island</option>
+        <option value="SC">South Carolina</option>
+        <option value="SD">South Dakota</option>
+        <option value="TN">Tennessee</option>
+        <option value="TX">Texas</option>
+
+        <option value="UT">Utah</option>
+        <option value="VT">Vermont</option>
+        <option value="VA">Virginia</option>
+        <option value="WA">Washington</option>
+        <option value="WV">West Virginia</option>
+        <option value="WI">Wisconsin</option>
+        <option value="WY">Wyoming</option>
+      </select>
+      <hr/>
+	</div>
+
+    <div>
+    	<h2>Skins; disable/enable</h2>
+		<script type="text/javascript" >
+		$(function () {
+			$("#skin1-combo").sexyCombo({});
+			$("#skin2-combo").sexyCombo({skin:"plain"});
+			$("#skin3-combo").sexyCombo({skin:"custom"});
+
+			var skins = $("#skin1-combo, #skin2-combo, #skin3-combo"); //original selects 
+
+			var disabled = false;
+			
+			$("#disableToggle").bind("click", function() {
+					if(disabled){
+					$.sexyCombo.undisable(skins); //static function needs the original select reference.
+					} else {
+						$.sexyCombo.disable(skins); //static function needs the original select reference.
+					}
+					disabled = !disabled;
+				});
+			
+		});    
+	    </script>
+
+	    <p>The combobox below allows freetext, submitting the text back using the original selects' name. All events are still propagated back to master (including attempt to set if matched) even though it has been renamed (suffixed).</p>
+	   
+	   <button id="disableToggle" type="button">Toggle disabled</button><br/>
+	    
+      <label for="skin1-combo">Choose the state:</label><br />
+      <select id="skin1-combo" name="skin1-combo">
+        <option value="AL">Alabama</option>
+        <option value="AK">Alaska</option>
+        <option value="AZ">Arizona</option>
+        <option value="AR">Arkansas</option>
+        <option value="CA">California</option>
+        <option value="CO">Colorado</option>
+        <option value="CT">Connecticut</option>
+     </select>
+      <br/>
+      <label for="skin2-combo">Choose the state:</label><br />
+      <select id="skin2-combo" name="skin2-combo">
+        <option value="DE">Delaware</option>
+        <option value="FL">Florida</option>
+        <option value="GA">Georgia</option>
+        <option value="HI">Hawaii</option>
+        <option value="ID">Idaho</option>
+        <option value="IL">Illinois</option>
+        <option value="IN">Indiana</option>
+        <option value="IA">Iowa</option>
+        <option value="KS">Kansas</option>
+      </select>
+      <br/>
+      <label for="skin3-combo">Choose the state:</label><br />
+      <select id="skin3-combo" name="skin3-combo">
+        <option value="KY">Kentucky</option>
+        <option value="LA">Louisiana</option>
+        <option value="ME">Maine</option>
+        <option value="MD">Maryland</option>
+        <option value="MA">Massachusetts</option>
+        <option value="MI">Michigan</option>
+        <option value="MN">Minnesota</option>
+        <option value="MS">Mississippi</option>
+        <option value="MO">Missouri</option>
+      </select>
+      <br/>
+
+      <hr/>
+	</div>
+      
+
+      
+    <div>
+    	<h2>zIndex correction on iE6</h2>
+		<script type="text/javascript" >
+		$(function () {
+			$("#zindex").sexyCombo();
+		});    
+	    </script>
+
+	    <p>The combobox works over select input, working around the iE6 zindex problem using bgiframe.</p>
+	    
+	<br/>
+	<select><option>Example</option></select>
+	<br/>
+	<select><option>Example</option></select>
+	<br/>
+	<select><option>Example</option></select>
+	<br/>
+	<select><option>Example</option></select>
+	<br/>
+	<select><option>Example</option></select>
+	<br/>
+    	    
+	    
+      <label for="zindex">Choose the state:</label><br />
+      <select id="zindex" name="zindex">
+        <option value="AL">Alabama</option>
+        <option value="AK">Alaska Alaska Alaska Alaska Alaska</option>
+        <option value="AZ">Arizona</option>
+        <option value="AR">Arkansas</option>
+        <option value="CA">California</option>
+        <option value="CO">Colorado</option>
+        <option value="CT">Connecticut</option>
+
+        <option value="DE">Delaware</option>
+        <option value="FL">Florida</option>
+        <option value="GA">Georgia</option>
+        <option value="HI">Hawaii</option>
+        <option value="ID">Idaho</option>
+        <option value="IL">Illinois</option>
+        <option value="IN">Indiana</option>
+        <option value="IA">Iowa</option>
+        <option value="KS">Kansas</option>
+
+        <option value="KY">Kentucky</option>
+        <option value="LA">Louisiana</option>
+        <option value="ME">Maine</option>
+        <option value="MD">Maryland</option>
+        <option value="MA">Massachusetts</option>
+        <option value="MI">Michigan</option>
+        <option value="MN">Minnesota</option>
+        <option value="MS">Mississippi</option>
+        <option value="MO">Missouri</option>
+
+        <option value="MT">Montana</option>
+        <option value="NE">Nebraska</option>
+        <option value="NV">Nevada</option>
+        <option value="NH">New Hampshire</option>
+        <option value="NJ">New Jersey</option>
+        <option value="NM">New Mexico</option>
+        <option value="NY">New York</option>
+        <option value="NC">North Carolina</option>
+        <option value="ND">North Dakota</option>
+
+        <option value="OH">Ohio</option>
+        <option value="OK">Oklahoma</option>
+        <option value="OR">Oregon</option>
+        <option value="PA">Pennsylvania</option>
+        <option value="RI">Rhode Island</option>
+        <option value="SC">South Carolina</option>
+        <option value="SD">South Dakota</option>
+        <option value="TN">Tennessee</option>
+        <option value="TX">Texas</option>
+
+        <option value="UT">Utah</option>
+        <option value="VT">Vermont</option>
+        <option value="VA">Virginia</option>
+        <option value="WA">Washington</option>
+        <option value="WV">West Virginia</option>
+        <option value="WI">Wisconsin</option>
+        <option value="WY">Wyoming</option>
+      </select>
+		<br/>
+		<select><option>Example</option></select>
+		<br/>
+		<select><option>Example</option></select>
+		<br/>
+		<select><option>Example</option></select>
+		<br/>
+		<select><option>Example</option></select>
+		<br/>
+		<select><option>Example</option></select>
+		<br/>
+		<hr/>
+	</div>
+    
+ 
+    
+    <div>
+		<h2>Performance test</h2>
+		
+		<script type="text/javascript" >
+		$(function () {
+			
+			$("#charButton").click(function(){
+
+
+				var pc = $("#perfContainer").html("");
+				var select = $("<select>").appendTo(pc);
+				var charCount = $("#charCount").val(); //should be a number
+
+				var start = new Date().getTime();
+				
+				for (;charCount > 0; charCount--){
+					var rs = randomString();
+					select.append('<option>' + rs + "</option>");
+				} 			
+
+				var mid = new Date().getTime();
+				select.sexyCombo({log:true});
+				var end = new Date().getTime();
+				
+				alert("Randoms strings in a select built in " + (mid-start) + 
+						" msec.  SexyCobmo constructed from select in: " +  (end-mid) + " msec.");
+				
+				return;
+			});
+
+			
+			function randomString(length) {
+			    var chars = 'abcdefghilmnoprstu'.split('');
+			    var vowels = 'aeiou'.split('');
+			    
+			    if (! length) {
+			        length = Math.floor(Math.random() * (chars.length-1) ) + 1;
+			    }
+			    
+			    var str = '';
+			    for (var i = 0; i < length; i++) {
+				    if(i%2 == 0) str += vowels[Math.floor(Math.random() * vowels.length)];
+				    else str += chars[Math.floor(Math.random() * chars.length)];
+			    }
+			    return str;
+			}
+			
+		});    
+	    </script>
+
+	    <p>Test...</p>
+	    
+	    Number of random strings:
+	    <input type="text" id="charCount" value="500"/>
+	    
+	    <button type="button" id="charButton">Click to build a new sexycombo</button>
+	    <br/>
+	    <br/>
+	    <br/>
+
+	    <div id="perfContainer">SELECT-PLACEHOLDER</div>
+      <hr/>
+	</div>
+        
+    
+    
+    <div>
+    <h2>Original</h2>
+    <p>
+    All this combos originally looked like:
+    </p>
+    <p>
+      <label for="selectbox">Choose the state:</label><br />
+      <select id="selectbox" name="selectbox"  size="1">
+        <option value="AL">Alabama</option>
+        <option value="AK">Alaska</option>
+        <option value="AZ">Arizona</option>
+        <option value="AR">Arkansas</option>
+        <option value="CA">California</option>
+        <option value="CO">Colorado</option>
+        <option value="CT">Connecticut</option>
+
+        <option value="DE">Delaware</option>
+        <option value="FL">Florida</option>
+        <option value="GA">Georgia</option>
+        <option value="HI">Hawaii</option>
+        <option value="ID">Idaho</option>
+        <option value="IL">Illinois</option>
+        <option value="IN">Indiana</option>
+        <option value="IA">Iowa</option>
+        <option value="KS">Kansas</option>
+
+        <option value="KY">Kentucky</option>
+        <option value="LA">Louisiana</option>
+        <option value="ME">Maine</option>
+        <option value="MD">Maryland</option>
+        <option value="MA">Massachusetts</option>
+        <option value    </div>="MI">Michigan</option>
+        <option value="MN">Minnesota</option>
+        <option value="MS">Mississippi</option>
+        <option value="MO">Missouri</option>
+
+        <option value="MT">Montana</option>
+        <option value="NE">Nebraska</option>
+        <option value="NV">Nevada</option>
+        <option value="NH">New Hampshire</option>
+        <option value="NJ">New Jersey</option>
+        <option value="NM">New Mexico</option>
+        <option value="NY">New York</option>
+        <option value="NC">North Carolina</option>
+        <option value="ND">North Dakota</option>
+
+        <option value="OH">Ohio</option>
+        <option value="OK">Oklahoma</option>
+        <option value="OR">Oregon</option>
+        <option value="PA">Pennsylvania</option>
+        <option value="RI">Rhode Island</option>
+        <option value="SC">South Carolina</option>
+        <option value="SD">South Dakota</option>
+        <option value="TN">Tennessee</option>
+        <option value="TX">Texas</option>
+
+        <option value="UT">Utah</option>
+        <option value="VT">Vermont</option>
+        <option value="VA">Virginia</option>
+        <option value="WA">Washington</option>
+        <option value="WV">West Virginia</option>
+        <option value="WI">Wisconsin</option>
+        <option value="WY">Wyoming</option>
+      </select>
+    </p>      
+        <script type="text/javascript" >
+    $(function () {
+
+
+
+/*
+    	var data = [];
+    	$("#selectbox").children().each(function () {
+    		var $this = $(this);
+    		data.push({
+    			value: $this.attr("value"),
+    			text: $this.text()
+    		});
+    	});
+
+    	$.sexyCombo.create({
+    		name: "static-combo",
+    		id: "static-combo",
+    		container: "#static-container",
+    		data: data
+    	});
+
+    	data[0].selected = true;
+    	$.sexyCombo.create({
+    		name: "static-selected-combo",
+    		id: "static-selected-combo",
+    		container: "#static-selected",
+    		data: data,
+    		triggerSelected: true
+    	});
+
+    	$.sexyCombo.create({
+    		name: "ajax-combo",
+    		id: "ajax-combo",
+    		container: "#ajax-container",
+    		url: "example.json"
+    	});
+    	$("#multiple-combo").sexyCombo();
+
+    	var logEvent = function (msg) {
+    		return;
+    		var $eventLogger = $("#event-logger");
+    		$eventLogger.html($eventLogger.html() + msg + "<br />");
+    	};
+
+    	$("#event-combo").sexyCombo({
+
+    		showListCallback: function () {
+    			logEvent("Dropdown list appeared.");
+    		},
+
+    		hideListCallback: function () {
+    			logEvent("Dropdown list disappeared.");
+    		},
+
+    		initCallback: function () {
+    			logEvent("Initialization...");
+    		},
+
+    		initEventsCallback: function () {
+    			logEvent("Events initialized.");
+    		},
+
+    		changeCallback: function () {
+    			logEvent("Combo value is changed. Text input value is " + this.getTextValue() + 
+    	    			". Hidden input value is " + this.getHiddenValue());
+    		},
+
+    		textChangeCallback: function () {
+    			logEvent("Text input's value is changed. Current value is " + this.getTextValue());
+    		}
+    	});
+
+    	$("#sc").sexyCombo();
+    	*/
+    });    
+    </script>
+    <hr/>
+    
+    </div>
+    
+    
+	<h2>#Log</h2>                        
+    <div id="log" style="margin-top: 50px;"></div>   
+    <hr/>
+  </body>
+</html> 

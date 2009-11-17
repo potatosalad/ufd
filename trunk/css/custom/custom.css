@@ -1,0 +1,66 @@
+/**
+	sexy-combo @VERSION : http://code.google.com/p/sexy-combo/
+	
+	This is a template skin; a basic pure CSS for you to build from for your own needs.
+	
+*/
+
+
+.custom {
+    height: 22px;
+}
+
+.custom input {
+    margin: 0;
+    height: 18px;
+    padding: 1px 3px;
+    border: 1px solid black;
+}
+
+.custom input.disabled {
+	background-color: gray; 
+}
+
+.custom div.icon {
+    width: 17px;
+    height: 22px;
+    border: 0;
+    background: black;
+}
+
+.custom div.icon.hover {
+	background-color: gray;
+}
+
+.custom div.icon.mouseDown {
+	background-color: red;
+}
+
+.custom div.icon.disabled {
+	background-color: gray; 
+}
+
+/* dropdown */
+
+.custom div.list-wrapper {
+    border: 1px solid black;
+    max-height: 160px; /* must set this explicitly, as height is manipulated */ 
+    
+}
+.custom div.list-scroll {
+}
+
+.custom div.list-wrapper-up {
+}
+
+.custom ul {
+}
+
+.custom li {
+    padding-left: 5px;
+    background-color: white;
+}
+
+.custom li.active {
+    background-color: highlight;
+}
