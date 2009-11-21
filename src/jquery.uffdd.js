@@ -28,23 +28,29 @@
  ***************************************************************************/
 
 ;(function($) {
+	
+    //shortcuts
+    var $uffdd = $.uffdd;
+    $uffdd.fn = $uffdd.prototype = {};
+    $uffdd.fn.extend = $uffdd.extend = $.extend;
 
-	$.fn.sexyCombo = function(config) {
+
+	$.fn.uffdd = function(config) {
         this.each(function() {
-			if ("SELECT" != this.tagName.toUpperCase())  return;	
-		    var sc = new $sc(this, config);
+			if ("select" != this.tagName.toLowerCase())  return;	
+		    var sc = new $uffdd(this, config);
 		    
-		    $(this).data("sexy-combo", sc);
+		    $(this).data("uffdd-instance", sc);
 	    });  
         
         return this;
     };
     
-    $.fn.sexyCombo.defaults = {
+    $.fn.uffdd.defaults = {
 
-		skin: "sexy", //skin name
-		suffix: "__sexyCombo", // original select name + suffix == pseudo-dropdown text input name  
-		dropDownID: "sexyComboDDC", //if provided, value of text input when it has no value and focus
+		skin: "plain", //skin name
+		suffix: "__uffdd", // original select name + suffix == pseudo-dropdown text input name  
+		dropDownID: "uffDDC", //if provided, value of text input when it has no value and focus
 		logSelector: "#log", // selector string to write log into, 
 		log: false, // log to firebug console (if available) and logSelector (if it exists)?
 
@@ -64,7 +70,7 @@
 		key: "value", //key json name for key/value pair
 		value: "text", //value json for key/value pair
 	
-		//all callback functions are called in the scope of the current sexyCombo instance
+		//all callback functions are called in the scope of the current instance
 		showListCallback: null, //called after dropdown list appears
 		hideListCallback: null, //called after dropdown list disappears
 		initCallback: null, //called at the end of constructor
@@ -74,10 +80,10 @@
     };
     
     //constructor: create initial markup and initialize
-    $.sexyCombo = function(selectbox, config) {
+    $.uffdd = function(selectbox, config) {
 		
-        if (selectbox.tagName.toUpperCase() != "SELECT") return;
-        this.config = $.extend({}, $.fn.sexyCombo.defaults, config || {}); 
+        if (selectbox.tagName.toLowerCase() != "select") return;
+        this.config = $.extend({}, $.fn.uffdd.defaults, config || {}); 
 
         // in place content
         this.selectbox = $(selectbox);
@@ -128,14 +134,10 @@
         this.initListEvents();
     };
     
-    //shortcuts
-    var $sc = $.sexyCombo;
-    $sc.fn = $sc.prototype = {};
-    $sc.fn.extend = $sc.extend = $.extend;
     
-    $sc.fn.extend({
+    $uffdd.fn.extend({
 	    
-    	// sexy combo object event handlers
+    	// event handlers
 
     	key: function(event, isKeyUp, isKeyPress) {
     		/*
@@ -143,7 +145,7 @@
     		 */
     		if(isKeyPress) return; //not needed
 
-    		var k = $sc.KEY; 
+    		var k = $uffdd.KEY; 
     		var key = null;
 
     		if (undefined === event.which) {
@@ -306,7 +308,7 @@
 	        
 		},
 	    
-    	// sexy combo object pseudo events
+    	// pseudo events
 		
 	    realFocusEvent: function() {
         	this.log("real input focus");
@@ -384,7 +386,7 @@
 	        this.inputFocus();
 	    },	    
 	
-	    //sexy combo methods
+	    // methods
 	    
 	    showList: function() {
         	if(this.listVisible()) return;
@@ -561,13 +563,13 @@
 	        	self.log(self.getCurrentTextValue() + ": matchesLength: " + 
 	        			self.trie.matches.length + " missesLength: " + self.trie.misses.length );
 
-	        	self.setAttr(self.trie.matches, $sc.classAttr,"visible" );
+	        	self.setAttr(self.trie.matches, $uffdd.classAttr,"visible" );
 		        if(self.trie.matches.length <= showAllLength) {
 		        	self.log("showing all");
-		        	self.setAttr(self.trie.misses, $sc.classAttr,"visible" );
+		        	self.setAttr(self.trie.misses, $uffdd.classAttr,"visible" );
 		        } else {
 		        	self.log("hiding");
-		        	self.setAttr(self.trie.misses, $sc.classAttr,"invisible" );
+		        	self.setAttr(self.trie.misses, $uffdd.classAttr,"invisible" );
 		        }
 		        if(self.trie.matches.length == 1) {
 		        	self.setActive(self.trie.matches[0]);
@@ -895,8 +897,8 @@
     });
     
     
-    // static $.sexycombo functions
-    $sc.extend({
+    // static $.uffdd functions
+    $uffdd.extend({
     	KEY: { //key codes
     		LEFT: 37,
     		UP: 38,
@@ -966,20 +968,20 @@
 				    delete config.url;
 				    delete config.ajaxData;
 				    config.data = data;
-				    return $sc.create(config);
+				    return $uffdd.create(config);
 				});
 		    }
 		    config.container = $(config.container);
-	        var selectbox = $sc.createSelectbox(config);
+	        var selectbox = $uffdd.createSelectbox(config);
 
-	        return new $sc(selectbox, config);
+	        return new $uffdd(selectbox, config);
 		},
 		*/
     	
 		changeOptions: function($select) {
 			$select = $($select);
 	        $select.each(function() {
-			    var sc = $(this).data("sexy-combo");
+			    var sc = $(this).data("uffdd-instance");
 			    if(sc) {
 				    sc.disable();
 				    sc.populateFromMaster();
@@ -992,7 +994,7 @@
 		undisable: function($select) {
 		    $select = $($select);
 			$select.each(function() {
-			    var sc = $(this).data("sexy-combo");
+			    var sc = $(this).data("uffdd-instance");
 			    if(sc) sc.undisable();
 			});
 
@@ -1001,7 +1003,7 @@
 		disable: function($select) {
 		    $select = $($select);
 			$select.each(function() {
-			    var sc = $(this).data("sexy-combo");
+			    var sc = $(this).data("uffdd-instance");
 			    if(sc) sc.disable();
 			});
 		},
@@ -1009,7 +1011,7 @@
 		revertSelected: function($select) {
 		    $select = $($select);
 			$select.each(function() {
-			    var sc = $(this).data("sexy-combo");
+			    var sc = $(this).data("uffdd-instance");
 			    if(sc) sc.revertSelected();
 			});
 		}
