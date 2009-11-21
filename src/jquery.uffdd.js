@@ -29,12 +29,6 @@
 
 ;(function($) {
 	
-    //shortcuts
-    var $uffdd = $.uffdd;
-    $uffdd.fn = $uffdd.prototype = {};
-    $uffdd.fn.extend = $uffdd.extend = $.extend;
-
-
 	$.fn.uffdd = function(config) {
         this.each(function() {
 			if ("select" != this.tagName.toLowerCase())  return;	
@@ -123,6 +117,10 @@
         this.initListEvents();
     };
     
+    //shortcuts
+    var $uffdd = $.uffdd;
+    $uffdd.fn = $uffdd.prototype = {};
+    $uffdd.fn.extend = $uffdd.extend = $.extend;
     
     $uffdd.fn.extend({
 	    
