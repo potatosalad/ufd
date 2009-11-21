@@ -1,14 +1,14 @@
 /***************************************************************************
  *                                                                         *
- *	sexy-combo @VERSION	: A jQuery date time picker.
+ *	uffdd @VERSION	: Unobtrusive fast filter drop down jQuery plugin.   
  *                                                                         *
  *	Authors:                                                               *
- *		Kadalashvili.Vladimir@gmail.com - Vladimir Kadalashvili            *
  *		thetoolman@gmail.com                                               * 
+ *		Kadalashvili.Vladimir@gmail.com                                    *
  *                                                                         *
- *	Version: 3.0.0-Alpha
+ *	Version:  @VERSION
  *                                                                         *
- *	Website: http://code.google.com/p/sexy-combo/                          *
+ *	Website: http://code.google.com/p/uffdd/                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -189,6 +189,7 @@
 		        	this.hideList();
 		        	this.tryToSetMaster();
 		        	this.inputFocus();
+		        	this.stopEvent(event);
 		        	break;
 		        	
 				case k.TAB: //tabout only
@@ -310,7 +311,7 @@
 	    realFocusEvent: function() {
         	this.log("real input focus");
         	this.internalFocus = true;
-        	this.selectbox.trigger("focus");
+        	this.triggerEventOnMaster("focus");
 	    	this.filter(1); //show all even tho one is selected
 	    	this.inputFocus();
 	    	this.showList();
@@ -322,7 +323,7 @@
         	this.internalFocus = false;
         	this.hideList();  
         	this.tryToSetMaster();
-        	this.selectbox.trigger("blur");
+        	this.triggerEventOnMaster("blur");
 	    },
 
 		inputFocus: function() {
@@ -337,7 +338,19 @@
 		inputBlur: function() {
         	this.log("inputBlur: loose input component focus");
         	this.input.blur();
-		},	    
+		},	 
+		
+		triggerEventOnMaster: function(eventName) {
+			if( document.createEvent ) { // good browsers
+				var evObj = document.createEvent('HTMLEvents');
+				evObj.initEvent( eventName, true, true );
+				this.selectbox.get(0).dispatchEvent(evObj);
+				
+			} else if( document.createEventObject ) { // iE
+				this.selectbox.get(0).fireEvent("on" + eventName);
+			} 
+			
+		},
 	    
 	    iconClick: function() {
 	    	this.log("clickIcon");
@@ -437,7 +450,7 @@
 	        }
 	        this.input.val(node.text);
 	        this.log("master selectbox set to: " + nodeVal);
-	        this.selectbox.trigger("change");
+	        this.triggerEventOnMaster("change");
 	        this.notify("textChange");
 	        return true;
 	    },
@@ -792,11 +805,8 @@
 	    stopEvent: function(e) {
             e.cancelBubble = true;
             e.returnValue = false;
-
-            if (e.stopPropagation) {
-                    e.stopPropagation();
-                    e.preventDefault();
-            }
+            if (e.stopPropagation) {e.stopPropagation(); }
+            if( e.preventDefault ) { e.preventDefault(); }
 	    },
 
 	    setAttr: function(array, attr, val ) { //fast attribute OVERWRITE

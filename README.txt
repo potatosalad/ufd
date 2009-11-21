@@ -1,11 +1,11 @@
-	sexy-combo @VERSION	: A jQuery date time picker.
+	uffdd @VERSION	: Unobtrusive fast filter drop down jQuery plugin.
 	
 	Authors: 
-		Kadalashvili.Vladimir@gmail.com - Vladimir Kadalashvili
 		thetoolman@gmail.com 
+		Kadalashvili.Vladimir@gmail.com
 		
 	Version: @VERSION
 	
-	Website: http://code.google.com/p/sexy-combo/
+	Website: http://code.google.com/p/uffdd/
 	
 	See examples/index.html for demonstration page, or visit the website for documentation.	

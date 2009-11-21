@@ -1,10 +1,10 @@
-<project name="sexy-combo" default="all" basedir=".">
+<project name="uffdd" default="all" basedir=".">
     <!--
     	*****************************
-		* Sexy Combo jQuery plugin *
+		*   UFFDD jQuery plugin     *
     	*****************************
 
-		See: http://code.google.com/p/sexy-combo/
+		See: http://code.google.com/p/uffdd/
 		
 		Build script inspired by jQuery build system.  Thanks!
     -->
