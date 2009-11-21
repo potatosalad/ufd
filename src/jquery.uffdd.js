@@ -50,7 +50,7 @@
 
 		skin: "plain", //skin name
 		suffix: "__uffdd", // original select name + suffix == pseudo-dropdown text input name  
-		dropDownID: "uffDDC", //if provided, value of text input when it has no value and focus
+		dropDownID: "uffDDC", // internal ID used for storing dropdown list near root node,to avoid ie6 zindex issues.
 		logSelector: "#log", // selector string to write log into, 
 		log: false, // log to firebug console (if available) and logSelector (if it exists)?
 
@@ -66,17 +66,7 @@
 		delayFilter: ($.support.style) ? 1 : 150, //msec to wait before starting filter (or get cancelled); long for IE 
 		delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
 		zIndexPopup: 101, // dropdown z-index
-		
-		key: "value", //key json name for key/value pair
-		value: "text", //value json for key/value pair
-	
-		//all callback functions are called in the scope of the current instance
-		showListCallback: null, //called after dropdown list appears
-		hideListCallback: null, //called after dropdown list disappears
-		initCallback: null, //called at the end of constructor
-		initEventsCallback: null, //called at the end of initEvents function
-		changeCallback: null, //called when both text and hidden inputs values are changed
-		textChangeCallback: null //text input's value is changed
+
     };
     
     //constructor: create initial markup and initialize
@@ -129,7 +119,6 @@
 	    
 		this.populateFromMaster();
 		
-	    this.notify("init");
 	    this.initEvents();
         this.initListEvents();
     };
@@ -285,7 +274,6 @@
 	            }
 	        });
 	        
-			this.notify("initEvents");
 	    },
 	    
         initListEvents: function() { 
@@ -395,7 +383,6 @@
         	this.listWrapper.removeClass("invisible").addClass("visible");
         	this.setListDisplay();
 			
-		    this.notify("showList");
 	    },
 	
 	    hideList: function() {
@@ -406,7 +393,6 @@
 	        this.listItems.removeClass("invisible"); //slow?  
 	        
 
-	        this.notify("hideList");
 	    },
 
 	    // attempt update; clear input or set default if fail:
@@ -453,7 +439,6 @@
 	        this.input.val(node.text);
 	        this.log("master selectbox set to: " + nodeVal);
 	        this.triggerEventOnMaster("change");
-	        this.notify("textChange");
 	        return true;
 	    },
 
@@ -879,11 +864,6 @@
 	    	return ddc;
 	    },
 	    		
-		notify: function(evt) {
-		    if (!$.isFunction(this.config[evt + "Callback"])) return;
-		    this.config[evt + "Callback"].call(this);	
-		},
-		
 		log: function(msg) {
 			if(!this.config.log) return;
 			

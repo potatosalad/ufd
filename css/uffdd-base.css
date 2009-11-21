@@ -1,7 +1,7 @@
 /**
-	sexy-combo @VERSION: http://code.google.com/p/sexy-combo/
+	uffdd @VERSION: http://code.google.com/p/uffdd/
 	
-	This is the structural base for the combo. Include a skin css file, else it won't be sexy.
+	This is only the structural base CSS, include 1+ skin CSS files also.
 */
 
 /* master wrapper; emulate select positioning */
@@ -46,30 +46,30 @@
 
 /* dropdown */
 
-#sexyComboDDC div.list-wrapper {
+#uffDDC div.list-wrapper {
     position: absolute;
     overflow: hidden;
     padding: 0;
     margin: 0;
 }
 
-#sexyComboDDC div.list-scroll {
+#uffDDC div.list-scroll {
     overflow: hidden;
 	padding: 0;
     margin: 0;
 }
 
 /* "drop-up" list wrapper */
-#sexyComboDDC div.list-wrapper-up {}
+#uffDDC div.list-wrapper-up {}
 
 /*dropdown list, items*/
-#sexyComboDDC ul {
+#uffDDC ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-#sexyComboDDC li {
+#uffDDC li {
     cursor: pointer;
     height: 20px;
     overflow: hidden;
@@ -78,21 +78,13 @@
 }
 
 /*active (hovered) list item*/
-#sexyComboDDC li.active {
+#uffDDC li.active {
 }
 
-#sexyComboDDC .visible {
+#uffDDC .visible {
     display: block;
 }
 
-#sexyComboDDC .invisible {
+#uffDDC .invisible {
     display: none;
 }
-
-
-
-
-
-
-
- 

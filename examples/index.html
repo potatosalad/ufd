@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us">
 
 <head>
-	<title>Sexy Combo @VERSION demonstration page</title>
+	<title>UFFDD @VERSION demonstration page</title>
 	
 	<!-- required dependency -->
 	<script type="text/javascript" src="jquery-1.3.2.min.js"></script>
@@ -19,7 +19,7 @@
 	<link href="../css/uffdd-base.css" rel="stylesheet" type="text/css" />
 	<link href="css/uffdd-base.css" rel="stylesheet" type="text/css" />
 	
-	<!--  development, distribution: sexy css skin (default)  -->    
+	<!--  development, distribution: sexy css skin -->    
 	<link href="../css/sexy/sexy.css" rel="stylesheet" type="text/css" />
 	<link href="css/sexy/sexy.css" rel="stylesheet" type="text/css" />
 	
@@ -63,18 +63,18 @@
  </head>
  <body>
     
-	<h1>Sexy Combo base demonstration page</h1>
+	<h1>UFFDD base demonstration page</h1>
     
     
     <div>
 		<h2>basic combo</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("#basic-combo").sexyCombo();
+			$("#basic-combo").uffdd();
 		});    
 	    </script>
 
-	    <p>The combobox below is a very basic example of using <em>Sexy Combo</em>.  </p>
+	    <p>The combobox below is a very basic example of using <em>UFFDD</em>.  </p>
 	    
       <label for="basic-combo">Choose the state:</label><br />
       <select id="basic-combo" name="basic-combo">
@@ -144,7 +144,7 @@
 		$(function () {
 			var insideCombo = $("#inside-combo");
 			var log = $("#insideLog").attr("tabindex", -10);
-			insideCombo.sexyCombo({log:false});
+			insideCombo.uffdd({log:false});
 
 			//reveal master to the right except in iE6
 			if($.support.style) insideCombo.css("position", "absolute").css("left", 250).attr("tabindex", -10).show(); 
@@ -164,7 +164,7 @@
 	    <p> If set visible in iE6, it interferes with event focus and tabbing order. Try in a different browser, or edit this demo to see it.    
 	    It *does* work fine in iE6 when hidden, this is exposed as a demonstration of its internals.</p>
 	      
-	    <p>Sexy Combo triggers some but not all events so that original events take place: namelt the focus, change and blur events.</p>
+	    <p>UFFDD triggers some but not all events so that original events take place: namelt the focus, change and blur events.</p>
 	    
       <label for="inside-combo">Choose the state:</label><br />
       <select id="inside-combo" name="inside-combo">
@@ -233,13 +233,13 @@
 		<h2>width control</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("select.sizeDemo1").sexyCombo({minimumSize: 20});
-			$("select.sizeDemo2").sexyCombo({log: false});
-			$("select.sizeDemo3").sexyCombo({manualWidth: 300});
+			$("select.sizeDemo1").uffdd({minimumSize: 20});
+			$("select.sizeDemo2").uffdd({log: false});
+			$("select.sizeDemo3").uffdd({manualWidth: 300});
 		});    
 	    </script>
 
-	    <p>Sizing defaults to autosize.  SexyCombo sets the exact same width as the master select, unless the original is below the "minWidth" option, or manualWidth is set.</p>
+	    <p>Sizing defaults to autosize.  UFFDD sets the exact same width as the master select, unless the original is below the "minWidth" option, or manualWidth is set.</p>
 	  <label>Below minimum size</label>  
       <select class="sizeDemo1">
         <option value=""></option>
@@ -262,7 +262,7 @@
     	<h2>Free text</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("#freetext-combo").sexyCombo({submitFreeText:true, log: false});
+			$("#freetext-combo").uffdd({submitFreeText:true, log: false});
 		});    
 	    </script>
 
@@ -333,9 +333,9 @@
     	<h2>Skins; disable/enable</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("#skin1-combo").sexyCombo({});
-			$("#skin2-combo").sexyCombo({skin:"plain"});
-			$("#skin3-combo").sexyCombo({skin:"custom"});
+			$("#skin1-combo").uffdd({});
+			$("#skin2-combo").uffdd({skin:"plain"});
+			$("#skin3-combo").uffdd({skin:"custom"});
 
 			var skins = $("#skin1-combo, #skin2-combo, #skin3-combo"); //original selects 
 
@@ -343,9 +343,9 @@
 			
 			$("#disableToggle").bind("click", function() {
 					if(disabled){
-					$.sexyCombo.undisable(skins); //static function needs the original select reference.
+					$.uffdd.undisable(skins); //static function needs the original select reference.
 					} else {
-						$.sexyCombo.disable(skins); //static function needs the original select reference.
+						$.uffdd.disable(skins); //static function needs the original select reference.
 					}
 					disabled = !disabled;
 				});
@@ -404,7 +404,7 @@
     	<h2>zIndex correction on iE6</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("#zindex").sexyCombo();
+			$("#zindex").uffdd();
 		});    
 	    </script>
 
@@ -518,11 +518,11 @@
 				} 			
 
 				var mid = new Date().getTime();
-				select.sexyCombo({log:true});
+				select.uffdd({log:true});
 				var end = new Date().getTime();
 				
 				alert("Randoms strings in a select built in " + (mid-start) + 
-						" msec.  SexyCobmo constructed from select in: " +  (end-mid) + " msec.");
+						" msec.  UFFDD constructed from select in: " +  (end-mid) + " msec.");
 				
 				return;
 			});
@@ -552,7 +552,7 @@
 	    Number of random strings:
 	    <input type="text" id="charCount" value="500"/>
 	    
-	    <button type="button" id="charButton">Click to build a new sexycombo</button>
+	    <button type="button" id="charButton">Click to build a new uffdd</button>
 	    <br/>
 	    <br/>
 	    <br/>
@@ -628,83 +628,6 @@
         <option value="WY">Wyoming</option>
       </select>
     </p>      
-        <script type="text/javascript" >
-    $(function () {
-
-
-
-/*
-    	var data = [];
-    	$("#selectbox").children().each(function () {
-    		var $this = $(this);
-    		data.push({
-    			value: $this.attr("value"),
-    			text: $this.text()
-    		});
-    	});
-
-    	$.sexyCombo.create({
-    		name: "static-combo",
-    		id: "static-combo",
-    		container: "#static-container",
-    		data: data
-    	});
-
-    	data[0].selected = true;
-    	$.sexyCombo.create({
-    		name: "static-selected-combo",
-    		id: "static-selected-combo",
-    		container: "#static-selected",
-    		data: data,
-    		triggerSelected: true
-    	});
-
-    	$.sexyCombo.create({
-    		name: "ajax-combo",
-    		id: "ajax-combo",
-    		container: "#ajax-container",
-    		url: "example.json"
-    	});
-    	$("#multiple-combo").sexyCombo();
-
-    	var logEvent = function (msg) {
-    		return;
-    		var $eventLogger = $("#event-logger");
-    		$eventLogger.html($eventLogger.html() + msg + "<br />");
-    	};
-
-    	$("#event-combo").sexyCombo({
-
-    		showListCallback: function () {
-    			logEvent("Dropdown list appeared.");
-    		},
-
-    		hideListCallback: function () {
-    			logEvent("Dropdown list disappeared.");
-    		},
-
-    		initCallback: function () {
-    			logEvent("Initialization...");
-    		},
-
-    		initEventsCallback: function () {
-    			logEvent("Events initialized.");
-    		},
-
-    		changeCallback: function () {
-    			logEvent("Combo value is changed. Text input value is " + this.getTextValue() + 
-    	    			". Hidden input value is " + this.getHiddenValue());
-    		},
-
-    		textChangeCallback: function () {
-    			logEvent("Text input's value is changed. Current value is " + this.getTextValue());
-    		}
-    	});
-
-    	$("#sc").sexyCombo();
-    	*/
-    });    
-    </script>
     <hr/>
     
     </div>
