@@ -56,7 +56,7 @@
 		height: 150px;
 		overflow: scroll;
 		position: relative;
-		left: 500px;
+		left: 250px;
 		top: -40px;
 	}
 	</style>
@@ -144,18 +144,13 @@
 		$(function () {
 			var insideCombo = $("#inside-combo");
 			var log = $("#insideLog").attr("tabindex", -10);
+
 			insideCombo.uffdd({log:false});
 
-			//reveal master to the right except in iE6
-			if($.support.style) insideCombo.css("position", "absolute").css("left", 250).attr("tabindex", -10).show(); 
 			var logEvent = function(event){
 				log.prepend(event.type + "<br/>");
 			};
 			insideCombo.bind("blur focus change ", logEvent);
-					 //  error ready, click, dblclick, select submit keydown keypress keyup  
-					 // mousedown, mouseup, mousemove, mouseover, mouseout, mouseenter, mouseleave,  
-			
-			
 		});    
 	    </script>
 
