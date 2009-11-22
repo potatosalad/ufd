@@ -16,7 +16,7 @@
     <property description="Rhino JS Engine" name="JS_JAR" value="${BUILD_TOOLS_DIR}/js.jar" />
     
     <loadfile property="VERSION" srcFile="version.txt" />
-    <property description="The output filename, excluding suffix" name="BASE_NAME" value="jquery.uffdd" />
+    <property description="The output filename, excluding suffix" name="BASE_NAME" value="jquery.ui.uffdd" />
     <property description="Distribution root" name="DIST_ROOT" value="./dist" />
 
     <property description="Versioned distribution folder" name="DIST_DIR" value="${DIST_ROOT}/${BASE_NAME}-${VERSION}" />
@@ -51,7 +51,7 @@
         
         <echo message="Copying static resoures to ${DIST_DIR}" />
         <copy todir="${DIST_DIR}">
-        	<fileset dir="." includes="css/** examples/** README.txt"/>
+        	<fileset dir="." includes="css/** examples/** README.txt GPL-LICENSE.txt"/>
         </copy>
 
         <echo message="Versioning resources in ${DIST_DIR}" />
@@ -59,6 +59,7 @@
 			<path>
 				<fileset file="${OUT}"/>
 				<fileset file="${DIST_DIR}/README.txt"/>
+				<fileset file="${DIST_DIR}/GPL-LICENSE.txt"/>
 				<fileset file="${DIST_DIR}/examples/index.html"/>
 	        	<fileset dir="${DIST_DIR}/css" includes="**/*.css"/>
 			</path>
