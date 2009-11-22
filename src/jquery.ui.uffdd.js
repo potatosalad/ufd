@@ -1009,6 +1009,8 @@
 			logSelector: "#log", // selector string to write log into, 
 			log: false, // log to firebug console (if available) and logSelector (if it exists)?
 			
+			dropDownIcon: ".ui-icon-circle-triangle-e", //ui-icon-triangle-1-s, ui-icon-arrowthick-1-s
+			
 			submitFreeText: false, // re[name=] original select, give text input the selects' original [name], and allow unmatched entries  
 			triggerSelected: true, //selected option of the selectbox will be the initial value of the combo
 			caseSensitive: false, // case sensitive search ?
