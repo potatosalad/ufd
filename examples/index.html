@@ -7,13 +7,14 @@
 	
 	<!-- required dependency -->
 	<script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+	<script type="text/javascript" src="ui.core.js"></script>
 	
 	<!--  if you want iE6 not to poke select boxes thru your dropdowns, you need ... -->
 	<script type="text/javascript" src="jquery.bgiframe.min.js"></script>
 	
-	<!-- Plugin source development location, distribution location: only 1 of 2 is there.. -->
-	<script type="text/javascript" src="../src/jquery.uffdd.js"></script>
-	<script type="text/javascript" src="../jquery.uffdd.js"></script>
+	<!-- Plugin source development location, distribution location: only 1 of 2 is there..	 -->
+	<script type="text/javascript" src="../src/jquery.ui.uffdd.js"></script>
+	<script type="text/javascript" src="../jquery.ui.uffdd.js"></script>
 	
 	<!--  development, distribution: base structure css  -->    
 	<link href="../css/uffdd-base.css" rel="stylesheet" type="text/css" />
@@ -328,19 +329,22 @@
     	<h2>Skins; disable/enable</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("#skin1-combo").uffdd({skin:"sexy"});
-			$("#skin2-combo").uffdd({skin:"plain"});
-			$("#skin3-combo").uffdd({skin:"custom"});
+			var s1 = $("#skin1-combo").uffdd({skin:"sexy"});
+			var s2 = $("#skin2-combo").uffdd({skin:"plain"});
+			var s3 = $("#skin3-combo").uffdd({skin:"custom"});
 
-			var skins = $("#skin1-combo, #skin2-combo, #skin3-combo"); //original selects 
 
 			var disabled = false;
 			
 			$("#disableToggle").bind("click", function() {
 					if(disabled){
-					$.uffdd.undisable(skins); //static function needs the original select reference.
+						s1.uffdd("undisable");
+						s2.uffdd("undisable");
+						s3.uffdd("undisable");
 					} else {
-						$.uffdd.disable(skins); //static function needs the original select reference.
+						s1.uffdd("disable");
+						s2.uffdd("disable");
+						s3.uffdd("disable");
 					}
 					disabled = !disabled;
 				});

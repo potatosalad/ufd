@@ -1,128 +1,77 @@
-/***************************************************************************
- *                                                                         *
- *	uffdd @VERSION	: Unobtrusive fast filter drop down jQuery plugin.   
- *                                                                         *
- *	Authors:                                                               *
- *		thetoolman@gmail.com                                               * 
- *		Kadalashvili.Vladimir@gmail.com                                    *
- *                                                                         *
- *	Version:  @VERSION
- *                                                                         *
- *	Website: http://code.google.com/p/uffdd/                               *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- *                                                                         *
- ***************************************************************************/
+/*
+	uffdd @VERSION : Unobtrusive fast filter drop down jQuery plugin.
 
-;(function($) {
-	
-	$.fn.uffdd = function(config) {
-        this.each(function() {
-			if ("select" != this.tagName.toLowerCase())  return;	
-		    var sc = new $uffdd(this, config);
-		    
-		    $(this).data("uffdd-instance", sc);
-	    });  
-        
-        return this;
-    };
-    
-    $.fn.uffdd.defaults = {
+	Authors:
+		thetoolman@gmail.com 
+		Kadalashvili.Vladimir@gmail.com
 
-		skin: "plain", //skin name
-		suffix: "__uffdd", // original select name + suffix == pseudo-dropdown text input name  
-		dropDownID: "uffDDC", // internal ID used for storing dropdown list near root node,to avoid ie6 zindex issues.
-		logSelector: "#log", // selector string to write log into, 
-		log: false, // log to firebug console (if available) and logSelector (if it exists)?
+	Version:  @VERSION
 
-		submitFreeText: false, // re[name=] original select, give text input the selects' original [name], and allow unmatched entries  
-		triggerSelected: true, //selected option of the selectbox will be the initial value of the combo
-		caseSensitive: false, // case sensitive search ?
-		autoFill: false, //enable autofilling 
-		allowDropUp: true, //if true, the options list will be placed above text input if flowing off bottom
-		AllowLR: false, //show horizontal scrollbar
+	Website: http://code.google.com/p/uffdd/
+*/
 
-		minWidth: 50, // don't autosize smaller then this.
-    	manualWidth: null, //override selectbox width; set explicit width
-		delayFilter: ($.support.style) ? 1 : 150, //msec to wait before starting filter (or get cancelled); long for IE 
-		delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
-		zIndexPopup: 101, // dropdown z-index
+(function($) {
 
-    };
-    
-    //constructor: create initial markup and initialize
-    $.uffdd = function(selectbox, config) {
+	$.widget("ui.uffdd", {
 		
-        if (selectbox.tagName.toLowerCase() != "select") return;
-        this.config = $.extend({}, $.fn.uffdd.defaults, config || {}); 
-
-        // in place content
-        this.selectbox = $(selectbox);
-        this.originalSelectboxWidth = this.selectbox.outerWidth(); //get size *before* its wrapped, in case of % width 
-        var selectName = this.selectbox.attr("name");
-        var suffixName = selectName + this.config.suffix;
-        if(this.config.submitFreeText) this.selectbox.attr("name", suffixName);
-
-	    this.wrapper = this.selectbox.wrap("<span>").parent().
-		    addClass("combo").
-		    addClass(this.config.skin); 
-
-	    this.input = $("<input type='text' />").
-		    appendTo(this.wrapper).
-		    attr("autocomplete", "off").
-		    attr("value", "").
-		    attr("name", this.config.submitFreeText ? selectName : suffixName);
-	    
-        this.icon = $('<div class="icon"/>').
-		    appendTo(this.wrapper); 
-        
-        // drop down content
-        var ddc = this.getDropdownContainer();
-        
-	    this.listWrapper = $('<div class="list-wrapper"/>').
-	    	addClass("invisible").
-	    	appendTo(ddc);
-	    if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
-
-	    this.listWrapper.wrap("<div>").parent().
-	    	addClass(this.config.skin);
-
-	    this.listScroll = $('<div class="list-scroll"/>').appendTo(this.listWrapper);
-	    
-	    this.list = $("<ul />").appendTo(this.listScroll); 
-
-	    this.isUpdatingMaster = false;
-	    this.isDisabled = false;
-	    this.internalFocus = false; 
-	    this.lastKey = null;
-	    this.logNode = $(this.config.logSelector);
-	    this.overflowCSS = this.config.allowLR ? "overflow" : "overflowY";
-	    
-		this.populateFromMaster();
+		// options: provided by framework
+		// element: provided by framework
 		
-	    this.initEvents();
-        this.initListEvents();
-    };
-    
-    //shortcuts
-    var $uffdd = $.uffdd;
-    $uffdd.fn = $uffdd.prototype = {};
-    $uffdd.fn.extend = $uffdd.extend = $.extend;
-    
-    $uffdd.fn.extend({
+		_init: function() {
+			if (this.element[0].tagName.toLowerCase() != "select") {
+				return false; // What should I do ?
+			}
+			
+			// in place content
+			this.selectbox = this.element;
+			this.originalSelectboxWidth = this.selectbox.outerWidth(); //get size *before* its wrapped, in case of % width 
+			var selectName = this.selectbox.attr("name");
+			var suffixName = selectName + this.options.suffix;
+			if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
+			
+			this.wrapper = this.selectbox.wrap("<span>").parent().
+			    addClass("combo").
+			    addClass(this.options.skin); 
+			
+			this.input = $("<input type='text' />").
+			    appendTo(this.wrapper).
+			    attr("autocomplete", "off").
+			    attr("value", "").
+			    attr("name", this.options.submitFreeText ? selectName : suffixName);
+			
+			this.icon = $('<div class="icon"/>').
+			    appendTo(this.wrapper); 
+			
+			// drop down content
+			var ddc = this.getDropdownContainer();
+			
+			this.listWrapper = $('<div class="list-wrapper"/>').
+				addClass("invisible").
+				appendTo(ddc);
+			if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
+			
+			this.listWrapper.wrap("<div>").parent().
+				addClass(this.options.skin);
+			
+			this.listScroll = $('<div class="list-scroll"/>').appendTo(this.listWrapper);
+			
+			this.list = $("<ul />").appendTo(this.listScroll); 
+			
+			this.isUpdatingMaster = false;
+			this.isDisabled = false;
+			this.internalFocus = false; 
+			this.lastKey = null;
+			this.logNode = $(this.options.logSelector);
+			this.overflowCSS = this.options.allowLR ? "overflow" : "overflowY";
+			
+			this.populateFromMaster();
+			
+			this.initEvents();
+			this.initListEvents();
+
+		},
+
+		
 	    
     	// event handlers
 
@@ -132,7 +81,7 @@
     		 */
     		if(isKeyPress) return; //not needed
 
-    		var k = $uffdd.KEY; 
+    		var k = $.ui.keyCode; 
     		var key = null;
 
     		if (undefined === event.which) {
@@ -145,21 +94,21 @@
     		
 		    // only process: keyups excluding tab/return; and only tab/return keydown 
     		// Only some browsers fire keyUp on tab in, ignore if it happens 
-		    if(!isKeyUp == ((key != k.TAB) && (key != k.RETURN)) ) return;
+		    if(!isKeyUp == ((key != k.TAB) && (key != k.ENTER)) ) return;
 
 		    //this.log("Key: " + key + " isKeyUp?: " + isKeyUp + " isKeyPress?: " + isKeyUp);
 		    this.lastKey = key;
 		    
+		    
 		    switch (key) {
 		    	case k.SHIFT:
-		    	case k.CTRL:
-		    	case k.ALT:
+		    	case k.CONTROL:
 		    		//don't refilter 
 		    		break;
 		    		
 		    	case k.END: //TODO
 		    	case k.DOWN:
-			    case k.PAGEDOWN:
+			    case k.PAGE_DOWN:
 			    	//this.log("down pressed");
 					this.showList();
 			    	this.selectNext();
@@ -167,13 +116,13 @@
 			    	
 			    case k.HOME: //TODO
 			    case k.UP:
-			    case k.PAGEUP:
+			    case k.PAGE_UP:
 			    	//this.log("up pressed");
 					this.showList();
 			    	this.selectPrev();
 			    	break;
 			    	
-		        case k.RETURN:
+		        case k.ENTER:
 		        	//this.log("enter pressed");
 		        	this.hideList();
 		        	this.tryToSetMaster();
@@ -186,7 +135,7 @@
 					this.realLooseFocus();
 					break;
 					
-				case k.ESC:
+				case k.ESCAPE:
 					//this.log("ESC pressed");
 				    this.hideList();
 				    this.revertSelected();
@@ -396,7 +345,7 @@
 	    // attempt update; clear input or set default if fail:
 	    tryToSetMaster: function() {
 	    	this.log("t.s.m");
-	        if(this.trie.matches.length == 0 && !this.config.submitFreeText) {
+	        if(this.trie.matches.length == 0 && !this.options.submitFreeText) {
 	        	this.log("not allowed freetext, revert:");
 	        	this.revertSelected();
 	        	return false; // no match
@@ -428,7 +377,7 @@
 	        if(this.selectbox.val() != nodeVal){ //set failed
 		        this.selectbox.val([curVal]); 
 		        this.log("set new master selected failed.");
-		        if(!this.config.submitFreeText) {
+		        if(!this.options.submitFreeText) {
 		        	this.log("not allowed freetext, revert:");
 		        	this.revertSelected();
 		        }
@@ -447,7 +396,7 @@
         	this.disable();
     		this.options = this.selectbox.children("option");
     		
-    		this.trie = new Trie(this.config.caseSensitive);
+    		this.trie = new Trie(this.options.caseSensitive);
     		this.trie.matches = [];
     		this.trie.misses = [];
 
@@ -469,7 +418,7 @@
 			this.listItems = this.list.children();
 			this.initListEvents();
 			
-    	    if(this.config.triggerSelected){
+    	    if(this.options.triggerSelected){
     	    	this.revertSelected();
     	    } else {
     	    	this.input.val(""); //better tecqnique?
@@ -477,10 +426,10 @@
     	    
     	    //match original width
     	    var newSelectWidth = this.originalSelectboxWidth;
-    	    if(this.config.manualWidth) {
-    	    	newSelectWidth = this.config.manualWidth; 
-    	    } else if (newSelectWidth < this.config.minWidth) {
-    	    	newSelectWidth = this.config.minWidth;
+    	    if(this.options.manualWidth) {
+    	    	newSelectWidth = this.options.manualWidth; 
+    	    } else if (newSelectWidth < this.options.minWidth) {
+    	    	newSelectWidth = this.options.minWidth;
     	    }
 
     	    
@@ -537,7 +486,7 @@
 		        self.trie.matches = mm.matches;
 		        self.trie.misses = mm.misses;
 		        //yield then screen update
-			    self.updateOnTimeout = setTimeout(function(){screenUpdate();}, self.config.delayYield); 
+			    self.updateOnTimeout = setTimeout(function(){screenUpdate();}, self.options.delayYield); 
 		        
 	        };
 
@@ -546,17 +495,17 @@
 	        	self.log(self.getCurrentTextValue() + ": matchesLength: " + 
 	        			self.trie.matches.length + " missesLength: " + self.trie.misses.length );
 
-	        	self.setAttr(self.trie.matches, $uffdd.classAttr,"visible" );
+	        	self.setAttr(self.trie.matches, $.ui.uffdd.classAttr,"visible" );
 		        if(self.trie.matches.length <= showAllLength) {
 		        	self.log("showing all");
-		        	self.setAttr(self.trie.misses, $uffdd.classAttr,"visible" );
+		        	self.setAttr(self.trie.misses, $.ui.uffdd.classAttr,"visible" );
 		        } else {
 		        	self.log("hiding");
-		        	self.setAttr(self.trie.misses, $uffdd.classAttr,"invisible" );
+		        	self.setAttr(self.trie.misses, $.ui.uffdd.classAttr,"invisible" );
 		        }
 		        if(self.trie.matches.length == 1) {
 		        	self.setActive(self.trie.matches[0]);
-		        } else if(self.getActiveIndex() == -1 && !self.config.submitFreeText){
+		        } else if(self.getActiveIndex() == -1 && !self.options.submitFreeText){
 		        	self.resetActive();
 		        }
 		        self.setListDisplay();
@@ -564,7 +513,7 @@
 	        
 	        if(doDelay) {
 	        	//setup new delay
-				this.filterOnTimeout = setTimeout(function(){search();}, this.config.delayFilter);
+				this.filterOnTimeout = setTimeout(function(){search();}, this.options.delayFilter);
 	        } else {
 	        	search();
 	        }
@@ -680,7 +629,7 @@
         	var dropUp = false;
         	var offset = this.input.offset();
 
-        	if(this.config.allowDropUp) {
+        	if(this.options.allowDropUp) {
 	        	var listHeight = maxHeight; // drop up if max doesnt fit, to prevent flicking up/down on type
 	        	var inputHeight = this.wrapper.height();
 	        	var bottomPos = offset.top + inputHeight + listHeight;
@@ -852,18 +801,18 @@
 	    },
 	    
 	    getDropdownContainer: function() {
-	    	var ddc = $("#" + this.config.dropDownID);
+	    	var ddc = $("#" + this.options.dropDownID);
 	    	if(!ddc.length) { //create
 	    		ddc = $("<div></div>").appendTo("body").
 	    		css("height", 0).
-	    		css("z-index", this.config.zIndexPopup).
-	    		attr("id", this.config.dropDownID);
+	    		css("z-index", this.options.zIndexPopup).
+	    		attr("id", this.options.dropDownID);
 	    	}
 	    	return ddc;
 	    },
 	    		
 		log: function(msg) {
-			if(!this.config.log) return;
+			if(!this.options.log) return;
 			
 			if(window.console && console.log) {  // firebug logger
 				console.log(msg);
@@ -871,191 +820,92 @@
 			if(this.logNode && this.logNode.length) {
 				this.logNode.prepend("<div>" + msg + "</div>");
 			}
+		},
+
+		changeOptions: function() {
+			this.disable();
+			this.populateFromMaster();
+			this.undisable();
+		},		
+		
+		
+		// UI STUFF TODO
+		
+		
+		value: function() {
+			// calculate some value and return it
+			return this._calculate();
+		},
+		length: function() {
+			return this._someOtherValue();
+		},
+		destroy: function() {
+			$.widget.prototype.apply(this, arguments); // default destroy
 		}
-    });
-    
-    
-    // static $.uffdd functions
-    $uffdd.extend({
-    	KEY: { //key codes
-    		LEFT: 37,
-    		UP: 38,
-    		RIGHT: 39,
-		    DOWN: 40,
-		    PAGEUP: 33,
-		    PAGEDOWN: 34,
-		    HOME: 36,
-		    END: 35,
-		    
-		    TAB: 9,
-		    RETURN: 13,
-		    ESC: 27,
+	
+	});
 
-		    SHIFT: 16,
-		    CTRL: 17,
-		    ALT: 18,
 
-		    COMMA: 188,
-		    DEL: 46,
-		    BACKSPACE: 8	
-    	},
-    	
-    	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
-
-		/* TODO ?
-	    createSelectbox: function(config) {
-		    var $selectbox = $("<select />").
-			    appendTo(config.container).
-			    attr({name: config.name, id: config.id, size: "1"});
-		    
-		    if (config.multiple) $selectbox.attr("multiple", true);
-		    
-		    var data = config.data;
-		    var selected = false;
-		    
-		    for (var i = 0, len = data.length; i < len; ++i) {
-		        selected = data[i].selected || false;
-		        $("<option />").appendTo($selectbox).
-					attr("value", data[i][config.key]).
-					text(data[i][config.value]).
-					attr("selected", selected);
-		    }
-		    
-		    return $selectbox.get(0);
-		},
-		
-		create: function(config) { //TODO
-			
-            var defaults = {
-		        name: "", //the name of the selectbox
-				id: "", //the ID of the selectbox
-				multiple: false, //if true, combo with multiple choice will be created
-				key: "value", //key json name for key/value pair
-				value: "text", //value json for key/value pair
-				container: $(document), //an element that will contain the widget
-				url: "",  // url giving JSON data object.  Overrides "data" config option 
-				ajaxData: {}, //params for AJAX request
-            	data: [] // data array of objects. Each object is:
-					//{value: <option> value, text: <option> text, selected: true|false} 
-		    };
-            
-		    config = $.extend({}, defaults, config || {});
-		    
-	            if (config.url) {
-		        return $.getJSON(config.url, config.ajaxData, function(data) {
-				    delete config.url;
-				    delete config.ajaxData;
-				    config.data = data;
-				    return $uffdd.create(config);
-				});
-		    }
-		    config.container = $(config.container);
-	        var selectbox = $uffdd.createSelectbox(config);
-
-	        return new $uffdd(selectbox, config);
-		},
-		*/
-    	
-		changeOptions: function($select) {
-			$select = $($select);
-	        $select.each(function() {
-			    var sc = $(this).data("uffdd-instance");
-			    if(sc) {
-				    sc.disable();
-				    sc.populateFromMaster();
-				    sc.undisable();
-			    }
-
-			});
-		},
-		
-		undisable: function($select) {
-		    $select = $($select);
-			$select.each(function() {
-			    var sc = $(this).data("uffdd-instance");
-			    if(sc) sc.undisable();
-			});
-
-		},
-		
-		disable: function($select) {
-		    $select = $($select);
-			$select.each(function() {
-			    var sc = $(this).data("uffdd-instance");
-			    if(sc) sc.disable();
-			});
-		},
-		
-		revertSelected: function($select) {
-		    $select = $($select);
-			$select.each(function() {
-			    var sc = $(this).data("uffdd-instance");
-			    if(sc) sc.revertSelected();
-			});
+	
+	/******************************************************
+	 * Trie implementation for fast prefix searching
+	 * 
+	 *		http://en.wikipedia.org/wiki/Trie
+	 *******************************************************/
+	
+	/**
+	 * Constructor
+	 */
+	function Trie(isCaseSensitive) {
+		this.isCaseSensitive = isCaseSensitive || false;
+	    this.root = [null, {}]; //masterNode
+	};
+	
+	/**
+	 * Add (String, Object) to store 
+	 */
+	Trie.prototype.cleanString = function( inStr ) {
+		if(!this.isCaseSensitive){
+			inStr = inStr.toLowerCase();
 		}
-
-    });
- 
-    
-/******************************************************
- * Trie implementation for fast prefix searching
- * 
- *		http://en.wikipedia.org/wiki/Trie
- *******************************************************/
-
-    /**
-     * Constructor
-     */
-    function Trie(isCaseSensitive) {
-    	this.isCaseSensitive = isCaseSensitive || false;
-        this.root = [null, {}]; //masterNode
-    };
-
-    /**
-     * Add (String, Object) to store 
-     */
-    Trie.prototype.cleanString = function( inStr ) {
-    	if(!this.isCaseSensitive){
-    		inStr = inStr.toLowerCase();
-    	}
-    	//invalid char clean here
-    	return inStr;
-    }
-    
-    /**
-     * Add (String, Object) to store 
-     */
-    Trie.prototype.add = function( key, object ) {
-        key = this.cleanString(key);
-    	var curNode = this.root;
-        var kLen = key.length; 
-        
-        for(var i = 0; i < kLen; i++) {
-            var char = key.charAt(i);
-            var node = curNode[1];
-            if(char in node) {
-                curNode = node[char];
-            } else {
-                curNode = node[char] = [null, {}];
-            }
-        }
-        if(curNode[0]) return false;
-        curNode[0] = object;
-        return true;
-    };
-
-    /**
-     * Find object exactly matching key (String)
-     */
+		//invalid char clean here
+		return inStr;
+	}
+	
+	/**
+	 * Add (String, Object) to store 
+	 */
+	Trie.prototype.add = function( key, object ) {
+	    key = this.cleanString(key);
+		var curNode = this.root;
+	    var kLen = key.length; 
+	    
+	    for(var i = 0; i < kLen; i++) {
+	        var char = key.charAt(i);
+	        var node = curNode[1];
+	        if(char in node) {
+	            curNode = node[char];
+	        } else {
+	            curNode = node[char] = [null, {}];
+	        }
+	    }
+	    if(curNode[0]) return false;
+	    curNode[0] = object;
+	    return true;
+	};
+	
+	/**
+	 * Find object exactly matching key (String)
+	 */
 	Trie.prototype.find = function( key ) {
-        key = this.cleanString(key);
+	    key = this.cleanString(key);
 		var resultNode = this.findNode(key);
 		return (resultNode) ? resultNode[0] : null;
 	};	
-
-    /**
-     * Find trieNode exactly matching (key) 
-     */
+	
+	/**
+	 * Find trieNode exactly matching (key) 
+	 */
 	Trie.prototype.findNode = function( key ) {
 		var results = this.findNodePartial(key);
 		var node = results[0];
@@ -1063,16 +913,16 @@
 		return (remainder.length > 0) ? null : node;
 	};
 	
-    /**
-     * Find prefix trieNode closest to (String) 
-     * returns [trieNode, remainder]
-     */
-    Trie.prototype.findNodePartial = function(key) {
-        key = this.cleanString(key);
+	/**
+	 * Find prefix trieNode closest to (String) 
+	 * returns [trieNode, remainder]
+	 */
+	Trie.prototype.findNodePartial = function(key) {
+	    key = this.cleanString(key);
 		var curNode = this.root;
 		var remainder = key;
 		var kLen = key.length;
-
+	
 		for (var i = 0; i < kLen; i++) {
 			var char = key.charAt(i);
 			if (char in curNode[1]) {
@@ -1084,17 +934,17 @@
 		}
 		return [ curNode, remainder ];
 	};
-
-    /**
-     * Get array of all objects on (trieNode) 
-     */
+	
+	/**
+	 * Get array of all objects on (trieNode) 
+	 */
 	Trie.prototype.getValues = function(trieNode) { 
 		return this.getMissValues(trieNode, null); // == Don't miss any
 	};
-
-    /**
-     * Get array of all objects on (startNode), except objects on (missNode) 
-     */
+	
+	/**
+	 * Get array of all objects on (startNode), except objects on (missNode) 
+	 */
 	Trie.prototype.getMissValues = function(startNode, missNode) { // string 
 		if (startNode == null) return [];
 		var stack = [ startNode ];
@@ -1111,38 +961,69 @@
 		}
 		return results;
 	};
-
-    /**
-     * Get array of all objects exactly matching the key (String) 
-     */
+	
+	/**
+	 * Get array of all objects exactly matching the key (String) 
+	 */
 	Trie.prototype.findPrefixMatches = function(key) { 
 		var trieNode = findNode(key);
 		return this.getValues(trieNode);
 	}
 
-    /**
-     * Get array of all objects not matching entire key (String) 
-     */
+	/**
+	 * Get array of all objects not matching entire key (String) 
+	 */
 	Trie.prototype.findPrefixMisses = function(key) { // string 
 		var trieNode = findNode(key);
 		return this.getMissValues(this.root, trieNode);
 	};
 	
-    /**
-     * Get object with two properties:
-     * 	matches: array of all objects not matching entire key (String) 
-     * 	misses:  array of all objects exactly matching the key (String)
-     * 
-     * This reuses "findNode()" to make it faster then 2x method calls
-     */
+	/**
+	 * Get object with two properties:
+	 * 	matches: array of all objects not matching entire key (String) 
+	 * 	misses:  array of all objects exactly matching the key (String)
+	 * 
+	 * This reuses "findNode()" to make it faster then 2x method calls
+	 */
 	Trie.prototype.findPrefixMatchesAndMisses = function(key) { // string 
 		var trieNode = this.findNode(key);
 		var matches = this.getValues(trieNode);
 		var misses = this.getMissValues(this.root, trieNode);
-
+	
 		return { matches : matches, misses : misses };
 	};
+
+	/* end Trie */	
+
+	
+	$.extend($.ui.uffdd, {
+		version: "@VERSION",
+		getter: "value length undisable disable changeOptions", 
+    	
+    	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
+		
+		defaults: {
+			skin: "plain", //skin name
+			suffix: "__uffdd", // original select name + suffix == pseudo-dropdown text input name  
+			dropDownID: "uffDDC", // internal ID used for storing dropdown list near root node,to avoid ie6 zindex issues.
+			logSelector: "#log", // selector string to write log into, 
+			log: false, // log to firebug console (if available) and logSelector (if it exists)?
+			
+			submitFreeText: false, // re[name=] original select, give text input the selects' original [name], and allow unmatched entries  
+			triggerSelected: true, //selected option of the selectbox will be the initial value of the combo
+			caseSensitive: false, // case sensitive search ?
+			autoFill: false, //enable autofilling 
+			allowDropUp: true, //if true, the options list will be placed above text input if flowing off bottom
+			AllowLR: false, //show horizontal scrollbar
+			
+			minWidth: 50, // don't autosize smaller then this.
+			manualWidth: null, //override selectbox width; set explicit width
+			delayFilter: ($.support.style) ? 1 : 150, //msec to wait before starting filter (or get cancelled); long for IE 
+			delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
+			zIndexPopup: 101, // dropdown z-index
+			hidden: true
+		}
+	});	
 	
 })(jQuery);
-
 /* END */
