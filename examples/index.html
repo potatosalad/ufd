@@ -81,9 +81,8 @@
 	}); 
 	</script>
 <style type="text/css">
-.uddff {
+.uddff, .uddf input {
 	white-space: nowrap;
-	border: 0;
 	margin: 0;
 	padding: 0;
 }
@@ -94,13 +93,14 @@
 	vertical-align: bottom;
 	position: relative;
 	overflow: visible;
+	height: 24px;
 	width: 200px; /* code will override */
 }
 
 .uddff-results {
 	position: absolute;
-	top: 130px;
-	left: 10px;
+	top: 127px;
+	left: 8px;
 	height: 200px;
 	max-height: 200px;
 	width: 200px; /* code will override */
@@ -111,12 +111,14 @@
 .uddff .ui-icon {
 	position: relative;
 	float: left;
-	margin: 0;
 }
 
 .uddff input {
-	width: 172px;
+	width: 170px;
 	border: 0px;
+	margin-top: 0.1em;
+	margin-left: 0.1em;
+	padding: 0em 0.1em;
 }
 
 .uddf input disabled {
@@ -162,7 +164,7 @@
 </style> 
     
     
-    <div id="" class="uddff uddff-widget ui-widget ui-widget-content ui-corner-top">
+    <div id="" class="uddff uddff-widget ui-widget ui-widget-header ui-corner-top">
     	<select class="ui-helper-hidden">
     		<option />
     		<option />
