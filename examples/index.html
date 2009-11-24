@@ -32,6 +32,14 @@
 	<link href="../css/ui-lightness/jquery-ui-1.7.2.custom.css" rel="stylesheet" type="text/css" />
 	
 	
+	
+	<script src="http://ui.jquery.com/applications/themeroller/themeswitchertool/" type="text/javascript"></script>
+	
+	<script type="text/javascript"> 
+		$(function(){ $('<div style="position: absolute; top: 20px; right: 10px;" />').appendTo('body').themeswitcher(); }); 
+	</script>	
+	
+	
 	<!-- 
 		Firebug lite for iE: 
 		Useful to see logging in iE. Can also create a DOM node matching the logSelector option.
@@ -70,18 +78,35 @@
     <div>
     	from http://jquery-ui.googlecode.com/svn/branches/labs/autocomplete/tests/static/autocomplete/autocomplete.html
     </div>
+    
     <script type="text/javascript">
-    $(function(){
-		//add hover states on the static widgets
-		$('.ui-state-default:not(.ui-state-disabled, .ui-slider-range, .ui-progressbar-value),'
-			+ ' a.ui-datepicker-next, a.ui-datepicker-prev, .ui-dialog-titlebar-close, .uddff-item a').hover(
-				function(){ $(this).addClass('ui-state-hover'); },
-				function(){ $(this).removeClass('ui-state-hover'); }
-		);
-	}); 
+	    $(function(){
+			$('.uddff-widget, .uddff-results .uddff-item').hover(
+					function(){ $(this).addClass('ui-state-hover'); },
+					function(){ $(this).removeClass('ui-state-hover'); }
+			);
+		}); 
 	</script>
+
 <style type="text/css">
-.uddff, .uddf input {
+
+
+.uddff-widget {
+	width: 185px;
+}
+
+.uddff-results {
+	top: 127px;
+	left: 8px;
+	width: 185px; /* code will override */
+}
+.uddff input {
+	width: 160px;
+}
+
+/* end temp */
+
+.uddff, .uddf input, .uddff {
 	white-space: nowrap;
 	margin: 0;
 	padding: 0;
@@ -94,18 +119,15 @@
 	position: relative;
 	overflow: visible;
 	height: 24px;
-	width: 200px; /* code will override */
 }
 
 .uddff-results {
 	position: absolute;
-	top: 127px;
-	left: 8px;
 	height: 200px;
-	max-height: 200px;
-	width: 200px; /* code will override */
 	overflow: auto;
-}
+	overflow-x: hidden;
+	overflowX: hioden;
+}	
 
 .uddff input,
 .uddff .ui-icon {
@@ -114,11 +136,10 @@
 }
 
 .uddff input {
-	width: 170px;
 	border: 0px;
-	margin-top: 0.1em;
-	margin-left: 0.1em;
-	padding: 0em 0.1em;
+	margin: 0.1em;
+	margin-right: 0px;
+	padding: 0.1em;
 }
 
 .uddf input disabled {
@@ -126,10 +147,13 @@
 }
 
 .uddff .ui-icon {
-	cursor: pointer;
 	width: 16px;
 	height: 16px;
-	margin: 4px;
+	border: 0px;
+	margin: 0.1em;
+}
+
+.uddff .ui-icon {
 }
 
 .uddf ui-icon.disabled {
@@ -144,18 +168,15 @@
 	width: 100%;
 }
 
-.uddff-results .uddff-item {
+.uddff-results li.uddff-item {
 	display: block;
-	padding: 0;
-}
-
-.uddff-results a {
+	margin: 0px;
 	text-decoration: none;
 	display: block;
 	padding: 0em .2em;
-	border: 1px solid transparent;
 	font-weight: normal !important;
 	overflow: hidden;
+	width: 100%;
 }
 
 .uddff-results a strong {
@@ -164,38 +185,39 @@
 </style> 
     
     
-    <div id="" class="uddff uddff-widget ui-widget ui-widget-header ui-corner-top">
+    <div id="" class="uddff uddff-widget ui-widget ui-widget-header ui-corner-top ">
     	<select class="ui-helper-hidden">
     		<option />
     		<option />
     		<option />
     	</select>
-		<input name="" value="" aria-autocomplete="list" aria-haspopup="true" aria-owns="uddff-instance" type="text"/>
-		<span class="ui-icon ui-icon-circle-triangle-s ">Drop down</span>
+		<input name="" class="ui-corner-left" value="" aria-autocomplete="list" aria-haspopup="true" aria-owns="uddff-instance" type="text"/>
+		<span class="ui-icon ui-corner-tr ui-icon-triangle-1-s ">Drop down</span>
 	
     </div>
 
-   	<div class="uddff uddff-results ui-widget ui-widget-content ui-corner-bottom" style="z-index: 10;">
+   	<div class="uddff uddff-results ui-widget ui-widget-content" style="z-index: 10;">
 		<ul id="" role="menu" aria-activedescendant="ui-active-menuitem">
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>berdeen</a></li>
-			<li class="uddff-item" role="menuitem" id="ui-active-menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>d<strong>a</strong></a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>d<strong>a</strong>msville</a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>ddyston</a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>delphi</a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>den<strong>a</strong></a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>dri<strong>a</strong>n</a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>kron</a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>lb<strong>a</strong>ny</a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>lex<strong>a</strong>ndri<strong>a</strong></a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>lger</a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>lledoni<strong>a</strong></a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>lli<strong>a</strong>nce</a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>lph<strong>a</strong></a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>lv<strong>a</strong>d<strong>a</strong></a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>lvordton</a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>m<strong>a</strong>nd<strong>a</strong></a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>meli<strong>a</strong></a></li>
-			<li class="uddff-item" role="menuitem"><a href="#" tabindex="-1" class="ui-corner-all"><strong>A</strong>mesville</a></li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>berdeen</li>
+			<li class="uddff-item ui-state-default" role="menuitem" 
+														  id="ui-active-menuitem"><strong>A</strong>d<strong>a</strong></a></li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>d<strong>a</strong>msville</li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>ddyston</li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>delphi</li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>den<strong>a</strong></li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>dri<strong>a</strong>n</li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>kron</li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lb<strong>a</strong>ny</li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lex<strong>a</strong>ndri<strong>a</strong></li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lger</li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lledoni<strong>a</strong></li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lli<strong>a</strong>nce</li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lph<strong>a</strong></li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lv<strong>a</strong>d<strong>a</strong></li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lvordton</li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>m<strong>a</strong>nd<strong>a</strong></li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>meli<strong>a</strong></li>
+			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>mesville</li>
 		</ul>
 	</div>
     
