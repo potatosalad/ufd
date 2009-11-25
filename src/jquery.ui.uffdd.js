@@ -394,7 +394,7 @@
         	
         	var self = this;
         	this.disable();
-    		this.options = this.selectbox.children("option");
+    		this.selectOptions = this.selectbox.children("option");
     		
     		this.trie = new Trie(this.options.caseSensitive);
     		this.trie.matches = [];
@@ -402,7 +402,7 @@
 
     		this.list.html(""); //delete old ones - consider bound objects TODO
 			
-    		this.options.each(function() {	
+    		this.selectOptions.each(function() {	
     			var opt = $(this);
     	    	var optionText = $.trim(opt.text());
                 var newItem = $('<li class="visible"><span>' + optionText + '</span></li>');
@@ -628,13 +628,13 @@
 			
         	var dropUp = false;
         	var offset = this.input.offset();
-
         	if(this.options.allowDropUp) {
+        		
 	        	var listHeight = maxHeight; // drop up if max doesnt fit, to prevent flicking up/down on type
 	        	var inputHeight = this.wrapper.height();
 	        	var bottomPos = offset.top + inputHeight + listHeight;
 	        	var maxShown = $(window).height() + $(document).scrollTop();
-	        	dropUp = (bottomPos > maxShown); 
+	        	dropUp = (bottomPos > maxShown);
         	}
 
         	var top;
@@ -827,18 +827,7 @@
 			this.populateFromMaster();
 			this.undisable();
 		},		
-		
-		
-		// UI STUFF TODO
-		
-		
-		value: function() {
-			// calculate some value and return it
-			return this._calculate();
-		},
-		length: function() {
-			return this._someOtherValue();
-		},
+
 		destroy: function() {
 			$.widget.prototype.apply(this, arguments); // default destroy
 		}
@@ -998,7 +987,7 @@
 	
 	$.extend($.ui.uffdd, {
 		version: "@VERSION",
-		getter: "value length undisable disable changeOptions", 
+		getter: "undisable disable changeOptions", 
     	
     	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
 		
@@ -1016,7 +1005,7 @@
 			caseSensitive: false, // case sensitive search ?
 			autoFill: false, //enable autofilling 
 			allowDropUp: true, //if true, the options list will be placed above text input if flowing off bottom
-			AllowLR: false, //show horizontal scrollbar
+			allowLR: false, //show horizontal scrollbar
 			
 			minWidth: 50, // don't autosize smaller then this.
 			manualWidth: null, //override selectbox width; set explicit width
