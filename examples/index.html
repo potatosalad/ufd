@@ -49,25 +49,12 @@
 	 -->
 	
 	<style type="text/css">
-	
-	select {
-		margin: 2px;
-	}
-	
+
 	#log {
 		height: 100px;
 		overflow: scroll;
 	}
-	
-	#insideLog {
-		border: 1px solid gray;
-		width: 300px;
-		height: 150px;
-		overflow: scroll;
-		position: relative;
-		left: 250px;
-		top: -40px;
-	}
+
 	</style>
  </head>
  <body>
@@ -81,7 +68,7 @@
     
     <script type="text/javascript">
 	    $(function(){
-			$('.uddff-widget, .uddff-results .uddff-item').hover(
+			$('.uffdd-widget button, .uffdd-results li').hover(
 					function(){ $(this).addClass('ui-state-hover'); },
 					function(){ $(this).removeClass('ui-state-hover'); }
 			);
@@ -91,54 +78,52 @@
 <style type="text/css">
 
 
-.uddff-widget {
+.uffdd-widget {
 	width: 185px;
 }
 
-.uddff-results {
+.uffdd-results {
 	top: 127px;
 	left: 8px;
 	width: 185px; /* code will override */
 }
-.uddff input {
-	width: 160px;
+.uffdd input {
+	width: 159px;
 }
 
 /* end temp */
 
-.uddff, .uddf input, .uddff {
+.uffdd, .uffdd input, .uffdd button {
 	white-space: nowrap;
 	margin: 0;
 	padding: 0;
 }
 
-.uddff-widget {
+.uffdd button {
+	border: 0;
+	display: block;
+	width: auto;
+	height: 100%;
+}
+
+.uffdd-widget {
 	display: -moz-inline-stack;
 	display: inline-block;
 	vertical-align: bottom;
 	position: relative;
-	overflow: visible;
-	height: 24px;
+	overflow: hidden;
 }
 
-.uddff-results {
-	position: absolute;
-	height: 200px;
-	overflow: auto;
-	overflow-x: hidden;
-	overflowX: hioden;
-}	
 
-.uddff input,
-.uddff .ui-icon {
+.uffdd input,
+.uffdd button {
 	position: relative;
 	float: left;
 }
 
-.uddff input {
+.uffdd input {
 	border: 0px;
-	margin: 0.1em;
-	margin-right: 0px;
+	margin: 0px;
 	padding: 0.1em;
 }
 
@@ -146,21 +131,32 @@
 	color: graytext;
 }
 
-.uddff .ui-icon {
+.uffdd .ui-icon {
 	width: 16px;
 	height: 16px;
 	border: 0px;
-	margin: 0.1em;
+	margin: auto;
 }
 
-.uddff .ui-icon {
+.uffdd .ui-icon {
 }
 
 .uddf ui-icon.disabled {
 	cursor: default;
 }
 
-.uddff ul {
+/* result list */
+
+.uffdd-results {
+	position: absolute;
+	height: 200px;
+	overflow: auto;
+	overflow-x: hidden;
+	overflowX: hioden;
+}	
+
+
+.uffdd-results ul {
 	list-style: none;
 	padding: 0;
 	margin: 0;
@@ -168,7 +164,7 @@
 	width: 100%;
 }
 
-.uddff-results li.uddff-item {
+.uffdd-results li {
 	display: block;
 	margin: 0px;
 	text-decoration: none;
@@ -179,50 +175,73 @@
 	width: 100%;
 }
 
-.uddff-results a strong {
+.uffdd-results li strong {
 	font-weight: bold;
 }
 </style> 
     
     
-    <div id="" class="uddff uddff-widget ui-widget ui-widget-header ui-corner-top ">
+    <div id="" class="uffdd uffdd-widget ui-widget ui-widget-header ui-corner-top ">
     	<select class="ui-helper-hidden">
     		<option />
     		<option />
     		<option />
     	</select>
-		<input name="" class="ui-corner-left" value="" aria-autocomplete="list" aria-haspopup="true" aria-owns="uddff-instance" type="text"/>
-		<span class="ui-icon ui-corner-tr ui-icon-triangle-1-s ">Drop down</span>
+		<input name="" class="ui-corner-tl" value="" aria-autocomplete="list" aria-haspopup="true" aria-owns="uffdd-instance" type="text"/>
+		<button class="ui-corner-tr ui-state-default">
+			<span class="ui-icon ui-icon-triangle-1-s ">Drop down</span>
+		</button>
 	
     </div>
 
-   	<div class="uddff uddff-results ui-widget ui-widget-content" style="z-index: 10;">
+   	<div class="uffdd uffdd-results ui-widget ui-widget-content" style="z-index: 10;">
 		<ul id="" role="menu" aria-activedescendant="ui-active-menuitem">
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>berdeen</li>
-			<li class="uddff-item ui-state-default" role="menuitem" 
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>berdeen</li>
+			<li class="ui-state-default" role="menuitem" 
 														  id="ui-active-menuitem"><strong>A</strong>d<strong>a</strong></a></li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>d<strong>a</strong>msville</li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>ddyston</li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>delphi</li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>den<strong>a</strong></li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>dri<strong>a</strong>n</li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>kron</li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lb<strong>a</strong>ny</li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lex<strong>a</strong>ndri<strong>a</strong></li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lger</li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lledoni<strong>a</strong></li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lli<strong>a</strong>nce</li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lph<strong>a</strong></li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lv<strong>a</strong>d<strong>a</strong></li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>lvordton</li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>m<strong>a</strong>nd<strong>a</strong></li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>meli<strong>a</strong></li>
-			<li class="uddff-item ui-state-default" role="menuitem"><strong>A</strong>mesville</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>d<strong>a</strong>msville</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>ddyston</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>delphi</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>den<strong>a</strong></li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>dri<strong>a</strong>n</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>kron</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>lb<strong>a</strong>ny</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>lex<strong>a</strong>ndri<strong>a</strong></li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>lger</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>lledoni<strong>a</strong></li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>lli<strong>a</strong>nce</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>lph<strong>a</strong></li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>lv<strong>a</strong>d<strong>a</strong></li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>lvordton</li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>m<strong>a</strong>nd<strong>a</strong></li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>meli<strong>a</strong></li>
+			<li class="ui-state-default" role="menuitem"><strong>A</strong>mesville</li>
 		</ul>
 	</div>
     
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    This is a dummy test to see if/how to use the jQuery UI; still not as nice as I'd like
     
     
+    <hr/>
     <div>
 		<h2>basic combo</h2>
 		<script type="text/javascript" >
