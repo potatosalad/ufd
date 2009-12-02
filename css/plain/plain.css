@@ -1,66 +1,56 @@
 /**
-	uffdd @VERSION: http://code.google.com/p/uffdd/
+	ufd @VERSION: http://code.google.com/p/ufd/
 	
 	This is the default skin, a plain but attractive dropdown.
 */
 
-.plain {
+.ufd.plain {
     height: 20px;
 }
 
-.plain input {
+.ufd.plain input {
     height: 16px;
     padding: 1px 3px;
     border: 1px solid #B5B8C8;
 }
 
-.plain input.disabled {
+.ufd.plain input.disabled {
     background-color: gray !important;
 }
 
-.plain div.icon {
+.ufd.plain button {
     width: 17px;
     height: 19px;
-    border: 0;
     background: transparent url(icon.gif) no-repeat 0 0;
     border-bottom: 1px solid #B5B8C8;
 }
 
-.plain div.icon.hover {
+.ufd.plain button.hover {
 	background-position: -17px 0px;
 }
 
-.plain div.icon.mouseDown {
+.ufd.plain button.mouseDown {
 	background-position: -34px 0px;
 }
 
-.plain div.icon.disabled {
+.ufd.plain button.disabled {
 	background-position: -51px 0px !important; 
 }
 
 /* dropdown */
 
-.plain div.list-wrapper {
+#ufd-container .plain div.list-wrapper {
     border: 1px solid #B5B8C8;
     background-color: #FFF;
     max-height: 200px; /* must set this explicitly, as height is manipulated */ 
 }
 
-.plain div.list-scroll {
-}
-
-.plain div.list-wrapper-up {
-}
-
-.plain ul {
-}
-
-.plain li {
+#ufd-container .plain li {
     padding-left: 5px;
     background-color: #FFF;
 }
 
-.plain li.active {
+#ufd-container .plain li.active {
 	background-color: highlight;
 }
 

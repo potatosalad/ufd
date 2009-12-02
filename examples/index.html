@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us">
 
 <head>
-	<title>UFFDD @VERSION demonstration page</title>
+	<title>UFD @VERSION demonstration page</title>
 	
 	<!-- required dependency -->
 	<script type="text/javascript" src="jquery-1.3.2.min.js"></script>
@@ -13,11 +13,11 @@
 	<script type="text/javascript" src="jquery.bgiframe.min.js"></script>
 	
 	<!-- Plugin source development location, distribution location: only 1 of 2 is there..	 -->
-	<script type="text/javascript" src="../src/jquery.ui.uffdd.js"></script>
-	<script type="text/javascript" src="../jquery.ui.uffdd.js"></script>
+	<script type="text/javascript" src="../src/jquery.ui.ufd.js"></script>
+	<script type="text/javascript" src="../jquery.ui.ufd.js"></script>
 	
 	<!--  base structure css  -->    
-	<link href="../css/uffdd-base.css" rel="stylesheet" type="text/css" />
+	<link href="../css/ufd-base.css" rel="stylesheet" type="text/css" />
 	
 	<!--  sexy css skin -->    
 	<link href="../css/sexy/sexy.css" rel="stylesheet" type="text/css" />
@@ -59,7 +59,7 @@
  </head>
  <body>
     
-	<h1>UFFDD base demonstration page</h1>
+	<h1>UFD base demonstration page</h1>
     
     
     <div>
@@ -68,11 +68,11 @@
     
     <script type="text/javascript">
 	    $(function(){
-			$('.uffdd-widget button, #left .uffdd-results li').hover(
+			$('.ufd-widget button, #left .ufd-results li').hover(
 					function(){ $(this).addClass('ui-state-hover'); },
 					function(){ $(this).removeClass('ui-state-hover'); }
 			);
-			$('#right .uffdd-results li').hover(
+			$('#right .ufd-results li').hover(
 					function(){ $(this).addClass('hover'); },
 					function(){ $(this).removeClass('hover'); }
 			);
@@ -90,31 +90,31 @@ left: 10px;
 position: absolute;
 left: 300px;
 }
-.uffdd-widget {
+.ufd-widget {
 	width: 190px;
 }
 
-.uffdd-results {
+.ufd-results {
 	top: 30px;
 	left: 0px;
 	width: 190px; /* code will override */
 }
-.uffdd-widget input {
+.ufd-widget input {
 	width: 158px;
 }
 
 /* end temp */
 
-.uffdd-widget, 
-.uffdd-widget input, 
-.uffdd-widget button, 
-.uffdd-results ul {
+.ufd-widget, 
+.ufd-widget input, 
+.ufd-widget button, 
+.ufd-results ul {
 	white-space: nowrap;
 	margin: 0;
 	padding: 0;
 }
 
-.uffdd-widget {
+.ufd-widget {
 	display: -moz-inline-stack;
 	display: inline-block;
 	vertical-align: bottom;
@@ -122,7 +122,7 @@ left: 300px;
 	overflow: hidden;
 }
 
-.uffdd-widget input {
+.ufd-widget input {
 	border: 0px;
 	margin: 0px;
 	padding: 0.2em;
@@ -132,13 +132,13 @@ left: 300px;
 	color: graytext;
 }
 
-.uffdd-widget input,
-.uffdd-widget button {
+.ufd-widget input,
+.ufd-widget button {
 	position: relative;
 	float: left;
 }
 
-.uffdd-widget button {
+.ufd-widget button {
 	border: 0;
 	display: block;
 	width: auto;
@@ -147,7 +147,7 @@ left: 300px;
 
 
 
-.uffdd-results {
+.ufd-results {
 	position: absolute;
 	height: 200px;
 	max-height: 200px;
@@ -157,14 +157,14 @@ left: 300px;
 }	
 
 
-.uffdd-results ul,
-.uffdd-results li {
+.ufd-results ul,
+.ufd-results li {
 	list-style: none;
 	display: block;
 	width: 100%;
 }
 
-.uffdd-results li {
+.ufd-results li {
 	border: 0px;
 	text-decoration: none;
 	padding: 0em 0.2em;
@@ -172,23 +172,23 @@ left: 300px;
 	font-weight: normal !important;
 }
 
-.uffdd-results li strong {
+.ufd-results li strong {
 	font-weight: bold;
 }
 
-#right .uffdd-results li {
+#right .ufd-results li {
 	color: menutext;
 	background-color: menu;
 }
 
 
-#right .uffdd-results li.hover {
+#right .ufd-results li.hover {
 	color: highlighttext;
 	background-color: highlight;
 }
 
 
-#left .uffdd-results .ui-state-hover {
+#left .ufd-results .ui-state-hover {
 	border: 0px !important;
 }
 
@@ -196,20 +196,20 @@ left: 300px;
 </style> 
     
     <div id="left">
-    <div id="" class="uffdd-widget ui-widget ui-widget-content ui-corner-top ">
+    <div id="" class="ufd-widget ui-widget ui-widget-content ui-corner-top ">
     	<select class="ui-helper-hidden">
     		<option />
     		<option />
     		<option />
     	</select>
-		<input name="" class="ui-corner-tl" value="" aria-autocomplete="list" aria-haspopup="true" aria-owns="uffdd-instance" type="text"/>
+		<input name="" class="ui-corner-tl" value="" aria-autocomplete="list" aria-haspopup="true" aria-owns="ufd-instance" type="text"/>
 		<button class="ui-corner-tr ui-state-default">
 			<span class="ui-icon ui-icon-triangle-1-s ">Drop down</span>
 		</button>
 	
     </div>
 
-   	<div class="uffdd-results ui-widget ui-widget-content" style="z-index: 10;">
+   	<div class="ufd-results ui-widget ui-widget-content" style="z-index: 10;">
 		<ul id="" role="menu" aria-activedescendant="ui-active-menuitem">
 			<li class="ui-menu-item" role="menuitem"><strong>A</strong>berdeen</li>
 			<li class="ui-menu-item" role="menuitem" 
@@ -236,20 +236,20 @@ left: 300px;
    </div> 
    
        <div id="right">
-    <div id="" class="uffdd-widget ui-widget ui-widget-header ui-corner-top ">
+    <div id="" class="ufd-widget ui-widget ui-widget-header ui-corner-top ">
     	<select class="ui-helper-hidden">
     		<option />
     		<option />
     		<option />
     	</select>
-		<input name="" class="ui-corner-tl" value="" aria-autocomplete="list" aria-haspopup="true" aria-owns="uffdd-instance" type="text"/>
+		<input name="" class="ui-corner-tl" value="" aria-autocomplete="list" aria-haspopup="true" aria-owns="ufd-instance" type="text"/>
 		<button class="ui-corner-tr ui-state-default">
 			<span class="ui-icon ui-icon-triangle-1-s ">Drop down</span>
 		</button>
 	
     </div>
 
-   	<div class="uffdd-results ui-widget ui-widget-content" style="z-index: 10;">
+   	<div class="ufd-results ui-widget ui-widget-content" style="z-index: 10;">
 		<ul id="" role="menu" aria-activedescendant="ui-active-menuitem">
 			<li class="" role="menuitem"><strong>A</strong>berdeen</li>
 			<li class="" role="menuitem" 
@@ -302,11 +302,11 @@ left: 300px;
 		<h2>basic combo</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("#basic-combo").uffdd();
+			$("#basic-combo").ufd();
 		});    
 	    </script>
 
-	    <p>The combobox below is a very basic example of using <em>UFFDD</em>.  </p>
+	    <p>The combobox below is a very basic example of using <em>UFD</em>.  </p>
 	    
       <label for="basic-combo">Choose the state:</label><br />
       <select id="basic-combo" name="basic-combo">
@@ -376,8 +376,12 @@ left: 300px;
 		$(function () {
 			var insideCombo = $("#inside-combo");
 			var log = $("#insideLog").attr("tabindex", -10);
+			insideCombo.ufd({log:false});
 
-			insideCombo.uffdd({log:false});
+			$("#reload").click(function(){
+				insideCombo.ufd("populateFromMaster");
+			});	
+			
 
 			var logEvent = function(event){
 				log.prepend(event.type + "<br/>");
@@ -388,8 +392,10 @@ left: 300px;
 
 	    <p>This is another basic combobox.  The events logged on the far right are events mounted 
 	    TO THE ORIGINAL SELECT BOX.  </p>
-	    <p>UFFDD triggers some but not all events so that original events take place: namely the focus, change and blur events.</p>
+	    <p>UFD triggers some but not all events so that original events take place: namely the focus, change and blur events.</p>
 	    
+	    
+	  <button id="reload">reload</button>  
       <label for="inside-combo">Choose the state:</label><br />
       <select id="inside-combo" name="inside-combo">
         <option value="AL">Alabama</option>
@@ -457,13 +463,13 @@ left: 300px;
 		<h2>width control</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("select.sizeDemo1").uffdd({minimumSize: 20});
-			$("select.sizeDemo2").uffdd({log: false});
-			$("select.sizeDemo3").uffdd({manualWidth: 300});
+			$("select.sizeDemo1").ufd({minimumSize: 20});
+			$("select.sizeDemo2").ufd({log: false});
+			$("select.sizeDemo3").ufd({manualWidth: 300});
 		});    
 	    </script>
 
-	    <p>Sizing defaults to autosize.  UFFDD sets the exact same width as the master select, unless the original is below the "minWidth" option, or manualWidth is set.</p>
+	    <p>Sizing defaults to autosize.  UFD sets the exact same width as the master select, unless the original is below the "minWidth" option, or manualWidth is set.</p>
 	  <label>Below minimum size</label>  
       <select class="sizeDemo1">
         <option value=""></option>
@@ -484,11 +490,27 @@ left: 300px;
     
     <div>
     	<h2>Free text</h2>
+    	
+    	
 		<script type="text/javascript" >
-		$(function () {
-			$("#freetext-combo").uffdd({submitFreeText:true, log: false});
+		
+		$(document).ready(function () {
+			$("#freetext-combo").ufd( {submitFreeText:true, log: false} );
 		});    
+
+
+		$(this).click(function () {
+			$("#freetext-combo").ufd({submitFreeText:true, log: false});
+		});    
+
+
+		
+		
 	    </script>
+	    
+	    
+	    
+	    
 
 	    <p>The combobox below allows freetext, submitting the text back using the original selects' name. All events are still propagated back to master (including attempt to set if matched) even though it has been renamed (suffixed).</p>
 	    
@@ -557,22 +579,22 @@ left: 300px;
     	<h2>Skins; disable/enable</h2>
 		<script type="text/javascript" >
 		$(function () {
-			var s1 = $("#skin1-combo").uffdd({skin:"sexy"});
-			var s2 = $("#skin2-combo").uffdd({skin:"plain"});
-			var s3 = $("#skin3-combo").uffdd({skin:"custom"});
+			var s1 = $("#skin1-combo").ufd({skin:"sexy"});
+			var s2 = $("#skin2-combo").ufd({skin:"plain"});
+			var s3 = $("#skin3-combo").ufd({skin:"custom"});
 
 
 			var disabled = false;
 			
 			$("#disableToggle").bind("click", function() {
 					if(disabled){
-						s1.uffdd("undisable");
-						s2.uffdd("undisable");
-						s3.uffdd("undisable");
+						s1.ufd("undisable");
+						s2.ufd("undisable");
+						s3.ufd("undisable");
 					} else {
-						s1.uffdd("disable");
-						s2.uffdd("disable");
-						s3.uffdd("disable");
+						s1.ufd("disable");
+						s2.ufd("disable");
+						s3.ufd("disable");
 					}
 					disabled = !disabled;
 				});
@@ -631,7 +653,7 @@ left: 300px;
     	<h2>zIndex correction on iE6</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("#zindex").uffdd();
+			$("#zindex").ufd();
 		});    
 	    </script>
 
@@ -745,11 +767,11 @@ left: 300px;
 				} 			
 
 				var mid = new Date().getTime();
-				select.uffdd({log:true});
+				select.ufd({log:true});
 				var end = new Date().getTime();
 				
 				alert("Randoms strings in a select built in " + (mid-start) + 
-						" msec.  UFFDD constructed from select in: " +  (end-mid) + " msec.");
+						" msec.  UFD constructed from select in: " +  (end-mid) + " msec.");
 				
 				return;
 			});
@@ -779,7 +801,7 @@ left: 300px;
 	    Number of random strings:
 	    <input type="text" id="charCount" value="500"/>
 	    
-	    <button type="button" id="charButton">Click to build a new uffdd</button>
+	    <button type="button" id="charButton">Click to build a new ufd</button>
 	    <br/>
 	    <br/>
 	    <br/>

@@ -1,4 +1,4 @@
-	uffdd @VERSION	: Unobtrusive fast filter drop down jQuery plugin.
+	ufd @VERSION	: Unobtrusive fast filter drop down jQuery plugin.
 	
 	Authors: 
 		thetoolman@gmail.com 
@@ -6,6 +6,6 @@
 		
 	Version: @VERSION
 	
-	Website: http://code.google.com/p/uffdd/
+	Website: http://code.google.com/p/ufd/
 	
 	See examples/index.html for demonstration page, or visit the website for documentation.	

@@ -1,5 +1,5 @@
 /*
-	uffdd @VERSION : Unobtrusive fast filter drop down jQuery plugin.
+	ufd @VERSION : Unobtrusive Fast-filter Drop-down jQuery plugin.
 
 	Authors:
 		thetoolman@gmail.com 
@@ -7,67 +7,68 @@
 
 	Version:  @VERSION
 
-	Website: http://code.google.com/p/uffdd/
+	Website: http://code.google.com/p/ufd/
 */
 
 (function($) {
 
-	$.widget("ui.uffdd", {
+	$.widget("ui.ufd", {
 		
 		// options: provided by framework
 		// element: provided by framework
 		
 		_init: function() {
 			if (this.element[0].tagName.toLowerCase() != "select") {
-				return false; // What should I do ?
+				this.destroy();
+				return false;
 			}
 			
-			// in place content
+			//console.profile("init");
+
 			this.selectbox = this.element;
-			this.originalSelectboxWidth = this.selectbox.outerWidth(); //get size *before* its wrapped, in case of % width 
-			var selectName = this.selectbox.attr("name");
-			var suffixName = selectName + this.options.suffix;
-			if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
 			
-			this.wrapper = this.selectbox.wrap("<span>").parent().
-			    addClass("combo").
-			    addClass(this.options.skin); 
-			
-			this.input = $("<input type='text' />").
-			    appendTo(this.wrapper).
-			    attr("autocomplete", "off").
-			    attr("value", "").
-			    attr("name", this.options.submitFreeText ? selectName : suffixName);
-			
-			this.icon = $('<div class="icon"/>').
-			    appendTo(this.wrapper); 
-			
-			// drop down content
-			var ddc = this.getDropdownContainer();
-			
-			this.listWrapper = $('<div class="list-wrapper"/>').
-				addClass("invisible").
-				appendTo(ddc);
-			if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
-			
-			this.listWrapper.wrap("<div>").parent().
-				addClass(this.options.skin);
-			
-			this.listScroll = $('<div class="list-scroll"/>').appendTo(this.listWrapper);
-			
-			this.list = $("<ul />").appendTo(this.listScroll); 
-			
-			this.isUpdatingMaster = false;
-			this.isDisabled = false;
-			this.internalFocus = false; 
-			this.lastKey = null;
 			this.logNode = $(this.options.logSelector);
 			this.overflowCSS = this.options.allowLR ? "overflow" : "overflowY";
+			var selectName = this.selectbox.attr("name");
+			var suffixName = selectName + this.options.suffix;
+			var inputName = this.options.submitFreeText ? selectName : suffixName;
 			
+			if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
+			
+			this.wrapper = $(
+				'<span class="ufd invisible ' + this.options.skin + '"  >' +
+					'<input type="text" autocomplete="off" value="" name="' + inputName + '"/>'+
+					'<button type="button"><div class="icon"/></button>'+
+				//   <select .../> goes here
+				'</span>'
+			);
+			this.dropdown = $(
+				'<div class="' + this.options.skin + '">' +
+					'<div class="list-wrapper invisible">' +
+						'<div class="list-scroll">' +
+							'<ul/>' +
+						'</div>' +
+					'</div>' +
+				'</div>'
+			);
+
+			this.selectbox.after(this.wrapper);
+			this.getDropdownContainer().append(this.dropdown);
+			
+			this.input = this.wrapper.find("input");
+			this.button = this.wrapper.find("button");
+			this.listWrapper = this.dropdown.find(".list-wrapper");
+			this.listScroll = this.dropdown.find(".list-scroll");
+			this.list = this.dropdown.find("ul");
+			
+			if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
+
 			this.populateFromMaster();
-			
 			this.initEvents();
 			this.initListEvents();
+			
+			//console.profileEnd();
+			
 
 		},
 
@@ -76,9 +77,8 @@
     	// event handlers
 
     	key: function(event, isKeyUp, isKeyPress) {
-    		/*
-    		 * Key handling is tricky; here is great key guide: http://unixpapa.com/js/key.html
-    		 */
+    		// Key handling is tricky; here is great key guide: http://unixpapa.com/js/key.html
+
     		if(isKeyPress) return; //not needed
 
     		var k = $.ui.keyCode; 
@@ -197,22 +197,22 @@
 				self.key(e, true, false); //isKeyUp, isKeyPress
 			});	
 			
-	        this.icon.bind("mouseover", function(e) { self.icon.addClass("hover"); }); 
-	        this.icon.bind("mouseout",  function(e) { self.icon.removeClass("hover"); }); 
-	        this.icon.bind("mousedown", function(e) { self.icon.addClass("mouseDown"); }); 
-	        this.icon.bind("mouseup",   function(e) { self.icon.removeClass("mouseDown"); }); 
-			this.icon.bind("click", function(e) {
+	        this.button.bind("mouseover", function(e) { self.button.addClass("hover"); }); 
+	        this.button.bind("mouseout",  function(e) { self.button.removeClass("hover"); }); 
+	        this.button.bind("mousedown", function(e) { self.button.addClass("mouseDown"); }); 
+	        this.button.bind("mouseup",   function(e) { self.button.removeClass("mouseDown"); }); 
+			this.button.bind("click", function(e) {
 		    	if(self.isDisabled){
 		    		self.stopEvent(e);
 		    		return;
 		    	}
-				self.log("icon click: " + e.target);
-	            self.iconClick();
+				self.log("button click: " + e.target);
+	            self.buttonClick();
 	        }); 
 	    
 	        // click anywhere else
 	        $(document).bind("click", function(e) {
-	            if ((self.icon.get(0) == e.target) || (self.input.get(0) == e.target)){
+	            if ((self.button.get(0) == e.target) || (self.input.get(0) == e.target)){
 	            	return;
 	            }
 	            if(self.internalFocus) {
@@ -289,8 +289,8 @@
 			
 		},
 	    
-	    iconClick: function() {
-	    	this.log("clickIcon");
+	    buttonClick: function() {
+	    	this.log("clickbutton");
 
 	        if (this.listVisible()) { 
 	            this.hideList();
@@ -392,9 +392,10 @@
         populateFromMaster: function() {
         	this.log("populate from master select");
         	
-        	var self = this;
+			this.setDimensions();
+        	
+        	
         	this.disable();
-    		this.selectOptions = this.selectbox.children("option");
     		
     		this.trie = new Trie(this.options.caseSensitive);
     		this.trie.matches = [];
@@ -402,16 +403,20 @@
 
     		this.list.html(""); //delete old ones - consider bound objects TODO
 			
-    		this.selectOptions.each(function() {	
+    		var self = this;
+
+    		this.selectbox.children("option").each(function() {	
     			var opt = $(this);
     	    	var optionText = $.trim(opt.text());
-                var newItem = $('<li class="visible"><span>' + optionText + '</span></li>');
+
+
+    	    	var newItem = $('<li class="visible"><span>' + optionText + '</span></li>');
+    	    	var addOK = self.trie.add(optionText, newItem.get(0));
                 newItem.data("optionNode", this);
-                var addOK = self.trie.add(optionText, newItem.get(0));
                 if(addOK){
                 	self.list.append(newItem);
                 } else {
-                	self.log(optionText + " already added, not rendering item twice.");
+                	// self.log(optionText + " already added, not rendering item twice.");
                 }
     	    });
     		
@@ -424,6 +429,29 @@
     	    	this.input.val(""); //better tecqnique?
     	    }
     	    
+    	    this.undisable();
+    	    
+        },
+        
+        setDimensions: function() {
+        	
+        	this.wrapper.addClass("invisible");
+        	if(this.options.selectIsWrapped) { //unwrap
+            	this.wrapper.before(this.selectbox);
+        	}
+        	
+        	//get dimensions un-wrapped, in case of % width etc.
+			this.originalSelectboxWidth = this.selectbox.outerWidth(); 
+    	    var props = ["marginLeft","marginTop","marginRight","marginBottom"];
+    	    for(propPtr in props){
+    	    	var prop = props[propPtr];
+    	    	this.wrapper.css(prop, this.selectbox.css(prop)); // copy property from selectbox to wrapper
+    	    }
+			
+        	this.wrapper.append(this.selectbox); //wrap
+        	this.wrapper.removeClass("invisible");
+        	this.options.selectIsWrapped = true;
+			
     	    //match original width
     	    var newSelectWidth = this.originalSelectboxWidth;
     	    if(this.options.manualWidth) {
@@ -433,9 +461,9 @@
     	    }
 
     	    
-    	    var iconWidth = this.icon.outerWidth();
+    	    var buttonWidth = this.button.outerWidth();
     	    var inputBP = this.input.outerWidth() - this.input.width();
-    	    var inputWidth = newSelectWidth - iconWidth - inputBP;
+    	    var inputWidth = newSelectWidth - buttonWidth - inputBP;
     	    var listWrapBP = this.listWrapper.outerWidth() - this.listWrapper.width();
 
     	    this.input.width(inputWidth);
@@ -443,19 +471,10 @@
     	    this.listWrapper.width(newSelectWidth - listWrapBP);
     	    
     	    //this.log(newSelectWidth + " : " + inputWidth + " : " + 
-    	    //		iconWidth + " : " + (newSelectWidth - listWrapBP));
-    	    
-    	    // copy listed css properties from select to container
-    	    var props = ["marginLeft","marginTop","marginRight","marginBottom"];
-    	    for(propPtr in props){
-    	    	var prop = props[propPtr];
-    	    	this.wrapper.css(prop, this.selectbox.css(prop));
-    	    }
-
-    	    
-    	    this.undisable();
+    	    //		buttonWidth + " : " + (newSelectWidth - listWrapBP));
     	    
         },
+        
         
 		revertSelected: function() {
 			var option = this.selectbox.children("option:selected");
@@ -495,13 +514,13 @@
 	        	self.log(self.getCurrentTextValue() + ": matchesLength: " + 
 	        			self.trie.matches.length + " missesLength: " + self.trie.misses.length );
 
-	        	self.setAttr(self.trie.matches, $.ui.uffdd.classAttr,"visible" );
+	        	self.setAttr(self.trie.matches, $.ui.ufd.classAttr,"visible" );
 		        if(self.trie.matches.length <= showAllLength) {
 		        	self.log("showing all");
-		        	self.setAttr(self.trie.misses, $.ui.uffdd.classAttr,"visible" );
+		        	self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"visible" );
 		        } else {
 		        	self.log("hiding");
-		        	self.setAttr(self.trie.misses, $.ui.uffdd.classAttr,"invisible" );
+		        	self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"invisible" );
 		        }
 		        if(self.trie.matches.length == 1) {
 		        	self.setActive(self.trie.matches[0]);
@@ -760,7 +779,7 @@
 			
 			this.hideList();
 			this.isDisabled = true;
-			this.icon.addClass("disabled");
+			this.button.addClass("disabled");
 			this.input.addClass("disabled");
 			this.input.attr("disabled", "disabled");
 		},
@@ -769,7 +788,7 @@
         	this.log("undisable");
 			
 			this.isDisabled = false;
-			this.icon.removeClass("disabled");
+			this.button.removeClass("disabled");
 			this.input.removeClass("disabled");
 			this.input.removeAttr("disabled");
 		},
@@ -823,9 +842,7 @@
 		},
 
 		changeOptions: function() {
-			this.disable();
 			this.populateFromMaster();
-			this.undisable();
 		},		
 
 		destroy: function() {
@@ -985,16 +1002,16 @@
 	/* end Trie */	
 
 	
-	$.extend($.ui.uffdd, {
+	$.extend($.ui.ufd, {
 		version: "@VERSION",
-		getter: "undisable disable changeOptions", 
+		getter: "", //for methods that are getters, not chainables
     	
     	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
 		
 		defaults: {
 			skin: "plain", //skin name
-			suffix: "__uffdd", // original select name + suffix == pseudo-dropdown text input name  
-			dropDownID: "uffDDC", // internal ID used for storing dropdown list near root node,to avoid ie6 zindex issues.
+			suffix: "_ufd", // original select name + suffix == pseudo-dropdown text input name  
+			dropDownID: "ufd-container", // ID of node for storing dropdown lists near root node, avoids ie6 zindex issues.
 			logSelector: "#log", // selector string to write log into, 
 			log: false, // log to firebug console (if available) and logSelector (if it exists)?
 			
@@ -1012,6 +1029,13 @@
 			delayFilter: ($.support.style) ? 1 : 150, //msec to wait before starting filter (or get cancelled); long for IE 
 			delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
 			zIndexPopup: 101, // dropdown z-index
+			
+			//internal state
+			isUpdatingMaster: false,
+			isDisabled: false,
+			internalFocus: false, 
+			lastKey: null,
+			selectIsWrapped: false,
 			hidden: true
 		}
 	});	
