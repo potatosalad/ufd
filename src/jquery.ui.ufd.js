@@ -79,8 +79,6 @@
     	key: function(event, isKeyUp, isKeyPress) {
     		// Key handling is tricky; here is great key guide: http://unixpapa.com/js/key.html
 
-    		if(isKeyPress) return; //not needed
-
     		var k = $.ui.keyCode; 
     		var key = null;
 
@@ -189,9 +187,9 @@
 				self.key(e, false, false); //isKeyUp, isKeyPress
 			});
 
-			this.input.bind("keypress", function(e) {
+			/*this.input.bind("keypress", function(e) {
 				self.key(e, false, true); //isKeyUp, isKeyPress
-			});	
+			});	*/
 			
 			this.input.bind("keyup", function(e) {
 				self.key(e, true, false); //isKeyUp, isKeyPress
@@ -213,6 +211,7 @@
 	        // click anywhere else
 	        $(document).bind("click", function(e) {
 	            if ((self.button.get(0) == e.target) || (self.input.get(0) == e.target)){
+	            	//TODO should check list for click also? 
 	            	return;
 	            }
 	            if(self.internalFocus) {
@@ -514,10 +513,10 @@
 	        	self.log(self.getCurrentTextValue() + ": matchesLength: " + 
 	        			self.trie.matches.length + " missesLength: " + self.trie.misses.length );
 
-	        	self.setAttr(self.trie.matches, $.ui.ufd.classAttr,"visible" );
+	        	self.setAttr(self.trie.matches, $.ui.ufd.classAttr,"" );
 		        if(self.trie.matches.length <= showAllLength) {
 		        	self.log("showing all");
-		        	self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"visible" );
+		        	self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"" );
 		        } else {
 		        	self.log("hiding");
 		        	self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"invisible" );
