@@ -23,10 +23,10 @@
 				return false;
 			}
 			
-			//console.profile("init");
-
-			this.selectbox = this.element;
+			//console.time("init");
+			//console.time("start");
 			
+			this.selectbox = this.element;
 			this.logNode = $(this.options.logSelector);
 			this.overflowCSS = this.options.allowLR ? "overflow" : "overflowY";
 			var selectName = this.selectbox.attr("name");
@@ -46,7 +46,7 @@
 				'<div class="' + this.options.skin + '">' +
 					'<div class="list-wrapper invisible">' +
 						'<div class="list-scroll">' +
-							'<ul/>' +
+							//'<ul/>' +
 						'</div>' +
 					'</div>' +
 				'</div>'
@@ -54,20 +54,33 @@
 
 			this.selectbox.after(this.wrapper);
 			this.getDropdownContainer().append(this.dropdown);
+
+			//console.timeEnd("start");
+			
+			//console.time("middle");
 			
 			this.input = this.wrapper.find("input");
 			this.button = this.wrapper.find("button");
 			this.listWrapper = this.dropdown.find(".list-wrapper");
 			this.listScroll = this.dropdown.find(".list-scroll");
-			this.list = this.dropdown.find("ul");
 			
 			if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
+			this.listMaxHeight = this.getListMaxHeight(); 
 
-			this.populateFromMaster();
-			this.initEvents();
-			this.initListEvents();
+			//console.timeEnd("middle");
 			
-			//console.profileEnd();
+			//console.time("end");
+
+			console.time("pfm");
+			this.populateFromMaster();
+			console.timeEnd("pfm");
+			console.time("ie");
+			this.initEvents();
+			console.timeEnd("ie");
+			
+			//console.timeEnd("end");
+			
+			//console.timeEnd("init");
 			
 
 		},
@@ -226,7 +239,7 @@
 			var self = this;
 			this.log("initListEvents");
 
-	        this.listItems.bind("mouseover", function(e) {
+	        this.list.bind("mouseover", function(e) {
 	        	var item = $(e.target);
 				if ("LI" != e.target.nodeName.toUpperCase()) { //child span click
 					item = item.parent();
@@ -234,7 +247,7 @@
 				self.highlight(item);	
 	        });
 	    
-	        this.listItems.bind("click", function(e) {
+	        this.list.bind("click", function(e) {
 	        	self.log("item click: " + e.target.nodeName);
 	            self.listItemClick($(e.target)); //TODO can be span or LI ?
 	            self.stopEvent(e); //prevent bubbling to document onclick binding etc
@@ -344,7 +357,7 @@
 	    // attempt update; clear input or set default if fail:
 	    tryToSetMaster: function() {
 	    	this.log("t.s.m");
-	        if(this.trie.matches.length == 0 && !this.options.submitFreeText) {
+	        if(this.selectedLi == null && !this.options.submitFreeText) {
 	        	this.log("not allowed freetext, revert:");
 	        	this.revertSelected();
 	        	return false; // no match
@@ -390,45 +403,72 @@
 
         populateFromMaster: function() {
         	this.log("populate from master select");
-        	
-			this.setDimensions();
-        	
+
+    		console.time("prep");
         	
         	this.disable();
-    		
+			this.setDimensions();
+
     		this.trie = new Trie(this.options.caseSensitive);
     		this.trie.matches = [];
     		this.trie.misses = [];
-
-    		this.list.html(""); //delete old ones - consider bound objects TODO
 			
     		var self = this;
+    		var listBuilder = [];
+    		var trieObjects = [];
 
-    		this.selectbox.children("option").each(function() {	
-    			var opt = $(this);
-    	    	var optionText = $.trim(opt.text());
+    		console.timeEnd("prep");
+    		console.time("build");
 
+    		listBuilder.push('<ul>');
 
-    	    	var newItem = $('<li class="visible"><span>' + optionText + '</span></li>');
-    	    	var addOK = self.trie.add(optionText, newItem.get(0));
-                newItem.data("optionNode", this);
+    		var options = this.selectbox.get(0).options;
+    		for(var i=0; i < options.length; i++) {
+    		
+    			var thisOpt = options[i]; 
+    	    	var optionText = $.trim(thisOpt.text);
+    	    	var optionIndex = thisOpt.index;
+    	    	
+    	    	var trieObj = {index: optionIndex, li: null};
+    	    	var addOK = self.trie.add(optionText, trieObj);
+
                 if(addOK){
-                	self.list.append(newItem);
+                	listBuilder.push('<li name="' + optionIndex + '">' + optionText + '</li>');
+                	trieObjects.push(trieObj);
                 } else {
                 	// self.log(optionText + " already added, not rendering item twice.");
                 }
-    	    });
+    	    }
+
+    		listBuilder.push('</ul>');
+
+    		this.listScroll.html(listBuilder.join(''));
+    		this.list = this.listScroll.find("ul");
+
+    		console.timeEnd("build");
+    		console.time("kids");
     		
-			this.listItems = this.list.children();
-			this.initListEvents();
+    		this.listItems = this.list.children();
+
+    		this.listItems.each(function() {
+    			trieObjects.pop().li = this;
+    		});
+    		console.timeEnd("kids");
+    		
+    		console.time("initLE");
+    		this.initListEvents();
+    		console.timeEnd("initLE");
 			
-    	    if(this.options.triggerSelected){
-    	    	this.revertSelected();
+    		console.time("tidy");
+
+    		if(this.options.triggerSelected){
+    	    	this.setInputFromMaster();
     	    } else {
-    	    	this.input.val(""); //better tecqnique?
+    	    	this.input.val(""); 
     	    }
     	    
     	    this.undisable();
+    		console.timeEnd("tidy");
     	    
         },
         
@@ -446,8 +486,8 @@
     	    	var prop = props[propPtr];
     	    	this.wrapper.css(prop, this.selectbox.css(prop)); // copy property from selectbox to wrapper
     	    }
-			
-        	this.wrapper.append(this.selectbox); //wrap
+
+    	    this.wrapper.append(this.selectbox); //wrap
         	this.wrapper.removeClass("invisible");
         	this.options.selectIsWrapped = true;
 			
@@ -474,12 +514,15 @@
     	    
         },
         
+        setInputFromMaster: function() {
+			var selectNode = this.selectbox.get(0);
+			var val = selectNode.options[selectNode.selectedIndex].text;
+			this.log("setting input to: " + val);
+			this.input.val(val);
+        },
         
 		revertSelected: function() {
-			var option = this.selectbox.children("option:selected");
-			var val = option.text();
-			this.log("reverting to: " + val);
-			this.input.val(val);
+        	this.setInputFromMaster();
 			this.filter(1);
 		},
 		
@@ -503,6 +546,7 @@
 		        var mm = self.trie.findPrefixMatchesAndMisses(self.getCurrentTextValue()); // search!
 		        self.trie.matches = mm.matches;
 		        self.trie.misses = mm.misses;
+		        
 		        //yield then screen update
 			    self.updateOnTimeout = setTimeout(function(){screenUpdate();}, self.options.delayYield); 
 		        
@@ -521,6 +565,9 @@
 		        	self.log("hiding");
 		        	self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"invisible" );
 		        }
+		        
+		        //self.selectedLi ...
+		        
 		        if(self.trie.matches.length == 1) {
 		        	self.setActive(self.trie.matches[0]);
 		        } else if(self.getActiveIndex() == -1 && !self.options.submitFreeText){
@@ -627,12 +674,12 @@
 		//corrects list wrapper's height depending on list items height
 		setListDisplay: function() {
 			
-			var liHeight = this.list.outerHeight();
-		    var maxHeight = this.getListMaxHeight();
+			var listHeight = this.list.outerHeight();
+		    var maxHeight = this.listMaxHeight;
 	
-		    this.log("set list height - listItemsHeight: " + liHeight + " : maxHeight: " + maxHeight );
+		    this.log("set list height - listItemsHeight: " + listHeight + " : maxHeight: " + maxHeight );
 
-		    var height = liHeight;
+		    var height = listHeight;
 		    if (height > maxHeight) {
 		    	height = maxHeight;
 		    	this.listScroll.css(this.overflowCSS, "scroll");
@@ -644,19 +691,18 @@
 		    this.listScroll.height(height); 
 		    this.listWrapper.height(height); 
 			
-        	var dropUp = false;
+        	var doDropUp = false;
         	var offset = this.input.offset();
         	if(this.options.allowDropUp) {
-        		
-	        	var listHeight = maxHeight; // drop up if max doesnt fit, to prevent flicking up/down on type
+	        	var listSpace = maxHeight; // drop up if maxHeight doesnt fit, to prevent flicking up/down on type
 	        	var inputHeight = this.wrapper.height();
-	        	var bottomPos = offset.top + inputHeight + listHeight;
+	        	var bottomPos = offset.top + inputHeight + listSpace;
 	        	var maxShown = $(window).height() + $(document).scrollTop();
-	        	dropUp = (bottomPos > maxShown);
+	        	doDropUp = (bottomPos > maxShown);
         	}
 
         	var top;
-        	if (dropUp) {
+        	if (doDropUp) {
 		        this.listWrapper.addClass("list-wrapper-up");
 		        top = (offset.top - this.listScroll.height()) ;
 		    } else {
@@ -674,8 +720,8 @@
 			
 			var result = parseInt(this.listWrapper.css("max-height"), 10);
 			if (isNaN(result)) {
-				this.log("no max height set.");
-				result = 200;	
+				this.log("no CSS max height set.");
+				result = this.listMaxHeight;	
 			}
 			this.log("get listmaxheight: " + result);
 			return result;
@@ -763,7 +809,7 @@
 
 	    setAttr: function(array, attr, val ) { //fast attribute OVERWRITE
         	for(nodePtr in array) {
-        		array[nodePtr].setAttribute(attr, val);
+        		array[nodePtr].li.setAttribute(attr, val);
         	}
         },
 	    
@@ -1023,6 +1069,7 @@
 			allowDropUp: true, //if true, the options list will be placed above text input if flowing off bottom
 			allowLR: false, //show horizontal scrollbar
 			
+			listMaxHeight: 200, //CSS value takes precedence
 			minWidth: 50, // don't autosize smaller then this.
 			manualWidth: null, //override selectbox width; set explicit width
 			delayFilter: ($.support.style) ? 1 : 150, //msec to wait before starting filter (or get cancelled); long for IE 
@@ -1035,6 +1082,7 @@
 			internalFocus: false, 
 			lastKey: null,
 			selectIsWrapped: false,
+			selectedLi: null,
 			hidden: true
 		}
 	});	
