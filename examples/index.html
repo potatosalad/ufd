@@ -44,9 +44,9 @@
 		Firebug lite for iE: 
 		Useful to see logging in iE. Can also create a DOM node matching the logSelector option.
 	
+	 -->
 		<script type='text/javascript' 
 	        src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
-	 -->
 	
 	<style type="text/css">
 
@@ -302,7 +302,7 @@ left: 300px;
 		<h2>basic combo</h2>
 		<script type="text/javascript" >
 		$(function () {
-			$("#basic-combo").ufd();
+			$("#basic-combo").ufd({log:true});
 		});    
 	    </script>
 
@@ -682,7 +682,7 @@ left: 300px;
         <option value="CO">Colorado</option>
         <option value="CT">Connecticut</option>
 
-        <option value="DE">Delaware</option>
+        <option value="DE" selected="selected">Delaware</option>
         <option value="FL">Florida</option>
         <option value="GA">Georgia</option>
         <option value="HI">Hawaii</option>
@@ -755,19 +755,24 @@ left: 300px;
 			$("#charButton").click(function(){
 
 
-				var pc = $("#perfContainer").html("");
-				var select = $("<select>").appendTo(pc);
 				var charCount = $("#charCount").val(); //should be a number
 
 				var start = new Date().getTime();
-				
+
+				var nodeBuilder = [];
+				nodeBuilder.push("<select>");
+
 				for (;charCount > 0; charCount--){
 					var rs = randomString();
-					select.append('<option>' + rs + "</option>");
+					nodeBuilder.push('<option>' + rs + "</option>");
 				} 			
+				nodeBuilder.push("</select>");
+
+				var pc = $("#perfContainer");
+				pc.html(nodeBuilder.join(''));
 
 				var mid = new Date().getTime();
-				select.ufd({log:true});
+				pc.children(":first").ufd({log:true});
 				var end = new Date().getTime();
 				
 				alert("Randoms strings in a select built in " + (mid-start) + 
@@ -795,11 +800,11 @@ left: 300px;
 			
 		});    
 	    </script>
-
+<a name="test" id="test">
 	    <p>Test...</p>
-	    
+	    </a>
 	    Number of random strings:
-	    <input type="text" id="charCount" value="500"/>
+	    <input type="text" id="charCount" value="2000"/>
 	    
 	    <button type="button" id="charButton">Click to build a new ufd</button>
 	    <br/>

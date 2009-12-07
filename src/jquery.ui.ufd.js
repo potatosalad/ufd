@@ -23,8 +23,8 @@
 				return false;
 			}
 			
-			//console.time("init");
-			//console.time("start");
+			// console.time("init");
+			// console.time("start");
 			
 			this.selectbox = this.element;
 			this.logNode = $(this.options.logSelector);
@@ -55,9 +55,9 @@
 			this.selectbox.after(this.wrapper);
 			this.getDropdownContainer().append(this.dropdown);
 
-			//console.timeEnd("start");
+			// console.timeEnd("start");
 			
-			//console.time("middle");
+			// console.time("middle");
 			
 			this.input = this.wrapper.find("input");
 			this.button = this.wrapper.find("button");
@@ -67,20 +67,20 @@
 			if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
 			this.listMaxHeight = this.getListMaxHeight(); 
 
-			//console.timeEnd("middle");
+			// console.timeEnd("middle");
 			
-			//console.time("end");
+			// console.time("end");
 
-			console.time("pfm");
+			// console.time("pfm");
 			this.populateFromMaster();
-			console.timeEnd("pfm");
-			console.time("ie");
+			// console.timeEnd("pfm");
+			// console.time("ie");
 			this.initEvents();
-			console.timeEnd("ie");
+			// console.timeEnd("ie");
 			
-			//console.timeEnd("end");
+			// console.timeEnd("end");
 			
-			//console.timeEnd("init");
+			// console.timeEnd("init");
 			
 
 		},
@@ -161,7 +161,7 @@
 
         initEvents: function() { //initialize all event listeners
 	        var self = this;
-			this.log("initEvents");
+			//this.log("initEvents");
 
 	        this.selectbox.bind("change", function(e) {
 	        	if(self.isUpdatingMaster){
@@ -179,7 +179,7 @@
 		    		self.stopEvent(e);
 		    		return;
 		    	}
-	        	self.log("input click");
+	        	// self.log("input click");
 	            if(!self.internalFocus) {
 	            	self.realFocusEvent();
 	            }
@@ -190,7 +190,7 @@
 		    		self.stopEvent(e);
 		    		return;
 		    	}
-	        	self.log("input focus");
+	        	 // self.log("input focus");
 	            if(!self.internalFocus){
 	            	self.realFocusEvent();
 	            }
@@ -217,9 +217,32 @@
 		    		self.stopEvent(e);
 		    		return;
 		    	}
-				self.log("button click: " + e.target);
+				// self.log("button click: " + e.target);
 	            self.buttonClick();
 	        }); 
+
+			//list events
+			this.listWrapper.bind("mouseover", function(e) {
+				if ("LI" != e.target.nodeName.toUpperCase()) return true;
+				$(e.target).addClass("hover");
+				return true;
+			});
+
+			this.listWrapper.bind("mouseout", function(e) {
+				if ("LI" != e.target.nodeName.toUpperCase()) return true;
+				$(e.target).removeClass("hover");
+				return true;
+			});
+			
+			this.listWrapper.bind("click", function(e) {
+				// self.log("item click: " + e.target.nodeName);
+				if("LI" != e.target.nodeName.toUpperCase()) return true;
+				
+				self.stopEvent(e); //prevent bubbling to document onclick binding etc
+				self.listItemClick(e.target);
+				return true;
+			});
+			
 	    
 	        // click anywhere else
 	        $(document).bind("click", function(e) {
@@ -228,29 +251,9 @@
 	            	return;
 	            }
 	            if(self.internalFocus) {
-					self.log("unfocus document click : " + e.target);
+					// self.log("unfocus document click : " + e.target);
 		            self.realLooseFocus();
 	            }
-	        });
-	        
-	    },
-	    
-        initListEvents: function() { 
-			var self = this;
-			this.log("initListEvents");
-
-	        this.list.bind("mouseover", function(e) {
-	        	var item = $(e.target);
-				if ("LI" != e.target.nodeName.toUpperCase()) { //child span click
-					item = item.parent();
-				}
-				self.highlight(item);	
-	        });
-	    
-	        this.list.bind("click", function(e) {
-	        	self.log("item click: " + e.target.nodeName);
-	            self.listItemClick($(e.target)); //TODO can be span or LI ?
-	            self.stopEvent(e); //prevent bubbling to document onclick binding etc
 	        });
 	        
 		},
@@ -258,7 +261,7 @@
     	// pseudo events
 		
 	    realFocusEvent: function() {
-        	this.log("real input focus");
+        	// this.log("real input focus");
         	this.internalFocus = true;
         	this.triggerEventOnMaster("focus");
 	    	this.filter(1); //show all even tho one is selected
@@ -268,7 +271,7 @@
 	    },
 
 	    realLooseFocus: function() {
-        	this.log("real loose focus (blur)");
+        	// this.log("real loose focus (blur)");
         	this.internalFocus = false;
         	this.hideList();  
         	this.tryToSetMaster();
@@ -276,7 +279,7 @@
 	    },
 
 		inputFocus: function() {
-        	this.log("inputFocus: restore input component focus");
+        	// this.log("inputFocus: restore input component focus");
         	this.input.focus();
 
             if (this.getCurrentTextValue().length) {
@@ -285,7 +288,7 @@
 		},
 		
 		inputBlur: function() {
-        	this.log("inputBlur: loose input component focus");
+        	// this.log("inputBlur: loose input component focus");
         	this.input.blur();
 		},	 
 		
@@ -302,7 +305,7 @@
 		},
 	    
 	    buttonClick: function() {
-	    	this.log("clickbutton");
+	    	// this.log("clickbutton");
 
 	        if (this.listVisible()) { 
 	            this.hideList();
@@ -317,15 +320,10 @@
 	    },
 
 	    listItemClick: function(item) {
-        	this.log("listitemclick");
-        	var activeNode = this.getActiveOptionNode();
-        	if(! activeNode) {
-        		this.log("bad! couldn't find active item");
-    	        this.inputFocus();
-    	        return;
-        	}
-        	var value = $.trim($(activeNode).html());
+        	// this.log("listitemclick");
+        	var value = $.trim($(item).text());
         	this.input.val(value);
+        	this.setActive(item);
 	        if(this.tryToSetMaster() ) {
 	        	this.hideList();
 	        	this.filter(1);
@@ -337,194 +335,22 @@
 	    
 	    showList: function() {
         	if(this.listVisible()) return;
-        	this.log("showlist");
+        	// this.log("showlist");
         	
-        	this.listWrapper.removeClass("invisible").addClass("visible");
+        	this.listWrapper.removeClass("invisible");
         	this.setListDisplay();
 			
 	    },
 	
 	    hideList: function() {
         	if(!this.listVisible()) return;
-        	this.log("hide list");
+        	// this.log("hide list");
 	        
-	        this.listWrapper.removeClass("visible").addClass("invisible");
-	        this.listItems.removeClass("invisible"); //slow?  
+	        this.listWrapper.addClass("invisible");
+	        this.listItems.removeClass("invisible");   
 	        
 
 	    },
-
-	    // attempt update; clear input or set default if fail:
-	    tryToSetMaster: function() {
-	    	this.log("t.s.m");
-	        if(this.selectedLi == null && !this.options.submitFreeText) {
-	        	this.log("not allowed freetext, revert:");
-	        	this.revertSelected();
-	        	return false; // no match
-	        }
-
-	    	
-	    	var active = this.getActive().get(0);  //get match
-        	if (active == null) {
-    	    	this.log("Bad! coudn't locate active item");
-    	    	return false; 
-        	}
-    		var node = $(active).data("optionNode");
-	        if(node == null) { 
-	        	this.log("Bad! no associated master option node");
-	        	return false;
-	        }
-
-	        var nodeVal = (node.value != null && node.value != "") ? node.value : node.text;
-	        var option = this.selectbox.children("option:selected");
-	        if(option.text() == node.text){
-	        	this.log("already set correctly." + option.text()  + " : " + node.text);
-	        	return true;
-	        }
-	        
-	        var curVal = this.selectbox.val();
-	        this.isUpdatingMaster = true;
-	        this.selectbox.val([nodeVal]);
-	        this.log(" update: " + this.selectbox.val() + " : "+ nodeVal);
-	        if(this.selectbox.val() != nodeVal){ //set failed
-		        this.selectbox.val([curVal]); 
-		        this.log("set new master selected failed.");
-		        if(!this.options.submitFreeText) {
-		        	this.log("not allowed freetext, revert:");
-		        	this.revertSelected();
-		        }
-		        return false;
-	        }
-	        this.input.val(node.text);
-	        this.log("master selectbox set to: " + nodeVal);
-	        this.triggerEventOnMaster("change");
-	        return true;
-	    },
-
-        populateFromMaster: function() {
-        	this.log("populate from master select");
-
-    		console.time("prep");
-        	
-        	this.disable();
-			this.setDimensions();
-
-    		this.trie = new Trie(this.options.caseSensitive);
-    		this.trie.matches = [];
-    		this.trie.misses = [];
-			
-    		var self = this;
-    		var listBuilder = [];
-    		var trieObjects = [];
-
-    		console.timeEnd("prep");
-    		console.time("build");
-
-    		listBuilder.push('<ul>');
-
-    		var options = this.selectbox.get(0).options;
-    		for(var i=0; i < options.length; i++) {
-    		
-    			var thisOpt = options[i]; 
-    	    	var optionText = $.trim(thisOpt.text);
-    	    	var optionIndex = thisOpt.index;
-    	    	
-    	    	var trieObj = {index: optionIndex, li: null};
-    	    	var addOK = self.trie.add(optionText, trieObj);
-
-                if(addOK){
-                	listBuilder.push('<li name="' + optionIndex + '">' + optionText + '</li>');
-                	trieObjects.push(trieObj);
-                } else {
-                	// self.log(optionText + " already added, not rendering item twice.");
-                }
-    	    }
-
-    		listBuilder.push('</ul>');
-
-    		this.listScroll.html(listBuilder.join(''));
-    		this.list = this.listScroll.find("ul");
-
-    		console.timeEnd("build");
-    		console.time("kids");
-    		
-    		this.listItems = this.list.children();
-
-    		this.listItems.each(function() {
-    			trieObjects.pop().li = this;
-    		});
-    		console.timeEnd("kids");
-    		
-    		console.time("initLE");
-    		this.initListEvents();
-    		console.timeEnd("initLE");
-			
-    		console.time("tidy");
-
-    		if(this.options.triggerSelected){
-    	    	this.setInputFromMaster();
-    	    } else {
-    	    	this.input.val(""); 
-    	    }
-    	    
-    	    this.undisable();
-    		console.timeEnd("tidy");
-    	    
-        },
-        
-        setDimensions: function() {
-        	
-        	this.wrapper.addClass("invisible");
-        	if(this.options.selectIsWrapped) { //unwrap
-            	this.wrapper.before(this.selectbox);
-        	}
-        	
-        	//get dimensions un-wrapped, in case of % width etc.
-			this.originalSelectboxWidth = this.selectbox.outerWidth(); 
-    	    var props = ["marginLeft","marginTop","marginRight","marginBottom"];
-    	    for(propPtr in props){
-    	    	var prop = props[propPtr];
-    	    	this.wrapper.css(prop, this.selectbox.css(prop)); // copy property from selectbox to wrapper
-    	    }
-
-    	    this.wrapper.append(this.selectbox); //wrap
-        	this.wrapper.removeClass("invisible");
-        	this.options.selectIsWrapped = true;
-			
-    	    //match original width
-    	    var newSelectWidth = this.originalSelectboxWidth;
-    	    if(this.options.manualWidth) {
-    	    	newSelectWidth = this.options.manualWidth; 
-    	    } else if (newSelectWidth < this.options.minWidth) {
-    	    	newSelectWidth = this.options.minWidth;
-    	    }
-
-    	    
-    	    var buttonWidth = this.button.outerWidth();
-    	    var inputBP = this.input.outerWidth() - this.input.width();
-    	    var inputWidth = newSelectWidth - buttonWidth - inputBP;
-    	    var listWrapBP = this.listWrapper.outerWidth() - this.listWrapper.width();
-
-    	    this.input.width(inputWidth);
-    	    this.wrapper.width(newSelectWidth);
-    	    this.listWrapper.width(newSelectWidth - listWrapBP);
-    	    
-    	    //this.log(newSelectWidth + " : " + inputWidth + " : " + 
-    	    //		buttonWidth + " : " + (newSelectWidth - listWrapBP));
-    	    
-        },
-        
-        setInputFromMaster: function() {
-			var selectNode = this.selectbox.get(0);
-			var val = selectNode.options[selectNode.selectedIndex].text;
-			this.log("setting input to: " + val);
-			this.input.val(val);
-        },
-        
-		revertSelected: function() {
-        	this.setInputFromMaster();
-			this.filter(1);
-		},
 		
 	    /*
 	     * adds / removes items to / from the dropdown list depending on combo's current value
@@ -532,7 +358,7 @@
 	     * if doDelay, will delay execution to allow re-entry to cancel.
 	     */
 	    filter: function(showAllLength, doDelay) {
-        	this.log("filter: " + showAllLength);
+        	// this.log("filter: " + showAllLength);
 	        var self = this;
 	        
 	        //cancel any pending
@@ -554,25 +380,31 @@
 
 	        var screenUpdate = function() {
 	        	//this.log("screen update");
-	        	self.log(self.getCurrentTextValue() + ": matchesLength: " + 
-	        			self.trie.matches.length + " missesLength: " + self.trie.misses.length );
+	        	//self.log(self.getCurrentTextValue() + ": matchesLength: " + 
+	        	//		self.trie.matches.length + " missesLength: " + self.trie.misses.length );
 
+	        	var active = self.getActive();
+	        	
 	        	self.setAttr(self.trie.matches, $.ui.ufd.classAttr,"" );
 		        if(self.trie.matches.length <= showAllLength) {
-		        	self.log("showing all");
+		        	// self.log("showing all");
 		        	self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"" );
 		        } else {
-		        	self.log("hiding");
+		        	// self.log("hiding");
 		        	self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"invisible" );
 		        }
 		        
-		        //self.selectedLi ...
-		        
-		        if(self.trie.matches.length == 1) {
-		        	self.setActive(self.trie.matches[0]);
-		        } else if(self.getActiveIndex() == -1 && !self.options.submitFreeText){
+		        var oldActiveVisible = (active.length && !active.hasClass("invisible"));
+		        if(oldActiveVisible) {
+		        	self.setActive(active.get(0));
+		        	
+		        } else if(self.trie.matches.length) {
+		        	self.setActive(self.trie.matches[0].li);
+		        	
+		        } else if(!self.options.submitFreeText){
 		        	self.resetActive();
 		        }
+		        
 		        self.setListDisplay();
 	        };
 	        
@@ -583,25 +415,305 @@
 	        	search();
 	        }
 	    },
-		
-		//returns index of currently active list item
-		getActiveIndex: function() {
-        	this.log("get activeindex");
+
+	    // attempt update; clear input or set default if fail:
+	    tryToSetMaster: function() {
+	    	// this.log("t.s.m");
+	        if(this.selectedLi == null && !this.options.submitFreeText) {
+	        	this.log("not allowed freetext, revert:");
+	        	this.revertSelected();
+	        	return false; // no match
+	        }
+	    	
+	    	var active = this.getActive();
+        	if (!active.length) {
+    	    	this.log("No selected item.");
+    	    	return false; 
+        	}
+        	
+        	var optionIndex = active.attr("name"); //sBox pointer index 
+        	if (optionIndex == null || optionIndex == "" || optionIndex < 0) {
+    	    	this.log("No selected item.");
+    	    	return false; 
+        	} 
+
+        	var sBox = this.selectbox.get(0);
+        	var curIndex = sBox.selectedIndex;
+        	var option = sBox.options[optionIndex];
+
+    		if(optionIndex == curIndex){
+	        	this.log("already set correctly." + active.text()  + " : " + option.text);
+	        	return true;
+	        }
+    		this.log(" update: " + this.selectbox.val() + " : "+ option.value);
+	        
+	        this.isUpdatingMaster = true;
+	        sBox.selectedIndex = optionIndex;
+	        if(this.selectbox.val() != option.value){ //set failed
+	        	this.log("set failed!");
+		        sBox.selectedIndex = curIndex;
+		        this.selectbox.val(curIndex); 
+		        // this.log("set new master selected failed.");
+		        if(!this.options.submitFreeText) {
+		        	// this.log("not allowed freetext, revert:");
+		        	this.revertSelected();
+		        }
+		        return false;
+	        }
+	        this.input.val(option.text);
+	        // this.log("master selectbox set to: " + option.text);
+	        this.triggerEventOnMaster("change");
+	        return true;
+	    },
+
+        populateFromMaster: function() {
+        	// this.log("populate from master select");
+
+    		// console.time("prep");
+        	
+        	this.disable();
+			this.setDimensions();
+
+    		this.trie = new Trie(this.options.caseSensitive);
+    		this.trie.matches = [];
+    		this.trie.misses = [];
 			
-		    return $.inArray(this.getActive().get(0), this.listItems.filter(".visible").get());
+    		var self = this;
+    		var listBuilder = [];
+    		var trieObjects = [];
+
+    		// console.timeEnd("prep");
+    		// console.time("build");
+
+    		listBuilder.push('<ul>');
+    		var options = this.selectbox.get(0).options;
+    		var thisOpt,optionText,optionIndex,trieObj,addOK, loopCountdown,index;
+    		
+    		loopCountdown = options.length;
+    		index = 0;
+    		do {
+    			thisOpt = options[index++]; 
+    	    	optionText = $.trim(thisOpt.text);
+    	    	optionIndex = thisOpt.index;
+    	    	
+    	    	trieObj = {index: optionIndex, li: null};
+    	    	addOK = self.trie.add(optionText, trieObj);
+
+                if(addOK){
+                	listBuilder.push('<li name="' + optionIndex + '">' + optionText + '</li>');
+                	trieObjects.push(trieObj);
+                } else {
+                	//self.log(optionText + " already added, not rendering item twice.");
+                	//trieObjects.push({}); //as trieObjects is iterating from source options 
+                }
+    	    } while(--loopCountdown); 
+
+    		listBuilder.push('</ul>');
+
+    		this.listScroll.html(listBuilder.join(''));
+    		this.list = this.listScroll.find("ul:first");
+
+    		// console.timeEnd("build");
+    		
+    		this.listItems = $("li", this.list);
+    		// console.time("kids");
+    		var theLis = this.list.get(0).getElementsByTagName('LI'); // much faster array then .childElements !
+
+    		loopCountdown = trieObjects.length;
+    		index = 0;
+    		do {
+    			trieObjects[index].li = theLis[index++];
+    	    } while(--loopCountdown); 
+
+    		// console.timeEnd("kids");
+    		// console.time("tidy");
+
+    		if(this.options.triggerSelected){
+    	    	this.setInputFromMaster();
+    	    } else {
+    	    	this.input.val(""); 
+    	    }
+    	    
+    	    this.undisable();
+    		// console.timeEnd("tidy");
+    	    
+        },
+        
+        setDimensions: function() {
+    		// console.time("1");
+        	
+        	this.wrapper.addClass("invisible");
+        	if(this.options.selectIsWrapped) { //unwrap
+            	this.wrapper.before(this.selectbox);
+        	}
+
+    		// console.timeEnd("1");
+    		// console.time("2");
+        	
+        	//get dimensions un-wrapped, in case of % width etc.
+			this.originalSelectboxWidth = this.selectbox.outerWidth(); 
+    	    var props = ["marginLeft","marginTop","marginRight","marginBottom"];
+    	    for(propPtr in props){
+    	    	var prop = props[propPtr];
+    	    	this.wrapper.css(prop, this.selectbox.css(prop)); // copy property from selectbox to wrapper
+    	    }
+
+    	    // console.timeEnd("2");
+    	    // console.time("2.5");
+
+    	    this.wrapper.get(0).appendChild(this.selectbox.get(0)); //wrap
+
+    	    
+
+    	    
+    	    // console.timeEnd("2.5");
+    		// console.time("3");
+    	    
+    		this.wrapper.removeClass("invisible");
+    		this.options.selectIsWrapped = true;
+    	    
+			
+    	    //match original width
+    	    var newSelectWidth = this.originalSelectboxWidth;
+    	    if(this.options.manualWidth) {
+    	    	newSelectWidth = this.options.manualWidth; 
+    	    } else if (newSelectWidth < this.options.minWidth) {
+    	    	newSelectWidth = this.options.minWidth;
+    	    }
+
+    	    
+    	    var buttonWidth = this.button.outerWidth();
+    	    var inputBP = this.input.outerWidth() - this.input.width();
+    	    var inputWidth = newSelectWidth - buttonWidth - inputBP;
+    	    var listWrapBP = this.listWrapper.outerWidth() - this.listWrapper.width();
+
+    		// console.timeEnd("3");
+    		// console.time("4");
+    	    
+    	    
+    	    this.input.width(inputWidth);
+    	    this.wrapper.width(newSelectWidth);
+    	    this.listWrapper.width(newSelectWidth - listWrapBP);
+    	    
+    	    //this.log(newSelectWidth + " : " + inputWidth + " : " + 
+    	    //		buttonWidth + " : " + (newSelectWidth - listWrapBP));
+    		// console.timeEnd("4");
+    	    
+        },
+        
+        setInputFromMaster: function() {
+			var selectNode = this.selectbox.get(0);
+			var val = selectNode.options[selectNode.selectedIndex].text;
+			// this.log("setting input to: " + val);
+			this.input.val(val);
+        },
+        
+		revertSelected: function() {
+        	this.setInputFromMaster();
+			this.filter(1);
 		},
 		
+		//corrects list wrapper's height depending on list items height
+		setListDisplay: function() {
+			
+			var listHeight = this.list.outerHeight();
+		    var maxHeight = this.listMaxHeight;
+	
+		    // this.log("set list height - listItemsHeight: " + listHeight + " : maxHeight: " + maxHeight );
+
+		    var height = listHeight;
+		    if (height > maxHeight) {
+		    	height = maxHeight;
+		    	this.listScroll.css(this.overflowCSS, "scroll");
+		    } else {
+		    	this.listScroll.css(this.overflowCSS, "hidden");
+		    }
+
+		    // this.log("height set to: " + height);
+		    this.listScroll.height(height); 
+		    this.listWrapper.height(height); 
+			
+        	var doDropUp = false;
+        	var offset = this.input.offset();
+        	if(this.options.allowDropUp) {
+	        	var listSpace = maxHeight; // drop up if maxHeight doesnt fit, to prevent flicking up/down on type
+	        	var inputHeight = this.wrapper.height();
+	        	var bottomPos = offset.top + inputHeight + listSpace;
+	        	var maxShown = $(window).height() + $(document).scrollTop();
+	        	doDropUp = (bottomPos > maxShown);
+        	}
+
+        	var top;
+        	if (doDropUp) {
+		        this.listWrapper.addClass("list-wrapper-up");
+		        top = (offset.top - this.listScroll.height()) ;
+		    } else {
+		        this.listWrapper.removeClass("list-wrapper-up");
+		        top = (offset.top + this.input.outerHeight() - 1);
+		    }
+        	this.listWrapper.css("left", offset.left);
+        	this.listWrapper.css("top", top );			
+
+		    return height;
+		},
+
+		//scrolls list wrapper to active
+		scrollTo: function() {
+        	// this.log("scrollTo");
+
+		    if ("scroll" != this.listScroll.css(this.overflowCSS)) return;
+		    
+			var active = this.getActive();
+			if(!active.length) return;
+			console.log(active.get(0));
+		    var activePos = active.position().top;
+		    var activeHeight = active.outerHeight(true);
+		    var listHeight = this.listWrapper.height();
+		    var scrollTop = this.listScroll.scrollTop();
+		    /*
+		    console.log("APT: " + activePos);
+		    console.log("AH: " + activeHeight);
+		    console.log("LH: " + listHeight);
+		    console.log("ST: " + scrollTop);
+		    */
+		    var top = 0;
+		    if (activePos <= activeHeight) { // nearly off top
+		    	top = scrollTop + activePos - activeHeight;
+		    } else if((activePos + activeHeight) >= listHeight ) { //nearly off bottom
+		    	top = scrollTop + activePos + activeHeight - activePos  ;
+		    }
+		    else {
+		    	return; // no need to scroll
+		    }
+		    // this.log("top: " + top);
+		    this.listScroll.scrollTop(top);
+		    
+		},		
+
+		//returns active (hovered) element of the dropdown list
+		getActive: function() {
+        	// this.log("get active");
+			return $(this.selectedLi);
+		},
+
 	    //highlights the item given
-	    highlight: function(activeItem) {
-        	//this.log("highlight");
-			this.getActive().removeClass("active");  
-	        $(activeItem).addClass("active");
+	    setActive: function(activeItem) {
+        	this.log("setActive");
+			$(this.selectedLi).removeClass("active");
+			this.selectedLi = activeItem;
+	        $(this.selectedLi).addClass("active");
 	    },
 	    
-		
+    	resetActive: function() {
+        	// this.log("resetActive");
+        	var active = this.listItems.filter(":not(.invisible):first");
+    		this.setActive( active );
+    	},
+    	
+			    
 		//highlights list item before currently active item
 		selectPrev: function() {
-        	this.log("hilightprev");
+        	// this.log("hilightprev");
 			
         	var active = this.getActive();
 		    if (!active.length) {
@@ -637,7 +749,7 @@
 		
 		//highlights item of the dropdown list next to the currently active item
 		selectNext: function() {
-        	this.log("hilightnext");
+        	//this.log("hilightnext");
 			
         	var active = this.getActive();
 		    if (!active.length) {
@@ -670,50 +782,6 @@
 	        return;
 		    
 		},
-		
-		//corrects list wrapper's height depending on list items height
-		setListDisplay: function() {
-			
-			var listHeight = this.list.outerHeight();
-		    var maxHeight = this.listMaxHeight;
-	
-		    this.log("set list height - listItemsHeight: " + listHeight + " : maxHeight: " + maxHeight );
-
-		    var height = listHeight;
-		    if (height > maxHeight) {
-		    	height = maxHeight;
-		    	this.listScroll.css(this.overflowCSS, "scroll");
-		    } else {
-		    	this.listScroll.css(this.overflowCSS, "hidden");
-		    }
-
-		    this.log("height set to: " + height);
-		    this.listScroll.height(height); 
-		    this.listWrapper.height(height); 
-			
-        	var doDropUp = false;
-        	var offset = this.input.offset();
-        	if(this.options.allowDropUp) {
-	        	var listSpace = maxHeight; // drop up if maxHeight doesnt fit, to prevent flicking up/down on type
-	        	var inputHeight = this.wrapper.height();
-	        	var bottomPos = offset.top + inputHeight + listSpace;
-	        	var maxShown = $(window).height() + $(document).scrollTop();
-	        	doDropUp = (bottomPos > maxShown);
-        	}
-
-        	var top;
-        	if (doDropUp) {
-		        this.listWrapper.addClass("list-wrapper-up");
-		        top = (offset.top - this.listScroll.height()) ;
-		    } else {
-		        this.listWrapper.removeClass("list-wrapper-up");
-		        top = (offset.top + this.input.outerHeight() - 1);
-		    }
-        	this.listWrapper.css("left", offset.left);
-        	this.listWrapper.css("top", top );			
-
-		    return height;
-		},
 
 		//just returns integer value of list wrapper's max-height property
 		getListMaxHeight: function() {
@@ -723,75 +791,9 @@
 				this.log("no CSS max height set.");
 				result = this.listMaxHeight;	
 			}
-			this.log("get listmaxheight: " + result);
+			// this.log("get listmaxheight: " + result);
 			return result;
 		},
-
-		
-		//returns active (hovered) element of the dropdown list
-		getActive: function() {
-        	this.log("get active");
-			return this.listItems.filter(".active:first"); //TODO used cached visible list
-		},
-
-		getActiveOptionNode: function() {
-        	this.log("get activeOptionNode");
-
-	    	var active = this.getActive();
-	    	if (active.length) {
-	    		return $(active).data("optionNode");
-	        }
-    	},
-    	
-    	setActive: function(node) {
-        	this.log("setActive");
-    		this.listItems.removeClass("active");
-    		$(node).addClass("active");
-    	},
-
-    	
-    	resetActive: function() {
-        	this.log("resetActive");
-        	var active = this.listItems.filter(".visible:first");
-    		this.setActive( active );
-    		return active;
-    	},
-    	
-		
-		//scrolls list wrapper to active
-		scrollTo: function() {
-        	this.log("scrollTo");
-
-		    if ("scroll" != this.listScroll.css(this.overflowCSS)) return;
-		    
-			var active = this.getActive();
-			if(!active.length) return;
-			
-		    var activePos = active.position().top;
-		    var activeHeight = active.outerHeight(true);
-		    var listHeight = this.listWrapper.height();
-		    var scrollTop = this.listScroll.scrollTop();
-		    /*
-		    console.log("APT: " + activePos);
-		    console.log("AH: " + activeHeight);
-		    console.log("LH: " + listHeight);
-		    console.log("ST: " + scrollTop);
-		    */
-		    var top = 0;
-		    if (activePos <= activeHeight) { // nearly off top
-		    	top = scrollTop + activePos - activeHeight;
-		    } else if((activePos + activeHeight) >= listHeight ) { //nearly off bottom
-		    	top = scrollTop + activePos + activeHeight - activePos  ;
-		    }
-		    else {
-		    	return; // no need to scroll
-		    }
-		    this.log("top: " + top);
-		    this.listScroll.scrollTop(top);
-		    
-		},		
-		
-
 
 	    getCurrentTextValue: function() {
 			var input = $.trim(this.input.val()); 
@@ -814,13 +816,13 @@
         },
 	    
 	    listVisible: function() {
-	        var isVisible = this.listWrapper.hasClass("visible");
-	        this.log("is list visible?: " + isVisible);
+	        var isVisible = !this.listWrapper.hasClass("invisible");
+	        // this.log("is list visible?: " + isVisible);
 	        return isVisible;
 	    },
 			
 		disable: function() {
-        	this.log("disable");
+        	// this.log("disable");
 			
 			this.hideList();
 			this.isDisabled = true;
@@ -830,7 +832,7 @@
 		},
 		
 		undisable: function() {
-        	this.log("undisable");
+        	// this.log("undisable");
 			
 			this.isDisabled = false;
 			this.button.removeClass("disabled");
@@ -859,7 +861,7 @@
 		},
 
 		selectAll: function() {
-			this.log("Select All");
+			// this.log("Select All");
 			this.input.get(0).select();
 	        //this.selection(this.input.get(0), 0, this.input.val().length);
 	    },
@@ -1062,7 +1064,7 @@
 			
 			dropDownIcon: ".ui-icon-circle-triangle-e", //ui-icon-triangle-1-s, ui-icon-arrowthick-1-s
 			
-			submitFreeText: false, // re[name=] original select, give text input the selects' original [name], and allow unmatched entries  
+			submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
 			triggerSelected: true, //selected option of the selectbox will be the initial value of the combo
 			caseSensitive: false, // case sensitive search ?
 			autoFill: false, //enable autofilling 

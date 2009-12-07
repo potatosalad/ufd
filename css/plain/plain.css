@@ -54,3 +54,7 @@
 	background-color: highlight;
 }
 
+#ufd-container .plain li.hover {
+	background-color: red;
+}
+
