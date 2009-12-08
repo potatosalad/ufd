@@ -38,7 +38,7 @@
 			this.wrapper = $(
 				'<span class="ufd invisible ' + this.options.skin + '"  >' +
 					'<input type="text" autocomplete="off" value="" name="' + inputName + '"/>'+
-					'<button type="button"><div class="icon"/></button>'+
+					'<button tabindex="-1" type="button"><div class="icon"/></button>'+
 				//   <select .../> goes here
 				'</span>'
 			);
@@ -85,8 +85,7 @@
 
 		},
 
-		
-	    
+
     	// event handlers
 
     	key: function(event, isKeyUp, isKeyPress) {
@@ -121,7 +120,6 @@
 		    	case k.DOWN:
 			    case k.PAGE_DOWN:
 			    	//this.log("down pressed");
-					this.showList();
 			    	this.selectNext();
 			    	break;
 			    	
@@ -129,7 +127,6 @@
 			    case k.UP:
 			    case k.PAGE_UP:
 			    	//this.log("up pressed");
-					this.showList();
 			    	this.selectPrev();
 			    	break;
 			    	
@@ -224,13 +221,15 @@
 			//list events
 			this.listWrapper.bind("mouseover", function(e) {
 				if ("LI" != e.target.nodeName.toUpperCase()) return true;
-				$(e.target).addClass("hover");
+				$(self.selectedLi).removeClass("active");
+				$(e.target).addClass("active");
 				return true;
 			});
 
 			this.listWrapper.bind("mouseout", function(e) {
 				if ("LI" != e.target.nodeName.toUpperCase()) return true;
-				$(e.target).removeClass("hover");
+				$(e.target).removeClass("active");
+				$(self.selectedLi).addClass("active");
 				return true;
 			});
 			
@@ -247,7 +246,6 @@
 	        // click anywhere else
 	        $(document).bind("click", function(e) {
 	            if ((self.button.get(0) == e.target) || (self.input.get(0) == e.target)){
-	            	//TODO should check list for click also? 
 	            	return;
 	            }
 	            if(self.internalFocus) {
@@ -657,43 +655,11 @@
 		    return height;
 		},
 
-		//scrolls list wrapper to active
-		scrollTo: function() {
-        	// this.log("scrollTo");
-
-		    if ("scroll" != this.listScroll.css(this.overflowCSS)) return;
-		    
-			var active = this.getActive();
-			if(!active.length) return;
-			console.log(active.get(0));
-		    var activePos = active.position().top;
-		    var activeHeight = active.outerHeight(true);
-		    var listHeight = this.listWrapper.height();
-		    var scrollTop = this.listScroll.scrollTop();
-		    /*
-		    console.log("APT: " + activePos);
-		    console.log("AH: " + activeHeight);
-		    console.log("LH: " + listHeight);
-		    console.log("ST: " + scrollTop);
-		    */
-		    var top = 0;
-		    if (activePos <= activeHeight) { // nearly off top
-		    	top = scrollTop + activePos - activeHeight;
-		    } else if((activePos + activeHeight) >= listHeight ) { //nearly off bottom
-		    	top = scrollTop + activePos + activeHeight - activePos  ;
-		    }
-		    else {
-		    	return; // no need to scroll
-		    }
-		    // this.log("top: " + top);
-		    this.listScroll.scrollTop(top);
-		    
-		},		
-
 		//returns active (hovered) element of the dropdown list
 		getActive: function() {
         	// this.log("get active");
-			return $(this.selectedLi);
+			if(this.selectedLi == null) return $([]);
+			return $(this.selectedLi); 
 		},
 
 	    //highlights the item given
@@ -721,27 +687,20 @@
 		    	return;
 		    }
         	
-		    var $prev = active.prev();
+		    var prev = active.prev();
 		    
-		    while ($prev.length && $prev.hasClass("invisible")) {
-		        $prev = $prev.prev();
+		    while (prev.length && prev.hasClass("invisible")) {
+		        prev = prev.prev();
 		    }
-		    if(!$prev.length) {
-		    	$prev = active; // top of list, no action
+		    if(!prev.length) {  // top of visible list, no action
 		    	return;
 		    }
-			
-	        active.removeClass("active");
-			$prev.addClass("active");
+		    
+		    this.setActive(prev);
 			this.tryToSetMaster();
 			this.scrollTo();
 			
-    		var node = $prev.data("optionNode");
-	        if(node == null) {  
-	        	this.log("shouldnt happen");
-	        	return;
-	        }
-	        this.input.val(node.text);
+	        this.input.val(prev.text());
 	        this.inputFocus();
 	        this.selectAll();
 	        return;
@@ -758,31 +717,57 @@
 		    }
         	var next = active.next();
 		    
-		    while (next.hasClass("invisible") && next.length) {
+		    while (next.length && next.hasClass("invisible")) {
 		        next = next.next();
 		    }
-		    if(!next.length) {
-		    	next = active; // bottom of list, no action
+		    if(!next.length) { // bottom of list, no action
 		    	return;
 		    }
 		    	
-	        active.removeClass("active");
-			next.addClass("active");
+		    this.setActive(next);
 			this.tryToSetMaster();
 			this.scrollTo();
-		
-    		var node = next.data("optionNode");
-	        if(node == null) { 
-	        	this.log("shouldnt happen");
-	        	return false;
-	        }
-	        this.input.val(node.text);
+
+
+	        this.input.val(next.text());
 	        this.inputFocus();
 	        this.selectAll();
 	        return;
 		    
 		},
 
+		//scrolls list wrapper to active
+		scrollTo: function() {
+        	// this.log("scrollTo");
+
+		    if ("scroll" != this.listScroll.css(this.overflowCSS)) return;
+		    
+			var active = this.getActive();
+			if(!active.length) return;
+		    var activePos = active.position().top;
+		    var activeHeight = active.outerHeight(true);
+		    var listHeight = this.listWrapper.height();
+		    var scrollTop = this.listScroll.scrollTop();
+		    /*
+		    console.log("APT: " + activePos);
+		    console.log("AH: " + activeHeight);
+		    console.log("LH: " + listHeight);
+		    console.log("ST: " + scrollTop);
+		    */
+		    var top = 0;
+		    if (activePos <= activeHeight) { // nearly off top
+		    	top = scrollTop + activePos - activeHeight;
+		    } else if((activePos + activeHeight) >= listHeight ) { //nearly off bottom
+		    	top = scrollTop + activePos + activeHeight - activePos  ;
+		    }
+		    else {
+		    	return; // no need to scroll
+		    }
+		    // this.log("top: " + top);
+		    this.listScroll.scrollTop(top);
+		    
+		},		
+		
 		//just returns integer value of list wrapper's max-height property
 		getListMaxHeight: function() {
 			
