@@ -46,7 +46,7 @@
 				'<div class="' + this.options.skin + '">' +
 					'<div class="list-wrapper invisible">' +
 						'<div class="list-scroll">' +
-							//'<ul/>' +
+							//'<ul/>' goes here
 						'</div>' +
 					'</div>' +
 				'</div>'
@@ -56,7 +56,6 @@
 			this.getDropdownContainer().append(this.dropdown);
 
 			// console.timeEnd("start");
-			
 			// console.time("middle");
 			
 			this.input = this.wrapper.find("input");
@@ -68,121 +67,93 @@
 			this.listMaxHeight = this.getListMaxHeight(); 
 
 			// console.timeEnd("middle");
-			
-			// console.time("end");
-
 			// console.time("pfm");
 			this.populateFromMaster();
 			// console.timeEnd("pfm");
 			// console.time("ie");
 			this.initEvents();
 			// console.timeEnd("ie");
-			
-			// console.timeEnd("end");
-			
 			// console.timeEnd("init");
-			
-
 		},
 
-
-    	// event handlers
-
-    	key: function(event, isKeyUp, isKeyPress) {
-    		// Key handling is tricky; here is great key guide: http://unixpapa.com/js/key.html
-
-    		var k = $.ui.keyCode; 
-    		var key = null;
-
-    		if (undefined === event.which) {
-    			key = event.keyCode; 
-    		} else if (!isKeyPress && event.which != 0) {
-    			key = event.keyCode;
-    		} else { 
-    			return; //special key
-    		}
-    		
-		    // only process: keyups excluding tab/return; and only tab/return keydown 
-    		// Only some browsers fire keyUp on tab in, ignore if it happens 
-		    if(!isKeyUp == ((key != k.TAB) && (key != k.ENTER)) ) return;
-
-		    //this.log("Key: " + key + " isKeyUp?: " + isKeyUp + " isKeyPress?: " + isKeyUp);
-		    this.lastKey = key;
-		    
-		    
-		    switch (key) {
-		    	case k.SHIFT:
-		    	case k.CONTROL:
-		    		//don't refilter 
-		    		break;
-		    		
-		    	case k.END: //TODO
-		    	case k.DOWN:
-			    case k.PAGE_DOWN:
-			    	//this.log("down pressed");
-			    	this.selectNext();
-			    	break;
-			    	
-			    case k.HOME: //TODO
-			    case k.UP:
-			    case k.PAGE_UP:
-			    	//this.log("up pressed");
-			    	this.selectPrev();
-			    	break;
-			    	
-		        case k.ENTER:
-		        	//this.log("enter pressed");
-		        	this.hideList();
-		        	this.tryToSetMaster();
-		        	this.inputFocus();
-		        	this.stopEvent(event);
-		        	break;
-		        	
-				case k.TAB: //tabout only
-					//this.log("tabout pressed");
-					this.realLooseFocus();
-					break;
-					
-				case k.ESCAPE:
-					//this.log("ESC pressed");
-				    this.hideList();
-				    this.revertSelected();
-				    break;
-				    
-				default:
-					this.showList();
-					this.filter(0, true); //do delay, as more keypresses may cancel
-					break;
-		    }
-		},
 
         initEvents: function() { //initialize all event listeners
 	        var self = this;
+	        var keyCodes = $.ui.keyCode; 
+	        var key, isKeyDown, isKeyPress,isKeyUp;
 			//this.log("initEvents");
 
-	        this.selectbox.bind("change", function(e) {
-	        	if(self.isUpdatingMaster){
-	        		self.log("master changed but we did the update");
-	    	        self.isUpdatingMaster = false;
-	        		return true;
-	        	}
-	        	self.log("master changed; reverting");
-	        	self.revertSelected();
-	        });
-			
-			
-	        this.input.bind("click", function(e) {
-		    	if(self.isDisabled){
-		    		self.stopEvent(e);
-		    		return;
-		    	}
-	        	// self.log("input click");
-	            if(!self.internalFocus) {
-	            	self.realFocusEvent();
-	            }
-	        });
+	        self.input.bind("keydown keypress keyup", function(event) {
+        		// Key handling is tricky; here is great key guide: http://unixpapa.com/js/key.html
+        		isKeyDown = (event.type == "keydown");
+        		isKeyPress = (event.type == "keypress");
+        		isKeyUp = (event.type == "keyup");
+        		key = null;
 
-	        this.input.bind("focus", function(e) {
+        		if (undefined === event.which) {
+        			key = event.keyCode; 
+        		} else if (!isKeyPress && event.which != 0) {
+        			key = event.keyCode;
+        		} else { 
+        			return; //special key
+        		}
+        		
+    		    // only process: keyups excluding tab/return; and only tab/return keydown 
+        		// Only some browsers fire keyUp on tab in, ignore if it happens 
+    		    if(!isKeyUp == ((key != keyCodes.TAB) && (key != keyCodes.ENTER)) ) return;
+
+    		    self.log("Key: " + key + " event: " + event.type);
+
+    		    self.lastKey = key;
+
+    		    switch (key) {
+    		    	case keyCodes.SHIFT:
+    		    	case keyCodes.CONTROL:
+    		    		//don't refilter 
+    		    		break;
+    		    		
+    		    	case keyCodes.DOWN:
+    			    	self.selectNext();
+    			    	break;
+    			    case keyCodes.PAGE_DOWN:
+    			    	self.selectNext(true);
+    			    	break;
+    			    case keyCodes.END:
+    			    	self.selectLast();
+    			    	break;
+
+    			    case keyCodes.UP:
+    			    	self.selectPrev();
+    			    	break;
+    			    case keyCodes.PAGE_UP:
+    			    	self.selectPrev(true);
+    			    	break;
+    			    case keyCodes.HOME:
+    			    	self.selectFirst();
+    			    	break;
+    			    	
+    		        case keyCodes.ENTER:
+    		        	self.hideList();
+    		        	self.tryToSetMaster();
+    		        	self.inputFocus();
+    		        	self.stopEvent(event);
+    		        	break;
+    				case keyCodes.TAB: //tabout only
+    					self.realLooseFocus();
+    					break;
+    				case keyCodes.ESCAPE:
+    				    self.hideList();
+    				    self.revertSelected();
+    				    break;
+    				    
+    				default:
+    					self.showList();
+    					self.filter(0, true); //do delay, as more keypresses may cancel
+    					break;
+    		    }
+	        });
+	        
+	        this.input.bind("click focus", function(e) {
 		    	if(self.isDisabled){
 		    		self.stopEvent(e);
 		    		return;
@@ -192,18 +163,6 @@
 	            	self.realFocusEvent();
 	            }
 	        });
-
-			this.input.bind("keydown", function(e) {
-				self.key(e, false, false); //isKeyUp, isKeyPress
-			});
-
-			/*this.input.bind("keypress", function(e) {
-				self.key(e, false, true); //isKeyUp, isKeyPress
-			});	*/
-			
-			this.input.bind("keyup", function(e) {
-				self.key(e, true, false); //isKeyUp, isKeyPress
-			});	
 			
 	        this.button.bind("mouseover", function(e) { self.button.addClass("hover"); }); 
 	        this.button.bind("mouseout",  function(e) { self.button.removeClass("hover"); }); 
@@ -215,43 +174,68 @@
 		    		return;
 		    	}
 				// self.log("button click: " + e.target);
-	            self.buttonClick();
+    	        if (self.listVisible()) { 
+    	            self.hideList();
+    			    self.inputFocus();
+    			    
+    		    } else {	
+    		    	self.filter(1); //show all even tho one is selected
+    		    	self.inputFocus();
+    	            self.showList();
+    		    	self.scrollTo();	    	
+    		    }          
 	        }); 
 
-			//list events
-			this.listWrapper.bind("mouseover", function(e) {
-				if ("LI" != e.target.nodeName.toUpperCase()) return true;
-				$(self.selectedLi).removeClass("active");
-				$(e.target).addClass("active");
+			this.listWrapper.bind("mouseover mouseout click", function(e) {
+				// this.log(e.type + " : " + e.target);
+				if ( "LI" == e.target.nodeName.toUpperCase() ) {
+					if(self.setActiveTimeout) { //cancel pending selectLI -> active
+						clearTimeout(self.setActiveTimeout);
+						self.setActiveTimeout == null;
+					}
+					if ("mouseout" == e.type) {
+						$(e.target).removeClass("active");
+					    self.setActiveTimeout = setTimeout(function() { 
+					    	$(self.selectedLi).addClass("active"); 
+					    }, self.options.delayYield);
+						
+					} else if ("mouseover" == e.type) { 
+						if (self.selectedLi != e.target) { 
+							$(self.selectedLi).removeClass("active");
+						}
+						$(e.target).addClass("active");
+						
+					} else { //click
+						self.stopEvent(e); //prevent bubbling to document onclick binding etc
+			        	var value = $.trim($(e.target).text());
+			        	self.input.val(value);
+			        	self.setActive(e.target);
+				        if(self.tryToSetMaster() ) {
+				        	self.hideList();
+				        	self.filter(1);
+				        }
+				        self.inputFocus();
+					}
+				}
+				
 				return true;
 			});
 
-			this.listWrapper.bind("mouseout", function(e) {
-				if ("LI" != e.target.nodeName.toUpperCase()) return true;
-				$(e.target).removeClass("active");
-				$(self.selectedLi).addClass("active");
-				return true;
-			});
-			
-			this.listWrapper.bind("click", function(e) {
-				// self.log("item click: " + e.target.nodeName);
-				if("LI" != e.target.nodeName.toUpperCase()) return true;
-				
-				self.stopEvent(e); //prevent bubbling to document onclick binding etc
-				self.listItemClick(e.target);
-				return true;
-			});
-			
-	    
+	        this.selectbox.bind("change", function(e) {
+	        	if(self.isUpdatingMaster){
+	        		// self.log("master changed but we did the update");
+	    	        self.isUpdatingMaster = false;
+	        		return true;
+	        	}
+	        	self.log("master changed; reverting");
+	        	self.revertSelected();
+	        });
+						
 	        // click anywhere else
 	        $(document).bind("click", function(e) {
-	            if ((self.button.get(0) == e.target) || (self.input.get(0) == e.target)){
-	            	return;
-	            }
-	            if(self.internalFocus) {
-					// self.log("unfocus document click : " + e.target);
-		            self.realLooseFocus();
-	            }
+	            if ((self.button.get(0) == e.target) || (self.input.get(0) == e.target)) return;
+	            // self.log("unfocus document click : " + e.target);
+	            if (self.internalFocus) self.realLooseFocus();
 	        });
 	        
 		},
@@ -275,20 +259,6 @@
         	this.tryToSetMaster();
         	this.triggerEventOnMaster("blur");
 	    },
-
-		inputFocus: function() {
-        	// this.log("inputFocus: restore input component focus");
-        	this.input.focus();
-
-            if (this.getCurrentTextValue().length) {
-	            this.selectAll();    	
-	        }			
-		},
-		
-		inputBlur: function() {
-        	// this.log("inputBlur: loose input component focus");
-        	this.input.blur();
-		},	 
 		
 		triggerEventOnMaster: function(eventName) {
 			if( document.createEvent ) { // good browsers
@@ -302,52 +272,34 @@
 			
 		},
 	    
-	    buttonClick: function() {
-	    	// this.log("clickbutton");
-
-	        if (this.listVisible()) { 
-	            this.hideList();
-			    this.inputFocus();
-			    
-		    } else {	
-		    	this.filter(1); //show all even tho one is selected
-		    	this.inputFocus();
-	            this.showList();
-		    	this.scrollTo();	    	
-		    }          
-	    },
-
-	    listItemClick: function(item) {
-        	// this.log("listitemclick");
-        	var value = $.trim($(item).text());
-        	this.input.val(value);
-        	this.setActive(item);
-	        if(this.tryToSetMaster() ) {
-	        	this.hideList();
-	        	this.filter(1);
-	        }
-	        this.inputFocus();
-	    },	    
-	
 	    // methods
+		
+		inputFocus: function() {
+			// this.log("inputFocus: restore input component focus");
+			this.input.focus();
+			
+			if (this.getCurrentTextValue().length) {
+				this.selectAll();    	
+			}			
+		},
+		
+		inputBlur: function() {
+			// this.log("inputBlur: loose input component focus");
+			this.input.blur();
+		},	 
 	    
 	    showList: function() {
+			// this.log("showlist");
         	if(this.listVisible()) return;
-        	// this.log("showlist");
-        	
         	this.listWrapper.removeClass("invisible");
         	this.setListDisplay();
-			
 	    },
 	
 	    hideList: function() {
+	    	// this.log("hide list");
         	if(!this.listVisible()) return;
-        	// this.log("hide list");
-	        
 	        this.listWrapper.addClass("invisible");
 	        this.listItems.removeClass("invisible");   
-	        
-
 	    },
 		
 	    /*
@@ -400,7 +352,7 @@
 		        	self.setActive(self.trie.matches[0].li);
 		        	
 		        } else if(!self.options.submitFreeText){
-		        	self.resetActive();
+		        	self.selectFirst();
 		        }
 		        
 		        self.setListDisplay();
@@ -408,7 +360,7 @@
 	        
 	        if(doDelay) {
 	        	//setup new delay
-				this.filterOnTimeout = setTimeout(function(){search();}, this.options.delayFilter);
+				this.filterOnTimeout = setTimeout( function(){ search(); }, this.options.delayFilter );
 	        } else {
 	        	search();
 	        }
@@ -466,7 +418,6 @@
 
         populateFromMaster: function() {
         	// this.log("populate from master select");
-
     		// console.time("prep");
         	
         	this.disable();
@@ -502,7 +453,6 @@
                 	trieObjects.push(trieObj);
                 } else {
                 	//self.log(optionText + " already added, not rendering item twice.");
-                	//trieObjects.push({}); //as trieObjects is iterating from source options 
                 }
     	    } while(--loopCountdown); 
 
@@ -561,17 +511,13 @@
 
     	    this.wrapper.get(0).appendChild(this.selectbox.get(0)); //wrap
 
-    	    
-
-    	    
     	    // console.timeEnd("2.5");
     		// console.time("3");
     	    
     		this.wrapper.removeClass("invisible");
     		this.options.selectIsWrapped = true;
-    	    
-			
-    	    //match original width
+
+    		//match original width
     	    var newSelectWidth = this.originalSelectboxWidth;
     	    if(this.options.manualWidth) {
     	    	newSelectWidth = this.options.manualWidth; 
@@ -579,7 +525,6 @@
     	    	newSelectWidth = this.options.minWidth;
     	    }
 
-    	    
     	    var buttonWidth = this.button.outerWidth();
     	    var inputBP = this.input.outerWidth() - this.input.width();
     	    var inputWidth = newSelectWidth - buttonWidth - inputBP;
@@ -587,8 +532,7 @@
 
     		// console.timeEnd("3");
     		// console.time("4");
-    	    
-    	    
+
     	    this.input.width(inputWidth);
     	    this.wrapper.width(newSelectWidth);
     	    this.listWrapper.width(newSelectWidth - listWrapBP);
@@ -670,20 +614,26 @@
 	        $(this.selectedLi).addClass("active");
 	    },
 	    
-    	resetActive: function() {
-        	// this.log("resetActive");
+    	selectFirst: function() {
+        	// this.log("selectFirst");
         	var active = this.listItems.filter(":not(.invisible):first");
     		this.setActive( active );
     	},
     	
-			    
+    	selectLast: function() {
+        	// this.log("selectFirst");
+        	var active = this.listItems.filter(":not(.invisible):last");
+    		this.setActive( active );
+    	},
+
+    	
 		//highlights list item before currently active item
 		selectPrev: function() {
         	// this.log("hilightprev");
 			
         	var active = this.getActive();
 		    if (!active.length) {
-		    	active = this.resetActive();
+		    	active = this.selectFirst();
 		    	return;
 		    }
         	
@@ -697,22 +647,17 @@
 		    }
 		    
 		    this.setActive(prev);
-			this.tryToSetMaster();
-			this.scrollTo();
-			
-	        this.input.val(prev.text());
-	        this.inputFocus();
-	        this.selectAll();
-	        return;
-		},		
-		
+		    this.input.val(prev.text());
+		    this.afterSelect();
+    	},
+
 		//highlights item of the dropdown list next to the currently active item
 		selectNext: function() {
         	//this.log("hilightnext");
 			
         	var active = this.getActive();
 		    if (!active.length) {
-		    	active = this.resetActive();
+		    	active = this.selectFirst();
 		    	return;
 		    }
         	var next = active.next();
@@ -725,17 +670,16 @@
 		    }
 		    	
 		    this.setActive(next);
-			this.tryToSetMaster();
-			this.scrollTo();
-
-
 	        this.input.val(next.text());
-	        this.inputFocus();
-	        this.selectAll();
-	        return;
-		    
+	        this.afterSelect();
 		},
 
+		afterSelect: function() {
+			this.inputFocus();
+			this.scrollTo();
+			this.tryToSetMaster();
+		},		
+		
 		//scrolls list wrapper to active
 		scrollTo: function() {
         	// this.log("scrollTo");
