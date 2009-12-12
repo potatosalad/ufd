@@ -36,20 +36,20 @@
 		if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
 
 		this.wrapper = $(
-				'<span class="ufd invisible ' + this.options.skin + '"  >' +
+			'<span class="ufd invisible ' + this.options.skin + '"  >' +
 				'<input type="text" autocomplete="off" value="" name="' + inputName + '"/>'+
 				'<button tabindex="-1" type="button"><div class="icon"/></button>'+
 				//   <select .../> goes here
-				'</span>'
+			'</span>'
 		);
 		this.dropdown = $(
-				'<div class="' + this.options.skin + '">' +
+			'<div class="' + this.options.skin + '">' +
 				'<div class="list-wrapper invisible">' +
-				'<div class="list-scroll">' +
-				//'<ul/>' goes here
+					'<div class="list-scroll">' +
+					//  <ul/> goes here
+					'</div>' +
 				'</div>' +
-				'</div>' +
-				'</div>'
+			'</div>'
 		);
 
 		this.selectbox.after(this.wrapper);
@@ -68,16 +68,16 @@
 
 		// console.timeEnd("middle");
 		// console.time("pfm");
-		this.populateFromMaster();
+		this._populateFromMaster();
 		// console.timeEnd("pfm");
 		// console.time("ie");
-		this.initEvents();
+		this._initEvents();
 		// console.timeEnd("ie");
 		// console.timeEnd("init");
 	},
 
 
-	initEvents: function() { //initialize all event listeners
+	_initEvents: function() { //initialize all event listeners
 		var self = this;
 		var keyCodes = $.ui.keyCode; 
 		var key, isKeyDown, isKeyPress,isKeyUp;
@@ -102,7 +102,7 @@
 			// Only some browsers fire keyUp on tab in, ignore if it happens 
 			if(!isKeyUp == ((key != keyCodes.TAB) && (key != keyCodes.ENTER)) ) return;
 
-			self.log("Key: " + key + " event: " + event.type);
+			//self.log("Key: " + key + " event: " + event.type);
 
 			self.lastKey = key;
 
@@ -113,7 +113,7 @@
 				break;
 
 			case keyCodes.DOWN:
-				self.selectNext();
+				self.selectNext(false);
 				break;
 			case keyCodes.PAGE_DOWN:
 				self.selectNext(true);
@@ -123,7 +123,7 @@
 				break;
 
 			case keyCodes.UP:
-				self.selectPrev();
+				self.selectPrev(false);
 				break;
 			case keyCodes.PAGE_UP:
 				self.selectPrev(true);
@@ -139,7 +139,7 @@
 				self.stopEvent(event);
 				break;
 			case keyCodes.TAB: //tabout only
-			self.realLooseFocus();
+			self.realLooseFocusEvent();
 			break;
 			case keyCodes.ESCAPE:
 				self.hideList();
@@ -235,7 +235,7 @@
 		$(document).bind("click", function(e) {
 			if ((self.button.get(0) == e.target) || (self.input.get(0) == e.target)) return;
 			// self.log("unfocus document click : " + e.target);
-			if (self.internalFocus) self.realLooseFocus();
+			if (self.internalFocus) self.realLooseFocusEvent();
 		});
 
 	},
@@ -245,22 +245,22 @@
 	realFocusEvent: function() {
 		// this.log("real input focus");
 		this.internalFocus = true;
-		this.triggerEventOnMaster("focus");
+		this._triggerEventOnMaster("focus");
 		this.filter(1); //show all even tho one is selected
 		this.inputFocus();
 		this.showList();
 		this.scrollTo();	    	
 	},
 
-	realLooseFocus: function() {
+	realLooseFocusEvent: function() {
 		// this.log("real loose focus (blur)");
 		this.internalFocus = false;
 		this.hideList();  
 		this.tryToSetMaster();
-		this.triggerEventOnMaster("blur");
+		this._triggerEventOnMaster("blur");
 	},
 
-	triggerEventOnMaster: function(eventName) {
+	_triggerEventOnMaster: function(eventName) {
 		if( document.createEvent ) { // good browsers
 			var evObj = document.createEvent('HTMLEvents');
 			evObj.initEvent( eventName, true, true );
@@ -390,16 +390,21 @@
 		var sBox = this.selectbox.get(0);
 		var curIndex = sBox.selectedIndex;
 		var option = sBox.options[optionIndex];
+		var optionValue = option.value || option.text; //iE6 doesn't default .value, but FF seems to;
 
+		//this.log(optionIndex + " : " + optionValue);
+		
 		if(optionIndex == curIndex){
-			this.log("already set correctly." + active.text()  + " : " + option.text);
+			//this.log("already set correctly." + active.text()  + " : " + option.text);
 			return true;
 		}
-		this.log(" update: " + this.selectbox.val() + " : "+ option.value);
+		//this.log(" update: " + this.selectbox.val() + " : "+ optionValue);
 
 		this.isUpdatingMaster = true;
 		sBox.selectedIndex = optionIndex;
-		if(this.selectbox.val() != option.value){ //set failed
+		
+		
+		if(this.selectbox.val() != optionValue){ //set failed
 			this.log("set failed!");
 			sBox.selectedIndex = curIndex;
 			this.selectbox.val(curIndex); 
@@ -412,11 +417,11 @@
 		}
 		this.input.val(option.text);
 		// this.log("master selectbox set to: " + option.text);
-		this.triggerEventOnMaster("change");
+		this._triggerEventOnMaster("change");
 		return true;
 	},
 
-	populateFromMaster: function() {
+	_populateFromMaster: function() {
 		// this.log("populate from master select");
 		// console.time("prep");
 
@@ -608,7 +613,7 @@
 
 	//highlights the item given
 	setActive: function(activeItem) {
-		this.log("setActive");
+		// this.log("setActive");
 		$(this.selectedLi).removeClass("active");
 		this.selectedLi = activeItem;
 		$(this.selectedLi).addClass("active");
@@ -616,100 +621,87 @@
 
 	selectFirst: function() {
 		// this.log("selectFirst");
-		var active = this.listItems.filter(":not(.invisible):first");
-		this.setActive( active );
+		var toSelect = this.listItems.filter(":not(.invisible):first");
+		this.afterSelect( toSelect );
 	},
 
 	selectLast: function() {
 		// this.log("selectFirst");
-		var active = this.listItems.filter(":not(.invisible):last");
-		this.setActive( active );
+		var toSelect = this.listItems.filter(":not(.invisible):last");
+		this.afterSelect( toSelect );
 	},
 
 
 	//highlights list item before currently active item
-	selectPrev: function() {
+	selectPrev: function(isPageLength) {
 		// this.log("hilightprev");
-
-		var active = this.getActive();
-		if (!active.length) {
-			active = this.selectFirst();
-			return;
-		}
-
-		var prev = active.prev();
-
-		while (prev.length && prev.hasClass("invisible")) {
-			prev = prev.prev();
-		}
-		if(!prev.length) {  // top of visible list, no action
-			return;
-		}
-
-		this.setActive(prev);
-		this.input.val(prev.text());
-		this.afterSelect();
-	},
-
+		var count = isPageLength ? this.options.pageLength : 1;
+		var toSelect = this.searchRelativeVisible(false, count);
+		this.afterSelect( toSelect );
+	},	
+		
+	
 	//highlights item of the dropdown list next to the currently active item
-	selectNext: function() {
+	selectNext: function(isPageLength) {
 		//this.log("hilightnext");
+		var count = isPageLength? this.options.pageLength : 1;
+		var toSelect = this.searchRelativeVisible(true, count);
+		this.afterSelect( toSelect );
+	},		
 
-		var active = this.getActive();
-		if (!active.length) {
-			active = this.selectFirst();
-			return;
-		}
-		var next = active.next();
-
-		while (next.length && next.hasClass("invisible")) {
-			next = next.next();
-		}
-		if(!next.length) { // bottom of list, no action
-			return;
-		}
-
-		this.setActive(next);
-		this.input.val(next.text());
-		this.afterSelect();
-	},
-
-	afterSelect: function() {
+	afterSelect: function(active) {
+		this.setActive(active);
+		this.input.val(active.text());
 		this.inputFocus();
 		this.scrollTo();
 		this.tryToSetMaster();
 	},		
 
+	searchRelativeVisible: function(isSearchDown, count) {
+		//this.log("searchRelative: " + isSearchDown + " : " + count);
+		
+		var active = this.getActive();
+		if (!active.length) return this.selectFirst();
+		var searchResult;
+		
+		do { // count times
+			do { //find next/prev item
+				searchResult = isSearchDown ? active.next() : active.prev();
+			} while (searchResult.length && searchResult.hasClass("invisible"));
+			
+			if (searchResult.length) active = searchResult;
+
+		} while(--count);
+		
+		return active;
+	},
+	
 	//scrolls list wrapper to active
 	scrollTo: function() {
 		// this.log("scrollTo");
-
 		if ("scroll" != this.listScroll.css(this.overflowCSS)) return;
-
 		var active = this.getActive();
 		if(!active.length) return;
-		var activePos = active.position().top;
+		
+		var activePos = Math.floor(active.position().top);
 		var activeHeight = active.outerHeight(true);
 		var listHeight = this.listWrapper.height();
 		var scrollTop = this.listScroll.scrollTop();
-		/*
-		    console.log("APT: " + activePos);
-		    console.log("AH: " + activeHeight);
-		    console.log("LH: " + listHeight);
-		    console.log("ST: " + scrollTop);
-		 */
-		var top = 0;
-		if (activePos <= activeHeight) { // nearly off top
-			top = scrollTop + activePos - activeHeight;
-		} else if((activePos + activeHeight) >= listHeight ) { //nearly off bottom
-			top = scrollTop + activePos + activeHeight - activePos  ;
+		
+	    /*  console.log(" AP: " + activePos + " AH: " + activeHeight + 
+	    		" LH: " + listHeight + " ST: " + scrollTop); */
+		    
+		var top;
+		var viewAheadGap = (this.options.viewAhead * activeHeight); 
+		
+		if (activePos < viewAheadGap) { //  off top
+			top = scrollTop + activePos - viewAheadGap;
+		} else if( (activePos + activeHeight) >= (listHeight - viewAheadGap) ) { // off bottom
+			top = scrollTop + activePos - listHeight + activeHeight + viewAheadGap;
 		}
-		else {
-			return; // no need to scroll
-		}
+		else return; // no need to scroll
 		// this.log("top: " + top);
 		this.listScroll.scrollTop(top);
-
 	},		
 
 	//just returns integer value of list wrapper's max-height property
@@ -818,7 +810,7 @@
 	},
 
 	changeOptions: function() {
-		this.populateFromMaster();
+		this._populateFromMaster();
 	},		
 
 	destroy: function() {
@@ -985,37 +977,57 @@
 		classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
 
 		defaults: {
-		skin: "plain", //skin name
-		suffix: "_ufd", // original select name + suffix == pseudo-dropdown text input name  
-		dropDownID: "ufd-container", // ID of node for storing dropdown lists near root node, avoids ie6 zindex issues.
-		logSelector: "#log", // selector string to write log into, 
-		log: false, // log to firebug console (if available) and logSelector (if it exists)?
+			skin: "plain", // skin name
+			suffix: "_ufd", // suffix for pseudo-dropdown text input name attr.  
+			dropDownID: "ufd-container", // ID for a root-child node for storing dropdown lists. avoids ie6 zindex issues by being at top of tree.
+			logSelector: "#log", // selector string to write log into, if present.
 
-		dropDownIcon: ".ui-icon-circle-triangle-e", //ui-icon-triangle-1-s, ui-icon-arrowthick-1-s
-
-		submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
-		triggerSelected: true, //selected option of the selectbox will be the initial value of the combo
-		caseSensitive: false, // case sensitive search ?
-		autoFill: false, //enable autofilling 
-		allowDropUp: true, //if true, the options list will be placed above text input if flowing off bottom
-		allowLR: false, //show horizontal scrollbar
-
-		listMaxHeight: 200, //CSS value takes precedence
-		minWidth: 50, // don't autosize smaller then this.
-		manualWidth: null, //override selectbox width; set explicit width
-		delayFilter: ($.support.style) ? 1 : 150, //msec to wait before starting filter (or get cancelled); long for IE 
-				delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
-				zIndexPopup: 101, // dropdown z-index
-
-				//internal state
-				isUpdatingMaster: false,
-				isDisabled: false,
-				internalFocus: false, 
-				lastKey: null,
-				selectIsWrapped: false,
-				selectedLi: null,
-				hidden: true
-	}
+			log: false, // log to firebug console (if available) and logSelector (if it exists)
+			submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
+			triggerSelected: true, // selected option of the selectbox will be the initial value of the combo
+			caseSensitive: false, // case sensitive search 
+			allowDropUp: true, // if true, the options list will be placed above text input if flowing off bottom
+			allowLR: false, // show horizontal scrollbar
+	
+			listMaxHeight: 200, // CSS value takes precedence
+			minWidth: 50, // don't autosize smaller then this.
+			manualWidth: null, //override selectbox width; set explicit width
+			viewAhead: 1, // items ahead to keep in view when cursor scrolling
+			pageLength: 10, // number of visible items jumped on pgup/pgdown.
+			delayFilter: ($.support.style) ? 1 : 150, // msec to wait before starting filter (or get cancelled); long for IE 
+			delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
+			zIndexPopup: 101, // dropdown z-index
+		
+			//class sets: TODO
+			css: {
+				input: "",
+				disabled: "disabled",
+				button: "",
+				buttonIcon: "icon",
+				buttonHover: "",
+				buttonMouseDown: "",
+				listWrapper: "",
+				listScroll: "",
+				li: "",
+				liHover: ""
+				
+			},
+			uiThemerollerCss: {
+				
+			},
+			uiThemerollerCssNativeColor: {
+				
+			},
+						
+			//internal state
+			selectIsWrapped: false,
+			internalFocus: false, 
+			hidden: true,
+			lastKey: null,
+			selectedLi: null,
+			isUpdatingMaster: false,
+			isDisabled: false
+		}
 	});	
 
 })(jQuery);
