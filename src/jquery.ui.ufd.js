@@ -487,7 +487,7 @@
 			this.input.val(""); 
 		}
 
-		this.undisable();
+		this.enable();
 		// console.timeEnd("tidy");
 
 	},
@@ -688,7 +688,7 @@
 		var listHeight = this.listWrapper.height();
 		var scrollTop = this.listScroll.scrollTop();
 		
-	    /*  console.log(" AP: " + activePos + " AH: " + activeHeight + 
+	    /*  this.log(" AP: " + activePos + " AH: " + activeHeight + 
 	    		" LH: " + listHeight + " ST: " + scrollTop); */
 		    
 		var top;
@@ -752,8 +752,8 @@
 		this.input.attr("disabled", "disabled");
 	},
 
-	undisable: function() {
-		// this.log("undisable");
+	enable: function() {
+		// this.log("enable");
 
 		this.isDisabled = false;
 		this.button.removeClass("disabled");
@@ -814,7 +814,17 @@
 	},		
 
 	destroy: function() {
-		$.widget.prototype.apply(this, arguments); // default destroy
+		this.log("called destroy");
+		if(this.options.selectIsWrapped) { //unwrap
+			this.wrapper.before(this.selectbox);
+		}
+		
+		// TODO more? event handlers ?
+		this.wrapper.remove();
+		this.listWrapper.remove();
+		this.element.unbind(); //expected $.widget to do this!
+		
+		$.widget.prototype.destroy.apply(this, arguments); // default destroy
 	}
 
 	});
