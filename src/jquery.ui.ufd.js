@@ -12,7 +12,7 @@
 
 (function($) {
 
-	$.widget("ui.ufd", {
+$.widget("ui.ufd", {
 
 		// options: provided by framework
 		// element: provided by framework
@@ -24,7 +24,6 @@
 		}
 
 		// console.time("init");
-		// console.time("start");
 
 		this.selectbox = this.element;
 		this.logNode = $(this.options.logSelector);
@@ -55,9 +54,6 @@
 		this.selectbox.after(this.wrapper);
 		this.getDropdownContainer().append(this.dropdown);
 
-		// console.timeEnd("start");
-		// console.time("middle");
-
 		this.input = this.wrapper.find("input");
 		this.button = this.wrapper.find("button");
 		this.listWrapper = this.dropdown.find(".list-wrapper");
@@ -66,13 +62,9 @@
 		if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
 		this.listMaxHeight = this.getListMaxHeight(); 
 
-		// console.timeEnd("middle");
-		// console.time("pfm");
 		this._populateFromMaster();
-		// console.timeEnd("pfm");
-		// console.time("ie");
 		this._initEvents();
-		// console.timeEnd("ie");
+
 		// console.timeEnd("init");
 	},
 
@@ -496,7 +488,7 @@
 		// console.time("1");
 
 		this.wrapper.addClass("invisible");
-		if(this.options.selectIsWrapped) { //unwrap
+		if(this.selectIsWrapped) { //unwrap
 			this.wrapper.before(this.selectbox);
 		}
 
@@ -520,7 +512,7 @@
 		// console.time("3");
 
 		this.wrapper.removeClass("invisible");
-		this.options.selectIsWrapped = true;
+		this.selectIsWrapped = true;
 
 		//match original width
 		var newSelectWidth = this.originalSelectboxWidth;
@@ -791,9 +783,9 @@
 		var ddc = $("#" + this.options.dropDownID);
 		if(!ddc.length) { //create
 			ddc = $("<div></div>").appendTo("body").
-			css("height", 0).
-			css("z-index", this.options.zIndexPopup).
-			attr("id", this.options.dropDownID);
+				css("height", 0).
+				css("z-index", this.options.zIndexPopup).
+				attr("id", this.options.dropDownID);
 		}
 		return ddc;
 	},
@@ -810,235 +802,229 @@
 	},
 
 	changeOptions: function() {
+		this.log("changeOptions");
 		this._populateFromMaster();
 	},		
 
 	destroy: function() {
 		this.log("called destroy");
-		if(this.options.selectIsWrapped) { //unwrap
+		if(this.selectIsWrapped) { //unwrap
 			this.wrapper.before(this.selectbox);
 		}
 		
-		// TODO more? event handlers ?
 		this.wrapper.remove();
 		this.listWrapper.remove();
+		
 		this.element.unbind(); //expected $.widget to do this!
-		
 		$.widget.prototype.destroy.apply(this, arguments); // default destroy
-	}
-
-	});
-
-
-
-	/******************************************************
-	 * Trie implementation for fast prefix searching
-	 * 
-	 *		http://en.wikipedia.org/wiki/Trie
-	 *******************************************************/
-
-	/**
-	 * Constructor
-	 */
-	function Trie(isCaseSensitive) {
-		this.isCaseSensitive = isCaseSensitive || false;
-		this.root = [null, {}]; //masterNode
-	};
-
-	/**
-	 * Add (String, Object) to store 
-	 */
-	Trie.prototype.cleanString = function( inStr ) {
-		if(!this.isCaseSensitive){
-			inStr = inStr.toLowerCase();
-		}
-		//invalid char clean here
-		return inStr;
-	}
-
-	/**
-	 * Add (String, Object) to store 
-	 */
-	Trie.prototype.add = function( key, object ) {
-		key = this.cleanString(key);
-		var curNode = this.root;
-		var kLen = key.length; 
-
-		for(var i = 0; i < kLen; i++) {
-			var char = key.charAt(i);
-			var node = curNode[1];
-			if(char in node) {
-				curNode = node[char];
-			} else {
-				curNode = node[char] = [null, {}];
-			}
-		}
-		if(curNode[0]) return false;
-		curNode[0] = object;
-		return true;
-	};
-
-	/**
-	 * Find object exactly matching key (String)
-	 */
-	Trie.prototype.find = function( key ) {
-		key = this.cleanString(key);
-		var resultNode = this.findNode(key);
-		return (resultNode) ? resultNode[0] : null;
-	};	
-
-	/**
-	 * Find trieNode exactly matching (key) 
-	 */
-	Trie.prototype.findNode = function( key ) {
-		var results = this.findNodePartial(key);
-		var node = results[0];
-		var remainder = results[1];
-		return (remainder.length > 0) ? null : node;
-	};
-
-	/**
-	 * Find prefix trieNode closest to (String) 
-	 * returns [trieNode, remainder]
-	 */
-	Trie.prototype.findNodePartial = function(key) {
-		key = this.cleanString(key);
-		var curNode = this.root;
-		var remainder = key;
-		var kLen = key.length;
-
-		for (var i = 0; i < kLen; i++) {
-			var char = key.charAt(i);
-			if (char in curNode[1]) {
-				curNode = curNode[1][char];
-			} else {
-				return [ curNode, remainder ]; 
-			}
-			remainder = remainder.slice(1, remainder.length);
-		}
-		return [ curNode, remainder ];
-	};
-
-	/**
-	 * Get array of all objects on (trieNode) 
-	 */
-	Trie.prototype.getValues = function(trieNode) { 
-		return this.getMissValues(trieNode, null); // == Don't miss any
-	};
-
-	/**
-	 * Get array of all objects on (startNode), except objects on (missNode) 
-	 */
-	Trie.prototype.getMissValues = function(startNode, missNode) { // string 
-		if (startNode == null) return [];
-		var stack = [ startNode ];
-		var results = [];
-		while (stack.length > 0) {
-			var thisNode = stack.pop();
-			if (thisNode == missNode) continue;
-			if (thisNode[0]) results.unshift(thisNode[0]);
-			for ( var char in thisNode[1]) {
-				if (thisNode[1].hasOwnProperty(char)) {
-					stack.push(thisNode[1][char]);
-				}
-			}
-		}
-		return results;
-	};
-
-	/**
-	 * Get array of all objects exactly matching the key (String) 
-	 */
-	Trie.prototype.findPrefixMatches = function(key) { 
-		var trieNode = findNode(key);
-		return this.getValues(trieNode);
-	}
-
-	/**
-	 * Get array of all objects not matching entire key (String) 
-	 */
-	Trie.prototype.findPrefixMisses = function(key) { // string 
-		var trieNode = findNode(key);
-		return this.getMissValues(this.root, trieNode);
-	};
-
-	/**
-	 * Get object with two properties:
-	 * 	matches: array of all objects not matching entire key (String) 
-	 * 	misses:  array of all objects exactly matching the key (String)
-	 * 
-	 * This reuses "findNode()" to make it faster then 2x method calls
-	 */
-	Trie.prototype.findPrefixMatchesAndMisses = function(key) { // string 
-		var trieNode = this.findNode(key);
-		var matches = this.getValues(trieNode);
-		var misses = this.getMissValues(this.root, trieNode);
-
-		return { matches : matches, misses : misses };
-	};
-
-	/* end Trie */	
-
-
-	$.extend($.ui.ufd, {
-		version: "@VERSION",
-		getter: "", //for methods that are getters, not chainables
-
-		classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
-
-		defaults: {
-			skin: "plain", // skin name
-			suffix: "_ufd", // suffix for pseudo-dropdown text input name attr.  
-			dropDownID: "ufd-container", // ID for a root-child node for storing dropdown lists. avoids ie6 zindex issues by being at top of tree.
-			logSelector: "#log", // selector string to write log into, if present.
-
-			log: false, // log to firebug console (if available) and logSelector (if it exists)
-			submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
-			triggerSelected: true, // selected option of the selectbox will be the initial value of the combo
-			caseSensitive: false, // case sensitive search 
-			allowDropUp: true, // if true, the options list will be placed above text input if flowing off bottom
-			allowLR: false, // show horizontal scrollbar
+	},
 	
-			listMaxHeight: 200, // CSS value takes precedence
-			minWidth: 50, // don't autosize smaller then this.
-			manualWidth: null, //override selectbox width; set explicit width
-			viewAhead: 1, // items ahead to keep in view when cursor scrolling
-			pageLength: 10, // number of visible items jumped on pgup/pgdown.
-			delayFilter: ($.support.style) ? 1 : 150, // msec to wait before starting filter (or get cancelled); long for IE 
-			delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
-			zIndexPopup: 101, // dropdown z-index
-		
-			//class sets: TODO
-			css: {
-				input: "",
-				disabled: "disabled",
-				button: "",
-				buttonIcon: "icon",
-				buttonHover: "",
-				buttonMouseDown: "",
-				listWrapper: "",
-				listScroll: "",
-				li: "",
-				liHover: ""
-				
-			},
-			uiThemerollerCss: {
-				
-			},
-			uiThemerollerCssNativeColor: {
-				
-			},
-						
-			//internal state
-			selectIsWrapped: false,
-			internalFocus: false, 
-			hidden: true,
-			lastKey: null,
-			selectedLi: null,
-			isUpdatingMaster: false,
-			isDisabled: false
+	//internal state
+	selectIsWrapped: false,
+	internalFocus: false, 
+	lastKey: null,
+	selectedLi: null,
+	isUpdatingMaster: false,
+	isDisabled: false
+
+});
+
+
+
+/******************************************************
+ * Trie implementation for fast prefix searching
+ * 
+ *		http://en.wikipedia.org/wiki/Trie
+ *******************************************************/
+
+/**
+ * Constructor
+ */
+function Trie(isCaseSensitive) {
+	this.isCaseSensitive = isCaseSensitive || false;
+	this.root = [null, {}]; //masterNode
+};
+
+/**
+ * Add (String, Object) to store 
+ */
+Trie.prototype.cleanString = function( inStr ) {
+	if(!this.isCaseSensitive){
+		inStr = inStr.toLowerCase();
+	}
+	//invalid char clean here
+	return inStr;
+}
+
+/**
+ * Add (String, Object) to store 
+ */
+Trie.prototype.add = function( key, object ) {
+	key = this.cleanString(key);
+	var curNode = this.root;
+	var kLen = key.length; 
+
+	for(var i = 0; i < kLen; i++) {
+		var char = key.charAt(i);
+		var node = curNode[1];
+		if(char in node) {
+			curNode = node[char];
+		} else {
+			curNode = node[char] = [null, {}];
 		}
-	});	
+	}
+	if(curNode[0]) return false;
+	curNode[0] = object;
+	return true;
+};
+
+/**
+ * Find object exactly matching key (String)
+ */
+Trie.prototype.find = function( key ) {
+	key = this.cleanString(key);
+	var resultNode = this.findNode(key);
+	return (resultNode) ? resultNode[0] : null;
+};	
+
+/**
+ * Find trieNode exactly matching (key) 
+ */
+Trie.prototype.findNode = function( key ) {
+	var results = this.findNodePartial(key);
+	var node = results[0];
+	var remainder = results[1];
+	return (remainder.length > 0) ? null : node;
+};
+
+/**
+ * Find prefix trieNode closest to (String) 
+ * returns [trieNode, remainder]
+ */
+Trie.prototype.findNodePartial = function(key) {
+	key = this.cleanString(key);
+	var curNode = this.root;
+	var remainder = key;
+	var kLen = key.length;
+
+	for (var i = 0; i < kLen; i++) {
+		var char = key.charAt(i);
+		if (char in curNode[1]) {
+			curNode = curNode[1][char];
+		} else {
+			return [ curNode, remainder ]; 
+		}
+		remainder = remainder.slice(1, remainder.length);
+	}
+	return [ curNode, remainder ];
+};
+
+/**
+ * Get array of all objects on (trieNode) 
+ */
+Trie.prototype.getValues = function(trieNode) { 
+	return this.getMissValues(trieNode, null); // == Don't miss any
+};
+
+/**
+ * Get array of all objects on (startNode), except objects on (missNode) 
+ */
+Trie.prototype.getMissValues = function(startNode, missNode) { // string 
+	if (startNode == null) return [];
+	var stack = [ startNode ];
+	var results = [];
+	while (stack.length > 0) {
+		var thisNode = stack.pop();
+		if (thisNode == missNode) continue;
+		if (thisNode[0]) results.unshift(thisNode[0]);
+		for ( var char in thisNode[1]) {
+			if (thisNode[1].hasOwnProperty(char)) {
+				stack.push(thisNode[1][char]);
+			}
+		}
+	}
+	return results;
+};
+
+/**
+ * Get array of all objects exactly matching the key (String) 
+ */
+Trie.prototype.findPrefixMatches = function(key) { 
+	var trieNode = findNode(key);
+	return this.getValues(trieNode);
+}
+
+/**
+ * Get array of all objects not matching entire key (String) 
+ */
+Trie.prototype.findPrefixMisses = function(key) { // string 
+	var trieNode = findNode(key);
+	return this.getMissValues(this.root, trieNode);
+};
+
+/**
+ * Get object with two properties:
+ * 	matches: array of all objects not matching entire key (String) 
+ * 	misses:  array of all objects exactly matching the key (String)
+ * 
+ * This reuses "findNode()" to make it faster then 2x method calls
+ */
+Trie.prototype.findPrefixMatchesAndMisses = function(key) { // string 
+	var trieNode = this.findNode(key);
+	var matches = this.getValues(trieNode);
+	var misses = this.getMissValues(this.root, trieNode);
+
+	return { matches : matches, misses : misses };
+};
+
+/* end Trie */	
+
+
+$.extend($.ui.ufd, {
+	version: "@VERSION",
+	getter: "", //for methods that are getters, not chainables
+	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
+	
+	defaults: {
+		skin: "plain", // skin name
+		suffix: "_ufd", // suffix for pseudo-dropdown text input name attr.  
+		dropDownID: "ufd-container", // ID for a root-child node for storing dropdown lists. avoids ie6 zindex issues by being at top of tree.
+		logSelector: "#log", // selector string to write log into, if present.
+
+		log: false, // log to firebug console (if available) and logSelector (if it exists)
+		submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
+		triggerSelected: true, // selected option of the selectbox will be the initial value of the combo
+		caseSensitive: false, // case sensitive search 
+		allowDropUp: true, // if true, the options list will be placed above text input if flowing off bottom
+		allowLR: false, // show horizontal scrollbar
+
+		listMaxHeight: 200, // CSS value takes precedence
+		minWidth: 50, // don't autosize smaller then this.
+		manualWidth: null, //override selectbox width; set explicit width
+		viewAhead: 1, // items ahead to keep in view when cursor scrolling
+		pageLength: 10, // number of visible items jumped on pgup/pgdown.
+		delayFilter: ($.support.style) ? 1 : 150, // msec to wait before starting filter (or get cancelled); long for IE 
+		delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
+		zIndexPopup: 101, // dropdown z-index
+	
+		// class sets
+		css: {
+			input: "",
+			disabled: "disabled",
+			button: "",
+			buttonIcon: "icon",
+			buttonHover: "",
+			buttonMouseDown: "",
+			listWrapper: "",
+			listScroll: "",
+			li: "",
+			liHover: ""
+			
+		},
+		uiThemerollerCss: {
+		}
+	}
+});	
 
 })(jQuery);
 /* END */
