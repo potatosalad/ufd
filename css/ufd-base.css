@@ -29,7 +29,7 @@
 .ufd button,
 #ufd-container div.list-scroll,
 #ufd-container div.list-wrapper,
-#ufd-container li {
+#ufd-container ul {
     overflow: hidden;
 }
 

@@ -39,26 +39,19 @@
 	 -->
 	
 	<style type="text/css">
-	
-	body {
-		font-family: arial, helvetica, sans-serif;
-	}
-	
-	
-	h1,h2,h3,h4,h5,h6 {
-		color: #00a;
-	}
-
-	hr {
-		color: red;
-	}
-	
-
-	#log {
-		height: 100px;
-		overflow: scroll;
-	}
-
+		body {
+			font-family: arial, helvetica, sans-serif;
+		}
+		h1,h2,h3,h4,h5,h6 {
+			color: #00a;
+		}
+		hr {
+			color: red;
+		}
+		#log {
+			height: 100px;
+			overflow: scroll;
+		}
 	</style>
  </head>
  <body>
@@ -321,10 +314,10 @@
 		    destroy multiple times to confirm that the correct instance is selected in each case. 
 	    </p>
 	   
-	   <button id="disableToggle" type="button">Toggle (disable|enable)</button><br/>
-	   <button id="changeOptions" type="button">add a new option to original and reload (changeOptions)</button><br/>
-	   <button id="destroy" type="button">revert to native (destroy)</button><br/>
 	   <button id="create" type="button">initialize as UFD</button><br/>
+	   <button id="destroy" type="button">revert to native (destroy)</button><br/>
+	   <button id="disableToggle" type="button">Toggle (disable|enable)</button><br/>
+	   <button id="changeOptions" type="button">add new option & reload (changeOptions)</button><br/>
 	    
       <label for="functions-combo">Choose a country:</label><br />
       <select id="functions-combo" name="functions-combo">

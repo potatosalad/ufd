@@ -324,9 +324,9 @@ $.widget("ui.ufd", {
 			//this.log("screen update");
 			//self.log(self.getCurrentTextValue() + ": matchesLength: " + 
 			//		self.trie.matches.length + " missesLength: " + self.trie.misses.length );
-
 			var active = self.getActive();
 
+			// console.time("visUpdate");
 			self.overwriteClass(self.trie.matches,"" );
 			if(self.trie.matches.length <= showAllLength) {
 				// self.log("showing all");
@@ -335,6 +335,7 @@ $.widget("ui.ufd", {
 				// self.log("hiding");
 				self.overwriteClass(self.trie.misses,"invisible" );
 			}
+			// console.timeEnd("visUpdate");
 
 			var oldActiveVisible = (active.length && !active.hasClass("invisible"));
 			if(oldActiveVisible) {
@@ -524,6 +525,7 @@ $.widget("ui.ufd", {
 		this.input.width(inputWidth);
 		this.wrapper.width(newSelectWidth);
 		this.listWrapper.width(newSelectWidth - listWrapBP);
+		this.listScroll.width(newSelectWidth - listWrapBP);
 
 		//this.log(newSelectWidth + " : " + inputWidth + " : " + 
 		//		buttonWidth + " : " + (newSelectWidth - listWrapBP));
@@ -652,7 +654,6 @@ $.widget("ui.ufd", {
 			searchResult = active;
 			do { //find next/prev item
 				searchResult = isSearchDown ? searchResult.next() : searchResult.prev();
-				this.log(searchResult);
 			} while (searchResult.length && searchResult.hasClass("invisible"));
 			
 			if (searchResult.length) active = searchResult;
@@ -716,11 +717,13 @@ $.widget("ui.ufd", {
 	},
 
 	overwriteClass: function(array,  classString ) { //fast attribute OVERWRITE
-		var tritem;
-		for(arrayPtr in array) {
-			tritem = array[arrayPtr]; 
-			for(nodePtr in tritem) { // duplicate match array
-				tritem[nodePtr].setAttribute($.ui.ufd.classAttr, classString);
+		var tritem, index, indexB;
+		index = array.length
+		while(index--) {
+			tritem = array[index];
+			indexB = tritem.length;
+			while(indexB--) { // duplicate match array
+				tritem[indexB].setAttribute($.ui.ufd.classAttr, classString);
 			}
 		}
 	},
