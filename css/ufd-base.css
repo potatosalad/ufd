@@ -29,7 +29,8 @@
 .ufd button,
 #ufd-container div.list-scroll,
 #ufd-container div.list-wrapper,
-#ufd-container ul {
+#ufd-container ul,
+#ufd-container li {
     overflow: hidden;
 }
 
@@ -65,4 +66,5 @@
     cursor: pointer;
     height: 20px;
     display: block;
+    white-space: nowrap;
 }
