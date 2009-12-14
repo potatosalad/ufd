@@ -327,13 +327,13 @@ $.widget("ui.ufd", {
 
 			var active = self.getActive();
 
-			self.setAttr(self.trie.matches, $.ui.ufd.classAttr,"" );
+			self.overwriteClass(self.trie.matches,"" );
 			if(self.trie.matches.length <= showAllLength) {
 				// self.log("showing all");
-				self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"" );
+				self.overwriteClass(self.trie.misses, "" );
 			} else {
 				// self.log("hiding");
-				self.setAttr(self.trie.misses, $.ui.ufd.classAttr,"invisible" );
+				self.overwriteClass(self.trie.misses,"invisible" );
 			}
 
 			var oldActiveVisible = (active.length && !active.hasClass("invisible"));
@@ -341,7 +341,8 @@ $.widget("ui.ufd", {
 				self.setActive(active.get(0));
 
 			} else if(self.trie.matches.length) {
-				self.setActive(self.trie.matches[0].li);
+				var firstmatch = self.trie.matches[0];
+				self.setActive(firstmatch[0]); //first instance of first match
 
 			} else if(!self.options.submitFreeText){
 				self.selectFirst();
@@ -433,24 +434,13 @@ $.widget("ui.ufd", {
 
 		listBuilder.push('<ul>');
 		var options = this.selectbox.get(0).options;
-		var thisOpt,optionText,optionIndex,trieObj,addOK, loopCountdown,index;
+		var thisOpt,loopCountdown,index;
 
 		loopCountdown = options.length;
 		index = 0;
 		do {
 			thisOpt = options[index++]; 
-			optionText = $.trim(thisOpt.text);
-			optionIndex = thisOpt.index;
-
-			trieObj = {index: optionIndex, li: null};
-			addOK = self.trie.add(optionText, trieObj);
-
-			if(addOK){
-				listBuilder.push('<li name="' + optionIndex + '">' + optionText + '</li>');
-				trieObjects.push(trieObj);
-			} else {
-				//self.log(optionText + " already added, not rendering item twice.");
-			}
+			listBuilder.push('<li name="' + thisOpt.index + '">' + $.trim(thisOpt.text) + '</li>');
 		} while(--loopCountdown); 
 
 		listBuilder.push('</ul>');
@@ -462,12 +452,13 @@ $.widget("ui.ufd", {
 
 		this.listItems = $("li", this.list);
 		// console.time("kids");
-		var theLis = this.list.get(0).getElementsByTagName('LI'); // much faster array then .childElements !
+		var theLiSet = this.list.get(0).getElementsByTagName('LI'); // much faster array then .childElements !
 
-		loopCountdown = trieObjects.length;
+		loopCountdown = theLiSet.length;
 		index = 0;
 		do {
-			trieObjects[index].li = theLis[index++];
+			thisOpt = options[index];
+			self.trie.add( $.trim(thisOpt.text), theLiSet[index++]);
 		} while(--loopCountdown); 
 
 		// console.timeEnd("kids");
@@ -650,19 +641,21 @@ $.widget("ui.ufd", {
 	},		
 
 	searchRelativeVisible: function(isSearchDown, count) {
-		//this.log("searchRelative: " + isSearchDown + " : " + count);
+		this.log("searchRelative: " + isSearchDown + " : " + count);
 		
 		var active = this.getActive();
 		if (!active.length) return this.selectFirst();
+		
 		var searchResult;
 		
 		do { // count times
+			searchResult = active;
 			do { //find next/prev item
-				searchResult = isSearchDown ? active.next() : active.prev();
+				searchResult = isSearchDown ? searchResult.next() : searchResult.prev();
+				this.log(searchResult);
 			} while (searchResult.length && searchResult.hasClass("invisible"));
 			
 			if (searchResult.length) active = searchResult;
-
 		} while(--count);
 		
 		return active;
@@ -722,9 +715,13 @@ $.widget("ui.ufd", {
 		if( e.preventDefault ) { e.preventDefault(); }
 	},
 
-	setAttr: function(array, attr, val ) { //fast attribute OVERWRITE
-		for(nodePtr in array) {
-			array[nodePtr].li.setAttribute(attr, val);
+	overwriteClass: function(array,  classString ) { //fast attribute OVERWRITE
+		var tritem;
+		for(arrayPtr in array) {
+			tritem = array[arrayPtr]; 
+			for(nodePtr in tritem) { // duplicate match array
+				tritem[nodePtr].setAttribute($.ui.ufd.classAttr, classString);
+			}
 		}
 	},
 
@@ -873,8 +870,9 @@ Trie.prototype.add = function( key, object ) {
 			curNode = node[char] = [null, {}];
 		}
 	}
-	if(curNode[0]) return false;
-	curNode[0] = object;
+	
+	if(curNode[0]) curNode[0].push(object);//return false;
+	else curNode[0] = [object];
 	return true;
 };
 
