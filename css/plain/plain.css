@@ -50,8 +50,9 @@
     padding-left: 5px;
 }
 
-#ufd-container .plain li em{
+#ufd-container .plain li em {
 	font-weight: bold;
+	font-style: normal;
 }
 
 

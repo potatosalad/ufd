@@ -351,16 +351,16 @@
 	</div>
   
     <div>
-    	<h2>Skins and functions</h2>
+    	<h2>Skins and emphasis</h2>
 		<script type="text/javascript" >
 		$(function () {
-			var s1 = $("#skin1-combo").ufd({skin:"sexy", log: true});
-			var s2 = $("#skin2-combo").ufd({skin:"plain"});
-			var s3 = $("#skin3-combo").ufd({skin:"custom"});
+			var s1 = $("#skin1-combo").ufd({skin:"sexy", log: true, addEmphasis: true});
+			var s2 = $("#skin2-combo").ufd({skin:"plain", addEmphasis: true});
+			var s3 = $("#skin3-combo").ufd({skin:"custom", addEmphasis: true});
 		});
 	    </script>
 
-	    <p> the 3 skins bundled with UFD.  The last one is a CSS only template to help you markup your own needs. </p>
+	    <p> the 3 skins bundled with UFD.  Each has the (experimental) addEmphasis option.  The last one is a CSS only template to help you markup your own needs. </p>
 	    
       <label for="skin1-combo">sexy skin: choose a country:</label><br />
       <select id="skin1-combo" name="skin1-combo">

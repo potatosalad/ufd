@@ -54,6 +54,12 @@
     background-color: white;
 }
 
+#ufd-container .sexy li em { 
+	font-weight: bold;
+	font-style: normal;
+}
+
+
 #ufd-container .sexy li.active {
 	background-color: highlight;
 }

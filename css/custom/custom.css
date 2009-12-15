@@ -60,6 +60,13 @@
     background-color: white;
 }
 
+#ufd-container .custom li em {
+	font-weight: bold;
+	font-style: normal;
+	color: fuchsia;
+}
+
+
 #ufd-container .custom li.active {
     background-color: highlight;
 }

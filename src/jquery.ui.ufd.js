@@ -380,31 +380,25 @@ $.widget(widgetName, {
 		console.time("em");
 		
 		var searchTextLength = searchText.length || 0;
-		var tritem, index, indexB, $li, text;
+		var tritem, index, indexB, li, text;
+		var options = this.selectbox.get(0).options;
 		
-		if(isAddEmphasis && searchTextLength) { 
-			index = array.length
-			while(index--) {
-				tritem = array[index];
-				indexB = tritem.length;
-				while(indexB--) { // duplicate match array
-					$li = $(tritem[indexB]);
-					text = $li.text();
-					$li.html('<em>' + text.slice(0, searchTextLength) + '</em>' + text.slice(searchTextLength) );
-				}
-			}
-		} else { //remove emphasis
-			index = array.length
-			while(index--) {
-				tritem = array[index];
-				indexB = tritem.length;
-				while(indexB--) { // duplicate match array
-					$li = $(tritem[indexB]);
-					text = $li.text();
-					$li.html(text);
+		isAddEmphasis = (isAddEmphasis && searchTextLength); // don't add emphasis to 0-length  
+		index = array.length;
+		while(index--) {
+			tritem = array[index];
+			indexB = tritem.length;
+			while(indexB--) { // duplicate match array
+				li = tritem[indexB];
+				text = $.trim(options[li.getAttribute("name")].text);
+				if (isAddEmphasis) {
+					li.innerHTML = '<em>' + text.slice(0, searchTextLength) + '</em>' + text.slice(searchTextLength) ;
+				} else {
+					li.innerHTML = text;
 				}
 			}
 		}
+		
 		console.timeEnd("em");
 	},
 
@@ -479,23 +473,22 @@ $.widget(widgetName, {
 		var trieObjects = [];
 
 		// console.timeEnd("prep");
-		 console.time("build");
+		// console.time("build");
 
 		listBuilder.push('<ul>');
 		var options = this.selectbox.get(0).options;
-		var thisOpt,loopCountdown,index,text;
+		var thisOpt,loopCountdown,index;
 
 		loopCountdown = options.length;
 		index = 0;
 		do {
 			thisOpt = options[index++];
-			text = $.trim(thisOpt.text);
 			listBuilder.push('<li name="');
 			listBuilder.push(thisOpt.index);
 			//listBuilder.push('" title="');
-			//listBuilder.push(text);
+			//listBuilder.push($.trim(thisOpt.text));
 			listBuilder.push('">');
-			listBuilder.push(text);
+			listBuilder.push($.trim(thisOpt.text));
 			listBuilder.push('</li>');
 		} while(--loopCountdown); 
 
@@ -504,7 +497,7 @@ $.widget(widgetName, {
 		this.listScroll.html(listBuilder.join(''));
 		this.list = this.listScroll.find("ul:first");
 
-		 console.timeEnd("build");
+		// console.timeEnd("build");
 
 		this.listItems = $("li", this.list);
 		// console.time("kids");
