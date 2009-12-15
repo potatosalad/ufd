@@ -48,8 +48,12 @@
 
 #ufd-container .plain li {
     padding-left: 5px;
-    background-color: ;
 }
+
+#ufd-container .plain li em{
+	font-weight: bold;
+}
+
 
 #ufd-container .plain li.active {
 	background-color: highlight;

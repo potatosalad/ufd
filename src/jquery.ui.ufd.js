@@ -314,10 +314,12 @@ $.widget(widgetName, {
 		if(this.filterOnTimeout) clearTimeout(this.filterOnTimeout);
 		this.updateOnTimeout = null;
 		this.filterOnTimeout = null;
+		
+		var searchText = self.getCurrentTextValue();
 
 		var search = function() {
 			//this.log("filter search");
-			var mm = self.trie.findPrefixMatchesAndMisses(self.getCurrentTextValue()); // search!
+			var mm = self.trie.findPrefixMatchesAndMisses(searchText); // search!
 			self.trie.matches = mm.matches;
 			self.trie.misses = mm.misses;
 
@@ -332,11 +334,19 @@ $.widget(widgetName, {
 			//		self.trie.matches.length + " missesLength: " + self.trie.misses.length );
 			var active = self.getActive();
 
-			// console.time("visUpdate");
+			//console.time("visUpdate");
+			
+			if (self.options.addEmphasis) {
+				self.emphasis(self.trie.matches, (self.trie.matches.length > showAllLength), searchText);
+			}
+			
 			self.overwriteClass(self.trie.matches,"" );
 			if(self.trie.matches.length <= showAllLength) {
 				// self.log("showing all");
 				self.overwriteClass(self.trie.misses, "" );
+				if (self.options.addEmphasis) {
+					self.emphasis(self.trie.misses, false, searchText);
+				}
 			} else {
 				// self.log("hiding");
 				self.overwriteClass(self.trie.misses,"invisible" );
@@ -364,6 +374,38 @@ $.widget(widgetName, {
 		} else {
 			search();
 		}
+	},
+	
+	emphasis: function(array, isAddEmphasis, searchText ) {
+		console.time("em");
+		
+		var searchTextLength = searchText.length || 0;
+		var tritem, index, indexB, $li, text;
+		
+		if(isAddEmphasis && searchTextLength) { 
+			index = array.length
+			while(index--) {
+				tritem = array[index];
+				indexB = tritem.length;
+				while(indexB--) { // duplicate match array
+					$li = $(tritem[indexB]);
+					text = $li.text();
+					$li.html('<em>' + text.slice(0, searchTextLength) + '</em>' + text.slice(searchTextLength) );
+				}
+			}
+		} else { //remove emphasis
+			index = array.length
+			while(index--) {
+				tritem = array[index];
+				indexB = tritem.length;
+				while(indexB--) { // duplicate match array
+					$li = $(tritem[indexB]);
+					text = $li.text();
+					$li.html(text);
+				}
+			}
+		}
+		console.timeEnd("em");
 	},
 
 	// attempt update; clear input or set default if fail:
@@ -437,17 +479,24 @@ $.widget(widgetName, {
 		var trieObjects = [];
 
 		// console.timeEnd("prep");
-		// console.time("build");
+		 console.time("build");
 
 		listBuilder.push('<ul>');
 		var options = this.selectbox.get(0).options;
-		var thisOpt,loopCountdown,index;
+		var thisOpt,loopCountdown,index,text;
 
 		loopCountdown = options.length;
 		index = 0;
 		do {
-			thisOpt = options[index++]; 
-			listBuilder.push('<li name="' + thisOpt.index + '">' + $.trim(thisOpt.text) + '</li>');
+			thisOpt = options[index++];
+			text = $.trim(thisOpt.text);
+			listBuilder.push('<li name="');
+			listBuilder.push(thisOpt.index);
+			//listBuilder.push('" title="');
+			//listBuilder.push(text);
+			listBuilder.push('">');
+			listBuilder.push(text);
+			listBuilder.push('</li>');
 		} while(--loopCountdown); 
 
 		listBuilder.push('</ul>');
@@ -455,7 +504,7 @@ $.widget(widgetName, {
 		this.listScroll.html(listBuilder.join(''));
 		this.list = this.listScroll.find("ul:first");
 
-		// console.timeEnd("build");
+		 console.timeEnd("build");
 
 		this.listItems = $("li", this.list);
 		// console.time("kids");
@@ -495,7 +544,7 @@ $.widget(widgetName, {
 
 		//get dimensions un-wrapped, in case of % width etc.
 		this.originalSelectboxWidth = this.selectbox.outerWidth(); 
-		var props = ["marginLeft","marginTop","marginRight","marginBottom"];
+		var props = this.options.mimicCSS;
 		for(propPtr in props){
 			var prop = props[propPtr];
 			this.wrapper.css(prop, this.selectbox.css(prop)); // copy property from selectbox to wrapper
@@ -1004,6 +1053,7 @@ $.extend($.ui.ufd, {
 		suffix: "_ufd", // suffix for pseudo-dropdown text input name attr.  
 		dropDownID: "ufd-container", // ID for a root-child node for storing dropdown lists. avoids ie6 zindex issues by being at top of tree.
 		logSelector: "#log", // selector string to write log into, if present.
+		mimicCSS: ["marginLeft","marginTop","marginRight","marginBottom"], //copy these properties to widget. Width auto-copied unless min/manual.
 
 		log: false, // log to firebug console (if available) and logSelector (if it exists)
 		submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
@@ -1011,6 +1061,7 @@ $.extend($.ui.ufd, {
 		caseSensitive: false, // case sensitive search 
 		allowDropUp: true, // if true, the options list will be placed above text input if flowing off bottom
 		allowLR: false, // show horizontal scrollbar
+		addEmphasis: false, // add <EM> tags around matches.
 
 		listMaxHeight: 200, // CSS value takes precedence
 		minWidth: 50, // don't autosize smaller then this.
@@ -1039,6 +1090,9 @@ $.extend($.ui.ufd, {
 		}
 	}
 });	
+
+
+
 
 })(jQuery);
 /* END */
