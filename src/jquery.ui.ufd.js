@@ -12,7 +12,9 @@
 
 (function($) {
 
-$.widget("ui.ufd", {
+var widgetName = "ui.ufd";	
+	
+$.widget(widgetName, {
 
 		// options: provided by framework
 		// element: provided by framework
@@ -109,9 +111,11 @@ $.widget("ui.ufd", {
 				break;
 			case keyCodes.PAGE_DOWN:
 				self.selectNext(true);
+				self.stopEvent(event);
 				break;
 			case keyCodes.END:
 				self.selectLast();
+				self.stopEvent(event);
 				break;
 
 			case keyCodes.UP:
@@ -119,9 +123,11 @@ $.widget("ui.ufd", {
 				break;
 			case keyCodes.PAGE_UP:
 				self.selectPrev(true);
+				self.stopEvent(event);
 				break;
 			case keyCodes.HOME:
 				self.selectFirst();
+				self.stopEvent(event);
 				break;
 
 			case keyCodes.ENTER:
@@ -131,8 +137,8 @@ $.widget("ui.ufd", {
 				self.stopEvent(event);
 				break;
 			case keyCodes.TAB: //tabout only
-			self.realLooseFocusEvent();
-			break;
+				self.realLooseFocusEvent();
+				break;
 			case keyCodes.ESCAPE:
 				self.hideList();
 				self.revertSelected();
@@ -140,8 +146,8 @@ $.widget("ui.ufd", {
 
 			default:
 				self.showList();
-			self.filter(0, true); //do delay, as more keypresses may cancel
-			break;
+				self.filter(0, true); //do delay, as more keypresses may cancel
+				break;
 			}
 		});
 
@@ -578,7 +584,7 @@ $.widget("ui.ufd", {
 		var top;
 		if (doDropUp) {
 			this.listWrapper.addClass("list-wrapper-up");
-			top = (offset.top - this.listScroll.height()) ;
+			top = (offset.top - this.listScroll.height() - 1) ;
 		} else {
 			this.listWrapper.removeClass("list-wrapper-up");
 			top = (offset.top + this.input.outerHeight() - 1);
@@ -815,8 +821,15 @@ $.widget("ui.ufd", {
 		this.wrapper.remove();
 		this.listWrapper.remove();
 		
-		this.element.unbind(); //expected $.widget to do this!
 		$.widget.prototype.destroy.apply(this, arguments); // default destroy
+		// see ticket; http://dev.jqueryui.com/ticket/5005
+		// code fixes <= 1.7.2 ; expect bug will be fixed in 1.7.3
+		if($.ui.version <= "1.7.2") { 
+			this.element.unbind("setData." + widgetName); 
+			this.element.unbind("getData." + widgetName);
+			// will remove all events sorry, might have other side effects but needed
+			this.element.unbind("remove"); 
+		}
 	},
 	
 	//internal state
