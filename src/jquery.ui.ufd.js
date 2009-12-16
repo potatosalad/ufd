@@ -58,7 +58,7 @@ $.widget(widgetName, {
 
 		this.input = this.wrapper.find("input");
 		this.button = this.wrapper.find("button");
-		this.listWrapper = this.dropdown.find(".list-wrapper");
+		this.listWrapper = this.dropdown.find(".list-wrapper").css("z-index", this.options.zIndexPopup);
 		this.listScroll = this.dropdown.find(".list-scroll");
 
 		if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
@@ -832,7 +832,6 @@ $.widget(widgetName, {
 		if(!ddc.length) { //create
 			ddc = $("<div></div>").appendTo("body").
 				css("height", 0).
-				css("z-index", this.options.zIndexPopup).
 				attr("id", this.options.dropDownID);
 		}
 		return ddc;
@@ -1063,7 +1062,7 @@ $.extend($.ui.ufd, {
 		pageLength: 10, // number of visible items jumped on pgup/pgdown.
 		delayFilter: ($.support.style) ? 1 : 150, // msec to wait before starting filter (or get cancelled); long for IE 
 		delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
-		zIndexPopup: 101, // dropdown z-index
+		zIndexPopup: 2000, // dropdown z-index
 	
 		// class sets
 		css: {
