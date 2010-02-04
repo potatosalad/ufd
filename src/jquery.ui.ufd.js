@@ -147,7 +147,7 @@ $.widget(widgetName, {
 
 			default:
 				self.showList();
-				self.filter(0, true); //do delay, as more keypresses may cancel
+				self.filter(false, true); //do delay, as more keypresses may cancel
 				break;
 			}
 		});
@@ -178,7 +178,7 @@ $.widget(widgetName, {
 				self.inputFocus();
 
 			} else {	
-				self.filter(1); //show all even tho one is selected
+				self.filter(true); //show all 
 				self.inputFocus();
 				self.showList();
 				self.scrollTo();	    	
@@ -211,7 +211,7 @@ $.widget(widgetName, {
 					self.setActive(e.target);
 					if(self.tryToSetMaster() ) {
 						self.hideList();
-						self.filter(1);
+						self.filter(true); //show all
 					}
 					self.inputFocus();
 				}
@@ -245,7 +245,7 @@ $.widget(widgetName, {
 		// this.log("real input focus");
 		this.internalFocus = true;
 		this._triggerEventOnMaster("focus");
-		this.filter(1); //show all even tho one is selected
+		this.filter(true); //show all
 		this.inputFocus();
 		this.showList();
 		this.scrollTo();	    	
@@ -306,7 +306,7 @@ $.widget(widgetName, {
 	 * 
 	 * if doDelay, will delay execution to allow re-entry to cancel.
 	 */
-	filter: function(showAllLength, doDelay) {
+	filter: function(showAll, doDelay) {
 		// this.log("filter: " + showAllLength);
 		var self = this;
 
@@ -338,18 +338,16 @@ $.widget(widgetName, {
 			//console.time("visUpdate");
 			
 			if (self.options.addEmphasis) {
-				self.emphasis(self.trie.matches, (self.trie.matches.length > showAllLength), searchText);
+				self.emphasis(self.trie.matches, true, searchText);
 			}
 			
 			self.overwriteClass(self.trie.matches,"" );
-			if(self.trie.matches.length <= showAllLength) {
-				// self.log("showing all");
+			if(showAll || !self.trie.matches.length) {
 				self.overwriteClass(self.trie.misses, "" );
 				if (self.options.addEmphasis) {
 					self.emphasis(self.trie.misses, false, searchText);
 				}
 			} else {
-				// self.log("hiding");
 				self.overwriteClass(self.trie.misses,"invisible" );
 			}
 			// console.timeEnd("visUpdate");
@@ -378,7 +376,7 @@ $.widget(widgetName, {
 	},
 	
 	emphasis: function(array, isAddEmphasis, searchText ) {
-		console.time("em");
+		//console.time("em");
 		
 		var searchTextLength = searchText.length || 0;
 		var tritem, index, indexB, li, text;
@@ -400,7 +398,7 @@ $.widget(widgetName, {
 			}
 		}
 		
-		console.timeEnd("em");
+		//console.timeEnd("em");
 	},
 
 	// attempt update; clear input or set default if fail:
@@ -591,7 +589,7 @@ $.widget(widgetName, {
 
 	revertSelected: function() {
 		this.setInputFromMaster();
-		this.filter(1);
+		this.filter(true); //show all
 	},
 
 	//corrects list wrapper's height depending on list items height
@@ -617,7 +615,7 @@ $.widget(widgetName, {
 		var doDropUp = false;
 		var offset = this.input.offset();
 		if(this.options.allowDropUp) {
-			var listSpace = maxHeight; // drop up if maxHeight doesnt fit, to prevent flicking up/down on type
+			var listSpace = height; 
 			var inputHeight = this.wrapper.height();
 			var bottomPos = offset.top + inputHeight + listSpace;
 			var maxShown = $(window).height() + $(document).scrollTop();
@@ -841,7 +839,7 @@ $.widget(widgetName, {
 	log: function(msg) {
 		if(!this.options.log) return;
 
-		if(window.console && console.log) {  // firebug logger
+		if(window.console && window.console.log) {  // firebug logger
 			console.log(msg);
 		}
 		if(this.logNode && this.logNode.length) {
