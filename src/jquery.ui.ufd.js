@@ -35,6 +35,7 @@ $.widget(widgetName, {
 		var inputName = this.options.submitFreeText ? selectName : suffixName;
 
 		if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
+		if(this.options.calculateZIndex) this.options.zIndexPopup = this._calculateZIndex();
 
 		this.wrapper = $(
 			'<span class="ufd invisible ' + this.options.skin + '"  >' +
@@ -848,6 +849,16 @@ $.widget(widgetName, {
 		}
 	},
 
+	_calculateZIndex: function(msg) {
+		var curZ, zIndex = this.options.zIndexPopup; // start here as a min
+		
+		this.selectbox.parents().each(function(){
+			curZ = parseInt($(this).css("zIndex"), 10);
+			if(curZ > zIndex) zIndex = curZ;
+		});
+		return zIndex;
+	},
+
 	changeOptions: function() {
 		this.log("changeOptions");
 		this._populateFromMaster();
@@ -1054,6 +1065,7 @@ $.extend($.ui.ufd, {
 		allowDropUp: true, // if true, the options list will be placed above text input if flowing off bottom
 		allowLR: false, // show horizontal scrollbar
 		addEmphasis: false, // add <EM> tags around matches.
+		calculateZIndex: false, // {max ancestor} + 1
 
 		listMaxHeight: 200, // CSS value takes precedence
 		minWidth: 50, // don't autosize smaller then this.
@@ -1062,7 +1074,7 @@ $.extend($.ui.ufd, {
 		pageLength: 10, // number of visible items jumped on pgup/pgdown.
 		delayFilter: ($.support.style) ? 1 : 150, // msec to wait before starting filter (or get cancelled); long for IE 
 		delayYield: 1, // msec to yield for 2nd 1/2 of filter re-entry cancel; 1 seems adequate to achieve yield
-		zIndexPopup: 2000, // dropdown z-index
+		zIndexPopup: 101, // dropdown z-index
 	
 		// class sets
 		css: {
