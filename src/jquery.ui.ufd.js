@@ -856,7 +856,7 @@ $.widget(widgetName, {
 			curZ = parseInt($(this).css("zIndex"), 10);
 			if(curZ > zIndex) zIndex = curZ;
 		});
-		return zIndex;
+		return zIndex + 1;
 	},
 
 	changeOptions: function() {
