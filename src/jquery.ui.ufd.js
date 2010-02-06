@@ -33,26 +33,26 @@ $.widget(widgetName, {
 		var selectName = this.selectbox.attr("name");
 		var suffixName = selectName + this.options.suffix;
 		var inputName = this.options.submitFreeText ? selectName : suffixName;
-
+		
 		if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
 		if(this.options.calculateZIndex) this.options.zIndexPopup = this._calculateZIndex();
 
-		this.wrapper = $(
-			'<span class="ufd invisible ' + this.options.skin + '"  >' +
-				'<input type="text" autocomplete="off" value="" name="' + inputName + '"/>'+
-				'<button tabindex="-1" type="button"><div class="icon"/></button>'+
+		this.wrapper = $([
+			'<span class="ufd invisible ', this.options.skin, '"  >',
+				'<input type="text" autocomplete="off" value="" name="', inputName, '"/>',
+				'<button tabindex="-1" type="button"><div class="icon"/></button>',
 				//   <select .../> goes here
 			'</span>'
-		);
-		this.dropdown = $(
-			'<div class="' + this.options.skin + '">' +
-				'<div class="list-wrapper invisible">' +
-					'<div class="list-scroll">' +
+		].join(''));
+		this.dropdown = $([
+			'<div class="', this.options.skin, '">',
+				'<div class="list-wrapper invisible">',
+					'<div class="list-scroll">',
 					//  <ul/> goes here
-					'</div>' +
-				'</div>' +
+					'</div>',
+				'</div>',
 			'</div>'
-		);
+		].join(''));
 
 		this.selectbox.after(this.wrapper);
 		this.getDropdownContainer().append(this.dropdown);
@@ -220,7 +220,7 @@ $.widget(widgetName, {
 			return true;
 		});
 
-		this.selectbox.bind("change", function(e) {
+		this.selectbox.bind("change." + widgetName, function(e) {
 			if(self.isUpdatingMaster){
 				// self.log("master changed but we did the update");
 				self.isUpdatingMaster = false;
@@ -230,12 +230,13 @@ $.widget(widgetName, {
 			self.revertSelected();
 		});
 
-		// click anywhere else
-		$(document).bind("click", function(e) {
+		// click anywhere else; keep reference for selective unbind
+		this._myDocClickHandler = function(e) {
 			if ((self.button.get(0) == e.target) || (self.input.get(0) == e.target)) return;
 			// self.log("unfocus document click : " + e.target);
 			if (self.internalFocus) self.realLooseFocusEvent();
-		});
+		};
+		$(document).bind("click." + widgetName, this._myDocClickHandler);
 
 	},
 
@@ -333,9 +334,9 @@ $.widget(widgetName, {
 			//this.log("screen update");
 			//self.log(self.getCurrentTextValue() + ": matchesLength: " + 
 			//		self.trie.matches.length + " missesLength: " + self.trie.misses.length );
-			var active = self.getActive();
 
 			//console.time("visUpdate");
+			var active = self.getActive(); //get item before class-overwrite
 			
 			if (self.options.addEmphasis) {
 				self.emphasis(self.trie.matches, true, searchText);
@@ -351,17 +352,18 @@ $.widget(widgetName, {
 				self.overwriteClass(self.trie.misses,"invisible" );
 			}
 			// console.timeEnd("visUpdate");
+			var oldActiveHidden =  active.hasClass("invisible") ; 
 
-			var oldActiveVisible = (active.length && !active.hasClass("invisible"));
-			if(oldActiveVisible) {
-				self.setActive(active.get(0));
+			// need to set overwritten active class  
+			if(!oldActiveHidden && active.length && self.trie.matches.length){
+				self.setActive(active.get(0));  
 
 			} else if(self.trie.matches.length) {
 				var firstmatch = self.trie.matches[0];
 				self.setActive(firstmatch[0]); //first instance of first match
 
-			} else if(!self.options.submitFreeText){
-				self.selectFirst();
+			} else { 
+				self.setActive(null);
 			}
 
 			self.setListDisplay();
@@ -671,7 +673,6 @@ $.widget(widgetName, {
 		var toSelect = this.searchRelativeVisible(false, count);
 		this.afterSelect( toSelect );
 	},	
-		
 	
 	//highlights item of the dropdown list next to the currently active item
 	selectNext: function(isPageLength) {
@@ -682,18 +683,22 @@ $.widget(widgetName, {
 	},		
 
 	afterSelect: function(active) {
+		if(active == null) return; 
 		this.setActive(active);
 		this.input.val(active.text());
-		this.inputFocus();
 		this.scrollTo();
 		this.tryToSetMaster();
+		this.inputFocus();
 	},		
 
 	searchRelativeVisible: function(isSearchDown, count) {
-		this.log("searchRelative: " + isSearchDown + " : " + count);
+		//this.log("searchRelative: " + isSearchDown + " : " + count);
 		
 		var active = this.getActive();
-		if (!active.length) return this.selectFirst();
+		if (!active.length) {
+			this.selectFirst();
+			return null;
+		}
 		
 		var searchResult;
 		
@@ -864,14 +869,18 @@ $.widget(widgetName, {
 
 	destroy: function() {
 		this.log("called destroy");
+		$.widget.prototype.destroy.apply(this, arguments); // default destroy
+
 		if(this.selectIsWrapped) { //unwrap
 			this.wrapper.before(this.selectbox);
 		}
 		
+		this.selectbox.unbind("change." + widgetName);
+		$(document).unbind("click." + widgetName, this._myDocClickHandler);
+		//all other handlers are in these removed nodes.
 		this.wrapper.remove();
 		this.listWrapper.remove();
 		
-		$.widget.prototype.destroy.apply(this, arguments); // default destroy
 		// see ticket; http://dev.jqueryui.com/ticket/5005
 		// code fixes <= 1.7.2 ; expect bug will be fixed in 1.7.3
 		if($.ui.version <= "1.7.2") { 
