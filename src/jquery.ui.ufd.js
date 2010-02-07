@@ -39,23 +39,20 @@ $.widget(widgetName, {
 		if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
 		if(this.options.calculateZIndex) this.options.zIndexPopup = this._calculateZIndex();
 
+		var css = this.options.css;
 		this.css = this.options.css;
-		if(this.options.useUiCss) {
-			this.options.skin = "uiCss";
-			$.extend(this.css, this.options.uiCss); 
-		}
-		
-		var css = this.css;
-		
+		if(this.options.useUiCss) $.extend(this.css, this.options.uiCss); 
+		if(!css.skin) css.skin = this.options.skin; // use option skin if not specified in CSS 
+
 		this.wrapper = $([
-			'<span class="', css.wrapper, ' ', css.hidden, ' ', this.options.skin, '">',
+			'<span class="', css.wrapper, ' ', css.hidden, ' ', css.skin, '">',
 				'<input type="text" autocomplete="off" value="" class="' + css.input + '" name="', inputName, '"/>',
 				'<button type="button" tabindex="-1" class="' + css.button + '"><div class="' + css.buttonIcon + '"/></button>',
 				//   <select .../> goes here
 			'</span>'
 		].join(''));
 		this.dropdown = $([
-			'<div class="', this.options.skin, '">',
+			'<div class="', css.skin, '">',
 				'<div class="', css.listWrapper, ' ', css.hidden, '">',
 					'<div class="', css.listScroll, '">',
 					//  <ul/> goes here
@@ -104,7 +101,20 @@ $.widget(widgetName, {
 			} else { 
 				return; //special key
 			}
-
+			
+			switch (key) { //stop default behivour for these events
+				case keyCodes.HOME:
+				case keyCodes.END:
+					if(self.options.homeEndForCursor) return; //no action except default
+				case keyCodes.DOWN:
+				case keyCodes.PAGE_DOWN:
+				case keyCodes.UP:
+				case keyCodes.PAGE_UP:
+				case keyCodes.ENTER:
+					self.stopEvent(event);
+				default:
+			}
+			
 			// only process: keyups excluding tab/return; and only tab/return keydown 
 			// Only some browsers fire keyUp on tab in, ignore if it happens 
 			if(!isKeyUp == ((key != keyCodes.TAB) && (key != keyCodes.ENTER)) ) return;
@@ -124,11 +134,9 @@ $.widget(widgetName, {
 				break;
 			case keyCodes.PAGE_DOWN:
 				self.selectNext(true);
-				self.stopEvent(event);
 				break;
 			case keyCodes.END:
 				self.selectLast();
-				self.stopEvent(event);
 				break;
 
 			case keyCodes.UP:
@@ -136,18 +144,15 @@ $.widget(widgetName, {
 				break;
 			case keyCodes.PAGE_UP:
 				self.selectPrev(true);
-				self.stopEvent(event);
 				break;
 			case keyCodes.HOME:
 				self.selectFirst();
-				self.stopEvent(event);
 				break;
 
 			case keyCodes.ENTER:
 				self.hideList();
 				self.tryToSetMaster();
 				self.inputFocus();
-				self.stopEvent(event);
 				break;
 			case keyCodes.TAB: //tabout only
 				self.realLooseFocusEvent();
@@ -442,6 +447,7 @@ $.widget(widgetName, {
 
 		if(!this.options.submitFreeText || this.input.val() == option.text){ //freetext only if exact match
 			this.input.val(option.text); // input may be only partially set
+			
 			if(optionIndex != curIndex){
 				this.isUpdatingMaster = true;
 				sBox.selectedIndex = optionIndex;
@@ -1058,7 +1064,7 @@ $.extend($.ui.ufd, {
 	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
 	
 	defaults: {
-		skin: "plain", // skin name
+		skin: "plain", // skin name 
 		suffix: "_ufd", // suffix for pseudo-dropdown text input name attr.  
 		dropDownID: "ufd-container", // ID for a root-child node for storing dropdown lists. avoids ie6 zindex issues by being at top of tree.
 		logSelector: "#log", // selector string to write log into, if present.
@@ -1072,8 +1078,8 @@ $.extend($.ui.ufd, {
 		allowLR: false, // show horizontal scrollbar
 		addEmphasis: false, // add <EM> tags around matches.
 		calculateZIndex: false, // {max ancestor} + 1
-		useUiCss: false, // ignore skin and use jquery UI themeroller classes. 
-		
+		useUiCss: false, // use jquery UI themeroller classes. 
+		homeEndForCursor: false, // should home/end affect dropdown or move cursor?
 
 		listMaxHeight: 200, // CSS value takes precedence
 		minWidth: 50, // don't autosize smaller then this.
@@ -1086,6 +1092,7 @@ $.extend($.ui.ufd, {
 	
 		// class sets
 		css: {
+			//skin: "plain", // if not set, will inherit options.skin
 			input: "",
 			inputDisabled: "disabled",
 
@@ -1106,7 +1113,9 @@ $.extend($.ui.ufd, {
 			listScroll: "list-scroll"
 		},
 		
+		//overlaid CSS set
 		uiCss: {
+			skin: "uiCss", 
 			input: "ui-widget-content",
 			inputDisabled: "disabled",
 
@@ -1128,8 +1137,6 @@ $.extend($.ui.ufd, {
 		}
 	}
 });	
-
-
 
 })(jQuery);
 /* END */
