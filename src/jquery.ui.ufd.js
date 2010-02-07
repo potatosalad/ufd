@@ -46,8 +46,8 @@ $.widget(widgetName, {
 
 		this.wrapper = $([
 			'<span class="', css.wrapper, ' ', css.hidden, ' ', css.skin, '">',
-				'<input type="text" autocomplete="off" value="" class="' + css.input + '" name="', inputName, '"/>',
-				'<button type="button" tabindex="-1" class="' + css.button + '"><div class="' + css.buttonIcon + '"/></button>',
+				'<input type="text" autocomplete="off" value="" class="', css.input, '" name="', inputName, '"/>',
+				'<button type="button" tabindex="-1" class="', css.button, '"><div class="', css.buttonIcon, '"/></button>',
 				//   <select .../> goes here
 			'</span>'
 		].join(''));
@@ -87,7 +87,7 @@ $.widget(widgetName, {
 		
 		//this.log("initEvents");
 
-		self.input.bind("keydown keypress keyup", function(event) {
+		this.input.bind("keydown keypress keyup", function(event) {
 			// Key handling is tricky; here is great key guide: http://unixpapa.com/js/key.html
 			isKeyDown = (event.type == "keydown");
 			isKeyPress = (event.type == "keypress");
@@ -169,12 +169,25 @@ $.widget(widgetName, {
 			}
 		});
 
-		this.input.bind("click focus", function(e) {
+		this.input.bind("click", function(e) {
 			if(self.isDisabled){
 				self.stopEvent(e);
 				return;
 			}
-			// self.log("input focus");
+			// self.log("input click: " + e.target);
+			if (!self.listVisible()) { 
+				self.filter(true); //show all 
+				self.inputFocus();
+				self.showList();
+				self.scrollTo();
+			}          
+		}); 
+		this.input.bind("focus", function(e) {
+			if(self.isDisabled){
+				self.stopEvent(e);
+				return;
+			}
+			self.log("input focus");
 			if(!self.internalFocus){
 				self.realFocusEvent();
 			}
@@ -193,12 +206,12 @@ $.widget(widgetName, {
 			if (self.listVisible()) { 
 				self.hideList();
 				self.inputFocus();
-
+				
 			} else {	
 				self.filter(true); //show all 
 				self.inputFocus();
 				self.showList();
-				self.scrollTo();	    	
+				self.scrollTo();
 			}          
 		}); 
 
