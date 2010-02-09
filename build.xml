@@ -10,29 +10,21 @@
     -->
 
 	<!-- Setup -->
+    <loadfile property="VERSION" srcFile="version.txt" />
 
     <property description="Source folder" name="SRC_DIR" value="src"  />
-    <property description="Build tools" name="BUILD_TOOLS_DIR" value="build" />
-    <property description="Rhino JS Engine" name="JS_JAR" value="${BUILD_TOOLS_DIR}/js.jar" />
     
-    <loadfile property="VERSION" srcFile="version.txt" />
     <property description="The output filename, excluding suffix" name="BASE_NAME" value="jquery.ui.ufd" />
     <property description="Distribution root" name="DIST_ROOT" value="./dist" />
 
     <property description="Versioned distribution folder" name="DIST_DIR" value="${DIST_ROOT}/${BASE_NAME}-${VERSION}" />
     <property description="Uncompressed distribution filename" name="OUT" value="${DIST_DIR}/${BASE_NAME}.js" />
+    <property description="Minified distribution filename" name="OUT_MIN" value="${DIST_DIR}/${BASE_NAME}-min.js" />
     <property description="Distribution archive filename" name="ARCHIVE" value="${DIST_ROOT}/${BASE_NAME}-${VERSION}.zip" />
-
-	<!-- http://ant-contrib.sourceforge.net/ - fixed: antcontrib.properties; "for" task added -->
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
-		<classpath>
-			<pathelement location="antLib/ant-contrib-1.0b3-fixed.jar"/>
-		</classpath>
-	</taskdef>
 
 	<!-- Targets -->
 
-    <target name="all" depends="clean,create,min,pack,zip">
+    <target name="all" depends="clean,create,min,zip">
         <echo message="All complete." />
     </target>
 
@@ -40,81 +32,62 @@
         <delete dir="${DIST_ROOT}" />
     </target>
 
-    <target name="create"  depends="clean" description="Concatenate source, gather static resources and replaces @VERSION">
+    <target name="create" depends="clean" description="Concatenate source, copy static resources and replace @VERSION">
         <echo message="Create ${DIST_DIR}" />
         <mkdir dir="${DIST_DIR}" />
         
-        <echo message="Concatenting source to ${OUT}" />
-        <concat destfile="${OUT}">
+        <echo message="Concatenate source to ${OUT}" />
+    	<concat destfile="${OUT}">
             <fileset dir="${SRC_DIR}" includes="*.js"/>
         </concat>
         
         <echo message="Copying static resoures to ${DIST_DIR}" />
         <copy todir="${DIST_DIR}">
-        	<fileset dir="." includes="css/** examples/** README.txt GPL-LICENSE.txt"/>
+        	<fileset dir="." includes="css/** examples/** *.txt" excludes="version.txt"/>
         </copy>
 
         <echo message="Versioning resources in ${DIST_DIR}" />
-        <for param="file">
-			<path>
-				<fileset file="${OUT}"/>
-				<fileset file="${DIST_DIR}/README.txt"/>
-				<fileset file="${DIST_DIR}/GPL-LICENSE.txt"/>
-				<fileset file="${DIST_DIR}/examples/index.html"/>
-	        	<fileset dir="${DIST_DIR}/css" includes="**/*.css"/>
-			</path>
-			<sequential>
-        		<echo message="Insert version ${VERSION} into @{file}" />
-		    	<java jar="${JS_JAR}" fork="true" failonerror="true" append="true">
-		    		<arg value="${BUILD_TOOLS_DIR}/build/version.js" />
-		            <arg value="@{file}" />
-		    	</java>
-			</sequential>
-		</for>
-
+		<replaceregexp match="@VERSION" replace="${VERSION}" flags="g" byline="true" >
+			<fileset file="${OUT}"/>
+			<fileset file="${DIST_DIR}/README.txt"/>
+			<fileset file="${DIST_DIR}/examples/**.html"/>
+        	<fileset dir="${DIST_DIR}/css" includes="**/*.css"/>
+		</replaceregexp>
     </target>
 
     <target name="min" depends="create" description="Remove all comments and whitespace, no compression, great in combination with GZip">
-		<for param="file">
-			<path>
-				<fileset file="${OUT}"/>
-			</path>
-			<sequential>
-		        <echo message="@{file} being 'min'ified." />
-				<java jar="${JS_JAR}" fork="true" failonerror="true">
-					<arg value="${BUILD_TOOLS_DIR}/build/min.js" />
-					<arg value="@{file}" />
-				</java>
-			</sequential>
-		</for>
-    </target>
-
-    <target name="pack" depends="create" description="Remove all comments and whitespace and compress">
-        <for param="file">
-			<path>
-				<fileset file="${OUT}"/>
-			</path>
-			<sequential>
-		        <echo message="@{file} being 'pack'ed." />
-				<java jar="${JS_JAR}" fork="true"  failonerror="true">
-					<arg value="${BUILD_TOOLS_DIR}/build/pack.js" />
-					<arg value="@{file}" />
-				</java>
-			</sequential>
-		</for>
-    </target>
-
+        <echo message="${OUT} being 'min'ified to ${OUT_MIN}." />
+	
+		<apply executable="java" parallel="false" verbose="true" dest="${DIST_DIR}">
+			<fileset file="${OUT}"/>
+			<arg line="-jar" />
+			<arg path="build/google-compiler-20091218.jar" />
+			<arg value="--warning_level" />
+			<arg value="QUIET" />
+			<arg value="--js_output_file" />
+			<targetfile />
+			<arg value="--js" />
+			<mapper type="glob" from="*.js" to="*.tempmin.js" />
+		</apply>
+    	<!-- copy head commment --> 
+		<concat destfile="${OUT_MIN}">
+			<fileset file="${OUT}"/>
+			<filterchain>
+				<headfilter lines="12"/>
+			</filterchain>
+		</concat>
+		<concat destfile="${OUT_MIN}" append="yes">
+			<fileset dir="${DIST_DIR}" includes="*.tempmin.js"/>
+		</concat>
+		<delete>
+			<fileset dir="${DIST_DIR}" includes="*.tempmin.js"/>
+		</delete>
+    	
+        <echo message="${OUT_MIN} created." />
+    </target>	
+	
 	<target name="zip" depends="create">
 		<zip destfile="${ARCHIVE}" basedir="${DIST_ROOT}"/>
-	</target>
-
-	<!-- TODO -->
-	<target name="runtest">
-		<echo message="Running Automated Test Suite" />
-		<java jar="${JS_JAR}" fork="true"  failonerror="true">
-            <arg value="${BUILD_TOOLS_DIR}/runtest/test.js" />
-        </java>
-		<echo message="Test Suite Finished" />
 	</target>
 	
 </project>
