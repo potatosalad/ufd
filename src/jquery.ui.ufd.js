@@ -919,8 +919,6 @@ $.widget(widgetName, {
 
 });
 
-
-
 /******************************************************
  * Trie implementation for fast prefix searching
  * 
@@ -955,16 +953,16 @@ Trie.prototype.add = function( key, object ) {
 	var kLen = key.length; 
 
 	for(var i = 0; i < kLen; i++) {
-		var char = key.charAt(i);
+		var chr = key.charAt(i);
 		var node = curNode[1];
-		if(char in node) {
-			curNode = node[char];
+		if(chr in node) {
+			curNode = node[chr];
 		} else {
-			curNode = node[char] = [null, {}];
+			curNode = node[chr] = [null, {}];
 		}
 	}
 	
-	if(curNode[0]) curNode[0].push(object);//return false;
+	if(curNode[0]) curNode[0].push(object);
 	else curNode[0] = [object];
 	return true;
 };
@@ -999,9 +997,9 @@ Trie.prototype.findNodePartial = function(key) {
 	var kLen = key.length;
 
 	for (var i = 0; i < kLen; i++) {
-		var char = key.charAt(i);
-		if (char in curNode[1]) {
-			curNode = curNode[1][char];
+		var chr = key.charAt(i);
+		if (chr in curNode[1]) {
+			curNode = curNode[1][chr];
 		} else {
 			return [ curNode, remainder ]; 
 		}
@@ -1028,9 +1026,9 @@ Trie.prototype.getMissValues = function(startNode, missNode) { // string
 		var thisNode = stack.pop();
 		if (thisNode == missNode) continue;
 		if (thisNode[0]) results.unshift(thisNode[0]);
-		for ( var char in thisNode[1]) {
-			if (thisNode[1].hasOwnProperty(char)) {
-				stack.push(thisNode[1][char]);
+		for ( var chr in thisNode[1]) {
+			if (thisNode[1].hasOwnProperty(chr)) {
+				stack.push(thisNode[1][chr]);
 			}
 		}
 	}
@@ -1068,7 +1066,9 @@ Trie.prototype.findPrefixMatchesAndMisses = function(key) { // string
 	return { matches : matches, misses : misses };
 };
 
-/* end Trie */	
+/* end Trie */
+
+
 
 
 $.extend($.ui.ufd, {

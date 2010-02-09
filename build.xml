@@ -14,12 +14,12 @@
 
     <property description="Source folder" name="SRC_DIR" value="src"  />
     
-    <property description="The output filename, excluding suffix" name="BASE_NAME" value="jquery.ui.ufd" />
     <property description="Distribution root" name="DIST_ROOT" value="./dist" />
 
+    <property description="The output filename, excluding suffix" name="BASE_NAME" value="jquery.ui.ufd" />
     <property description="Versioned distribution folder" name="DIST_DIR" value="${DIST_ROOT}/${BASE_NAME}-${VERSION}" />
     <property description="Uncompressed distribution filename" name="OUT" value="${DIST_DIR}/${BASE_NAME}.js" />
-    <property description="Minified distribution filename" name="OUT_MIN" value="${DIST_DIR}/${BASE_NAME}-min.js" />
+    <property description="Minified distribution filename" name="OUT_MIN" value="${DIST_DIR}/${BASE_NAME}.min.js" />
     <property description="Distribution archive filename" name="ARCHIVE" value="${DIST_ROOT}/${BASE_NAME}-${VERSION}.zip" />
 
 	<!-- Targets -->
