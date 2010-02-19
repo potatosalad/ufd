@@ -16,8 +16,8 @@ var widgetName = "ui.ufd";
 	
 $.widget(widgetName, {
 
-		// options: provided by framework
-		// element: provided by framework
+	// options: provided by framework
+	// element: provided by framework
 
 	_init: function() {
 		if (this.element[0].tagName.toLowerCase() != "select") {
@@ -207,7 +207,7 @@ $.widget(widgetName, {
 				self.hideList();
 				self.inputFocus();
 				
-			} else {	
+			} else {
 				self.filter(true); //show all 
 				self.inputFocus();
 				self.showList();
@@ -338,7 +338,7 @@ $.widget(widgetName, {
 	 * if doDelay, will delay execution to allow re-entry to cancel.
 	 */
 	filter: function(showAll, doDelay) {
-		// this.log("filter: " + showAllLength);
+		//this.log("filter: " );
 		var self = this;
 
 		//cancel any pending
@@ -350,8 +350,8 @@ $.widget(widgetName, {
 		var searchText = self.getCurrentTextValue();
 
 		var search = function() {
-			//this.log("filter search");
-			var mm = self.trie.findPrefixMatchesAndMisses(searchText); // search!
+			//self.log("filter search");
+			var mm = self.trie.find(searchText); // search!
 			self.trie.matches = mm.matches;
 			self.trie.misses = mm.misses;
 
@@ -423,6 +423,7 @@ $.widget(widgetName, {
 				li = tritem[indexB];
 				text = $.trim(options[li.getAttribute("name")].text);
 				if (isAddEmphasis) {
+					//TODO regex is faster?
 					li.innerHTML = '<em>' + text.slice(0, searchTextLength) + '</em>' + text.slice(searchTextLength) ;
 				} else {
 					li.innerHTML = text;
@@ -483,13 +484,15 @@ $.widget(widgetName, {
 		this.disable();
 		this.setDimensions();
 
-		this.trie = new Trie(this.options.caseSensitive);
+		this.trie = getNewTrie(this.options.caseSensitive);
 		this.trie.matches = [];
 		this.trie.misses = [];
+		console.log("trie");
+		
+		console.dir(this.trie);
 
 		var self = this;
 		var listBuilder = [];
-		var trieObjects = [];
 
 		// console.timeEnd("prep");
 		// console.time("build");
@@ -909,6 +912,7 @@ $.widget(widgetName, {
 		}
 	},
 	
+	
 	//internal state
 	selectIsWrapped: false,
 	internalFocus: false, 
@@ -918,155 +922,146 @@ $.widget(widgetName, {
 	isDisabled: false
 
 });
+window.InfixTrie = getNewTrie;
 
-/******************************************************
- * Trie implementation for fast prefix searching
- * 
- *		http://en.wikipedia.org/wiki/Trie
- *******************************************************/
+/****************************************************************************
+ * Trie + infix extension implementation for fast prefix or infix searching
+ * http://en.wikipedia.org/wiki/Trie
+ ****************************************************************************/
 
 /**
  * Constructor
  */
-function Trie(isCaseSensitive) {
-	this.isCaseSensitive = isCaseSensitive || false;
-	this.root = [null, {}]; //masterNode
-};
+var getNewTrie = function(isCaseSensitive) {
+	isCaseSensitive = !!isCaseSensitive;
+	
+	var root = [null, {}, false]; //masterNode
+	var infixRoots = {};
 
-/**
- * Add (String, Object) to store 
- */
-Trie.prototype.cleanString = function( inStr ) {
-	if(!this.isCaseSensitive){
-		inStr = inStr.toLowerCase();
-	}
-	//invalid char clean here
-	return inStr;
-}
-
-/**
- * Add (String, Object) to store 
- */
-Trie.prototype.add = function( key, object ) {
-	key = this.cleanString(key);
-	var curNode = this.root;
-	var kLen = key.length; 
-
-	for(var i = 0; i < kLen; i++) {
-		var chr = key.charAt(i);
-		var node = curNode[1];
-		if(chr in node) {
-			curNode = node[chr];
-		} else {
-			curNode = node[chr] = [null, {}];
+	var cleanString = function( inStr ) {
+		if(!isCaseSensitive){
+			inStr = inStr.toLowerCase();
 		}
+		//invalid char clean here
+		return inStr;
 	}
 	
-	if(curNode[0]) curNode[0].push(object);
-	else curNode[0] = [object];
-	return true;
-};
-
-/**
- * Find object exactly matching key (String)
- */
-Trie.prototype.find = function( key ) {
-	key = this.cleanString(key);
-	var resultNode = this.findNode(key);
-	return (resultNode) ? resultNode[0] : null;
-};	
-
-/**
- * Find trieNode exactly matching (key) 
- */
-Trie.prototype.findNode = function( key ) {
-	var results = this.findNodePartial(key);
-	var node = results[0];
-	var remainder = results[1];
-	return (remainder.length > 0) ? null : node;
-};
-
-/**
- * Find prefix trieNode closest to (String) 
- * returns [trieNode, remainder]
- */
-Trie.prototype.findNodePartial = function(key) {
-	key = this.cleanString(key);
-	var curNode = this.root;
-	var remainder = key;
-	var kLen = key.length;
-
-	for (var i = 0; i < kLen; i++) {
-		var chr = key.charAt(i);
-		if (chr in curNode[1]) {
-			curNode = curNode[1][chr];
-		} else {
-			return [ curNode, remainder ]; 
+	/**
+	 * Take an array of nodes, and construct new array of children nodes along the given chr.
+	 */
+	var mapNewArray = function(nodeArr, chr) {
+		
+		if(nodeArr[0] == root) {
+			//return [root[1][chr]]; //prefix
+			return infixRoots[chr]; //infix
 		}
-		remainder = remainder.slice(1, remainder.length);
-	}
-	return [ curNode, remainder ];
-};
-
-/**
- * Get array of all objects on (trieNode) 
- */
-Trie.prototype.getValues = function(trieNode) { 
-	return this.getMissValues(trieNode, null); // == Don't miss any
-};
-
-/**
- * Get array of all objects on (startNode), except objects on (missNode) 
- */
-Trie.prototype.getMissValues = function(startNode, missNode) { // string 
-	if (startNode == null) return [];
-	var stack = [ startNode ];
-	var results = [];
-	while (stack.length > 0) {
-		var thisNode = stack.pop();
-		if (thisNode == missNode) continue;
-		if (thisNode[0]) results.unshift(thisNode[0]);
-		for ( var chr in thisNode[1]) {
-			if (thisNode[1].hasOwnProperty(chr)) {
-				stack.push(thisNode[1][chr]);
+		
+		var retArray = [];
+		var aLen = nodeArr.length;
+		var thisNodesArray;
+		for (var i = 0; i < aLen; i++) {
+			thisNodesArray = nodeArr[i][1];
+			if(thisNodesArray.hasOwnProperty(chr)){
+				retArray.push(thisNodesArray[chr]);
 			}
 		}
+	
+		return retArray;
+	};
+	
+	/**
+	 * Find array of trieNodes that match the infix key 
+	 */
+	var findNodeArray = function(key) {
+		key = cleanString(key);
+		var retArray = [root];
+		var kLen = key.length;
+		var chr;
+	
+		for (var i = 0; i < kLen; i++) {
+			chr = key.charAt(i);
+			retArray = mapNewArray(retArray, chr);
+		}
+
+		return retArray;
+	};
+	
+	
+	/**
+	 * 
+	 */
+	var markAndRetrieve = function(array, trie, toggleSet) {  
+		var stack = [ trie ];
+		while (stack.length > 0) {
+			var thisTrie = stack.pop();
+			if (thisTrie[2] == toggleSet) continue; //already traversed
+			thisTrie[2] = toggleSet;
+			if (thisTrie[0]) array.unshift(thisTrie[0]);
+			for (chr in thisTrie[1]) {
+				if (thisTrie[1].hasOwnProperty(chr)) {
+					stack.push(thisTrie[1][chr]);
+				}
+			}
+		}
+	}	
+	
+	return {
+		/**
+		 * Add (String, Object) to store 
+		 */
+		add : function( key, object ) {
+			key = cleanString(key);
+			var curNode = root;
+			var kLen = key.length; 
+			var chr, node;
+		
+			for(var i = 0; i < kLen; i++) {
+				chr = key.charAt(i);
+				node = curNode[1];
+				if(chr in node) {
+					curNode = node[chr];
+				} else {
+					curNode = node[chr] = [null, {}, false];
+					//only add new curNodes
+					if(chr in infixRoots) { 
+						infixRoots[chr].push(curNode);
+					} else {
+						infixRoots[chr] = [curNode];
+					}
+				}
+			}
+		
+			if(curNode[0]) curNode[0].push(object);
+			else curNode[0] = [object];
+			return true;
+		},
+		
+		/**
+		 * Get object with two properties:
+		 * 	matches: array of all objects not matching entire key (String) 
+		 * 	misses:  array of all objects exactly matching the key (String)
+		 * 
+		 */
+		find : function(key) { // string 
+			var trieNodeArray = findNodeArray(key);
+			var toggleTo = !root[2];
+			var matches = [];
+			var misses = [];
+			var trie;
+		
+			for(arrName in trieNodeArray){
+				trie = trieNodeArray[arrName];
+				markAndRetrieve(matches, trie, toggleTo);
+			}
+			markAndRetrieve(misses, root, toggleTo);
+			
+			return { matches : matches, misses : misses };
+		}
 	}
-	return results;
 };
 
-/**
- * Get array of all objects exactly matching the key (String) 
- */
-Trie.prototype.findPrefixMatches = function(key) { 
-	var trieNode = findNode(key);
-	return this.getValues(trieNode);
-}
 
-/**
- * Get array of all objects not matching entire key (String) 
- */
-Trie.prototype.findPrefixMisses = function(key) { // string 
-	var trieNode = findNode(key);
-	return this.getMissValues(this.root, trieNode);
-};
-
-/**
- * Get object with two properties:
- * 	matches: array of all objects not matching entire key (String) 
- * 	misses:  array of all objects exactly matching the key (String)
- * 
- * This reuses "findNode()" to make it faster then 2x method calls
- */
-Trie.prototype.findPrefixMatchesAndMisses = function(key) { // string 
-	var trieNode = this.findNode(key);
-	var matches = this.getValues(trieNode);
-	var misses = this.getMissValues(this.root, trieNode);
-
-	return { matches : matches, misses : misses };
-};
-
-/* end Trie */
+/* end InfixTrie */	
 
 
 
