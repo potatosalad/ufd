@@ -187,7 +187,7 @@ $.widget(widgetName, {
 				self.stopEvent(e);
 				return;
 			}
-			self.log("input focus");
+			//self.log("input focus");
 			if(!self.internalFocus){
 				self.realFocusEvent();
 			}
@@ -411,8 +411,13 @@ $.widget(widgetName, {
 		//console.time("em");
 		
 		var searchTextLength = searchText.length || 0;
-		var tritem, index, indexB, li, text;
 		var options = this.selectbox.get(0).options;
+		var tritem, index, indexB, li, text;
+		
+		var wrappedSearchText = "<em>" + searchText + "</em>";
+		var stPattern = new RegExp(
+				searchText.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g,"\\$1"), // http://xkr.us/js/regexregex
+				"gi");
 		
 		isAddEmphasis = (isAddEmphasis && searchTextLength); // don't add emphasis to 0-length  
 		index = array.length;
@@ -423,8 +428,8 @@ $.widget(widgetName, {
 				li = tritem[indexB];
 				text = $.trim(options[li.getAttribute("name")].text);
 				if (isAddEmphasis) {
-					//TODO regex is faster?
-					li.innerHTML = '<em>' + text.slice(0, searchTextLength) + '</em>' + text.slice(searchTextLength) ;
+					
+					li.innerHTML = text.replace(stPattern, wrappedSearchText);
 				} else {
 					li.innerHTML = text;
 				}
@@ -484,12 +489,9 @@ $.widget(widgetName, {
 		this.disable();
 		this.setDimensions();
 
-		this.trie = getNewTrie(this.options.caseSensitive);
+		this.trie = getNewTrie(this.options.infix, this.options.caseSensitive);
 		this.trie.matches = [];
 		this.trie.misses = [];
-		console.log("trie");
-		
-		console.dir(this.trie);
 
 		var self = this;
 		var listBuilder = [];
@@ -884,7 +886,7 @@ $.widget(widgetName, {
 	},
 
 	changeOptions: function() {
-		this.log("changeOptions");
+		//this.log("changeOptions");
 		this._populateFromMaster();
 	},		
 
@@ -932,11 +934,12 @@ window.InfixTrie = getNewTrie;
 /**
  * Constructor
  */
-var getNewTrie = function(isCaseSensitive) {
+var getNewTrie = function(isInfix, isCaseSensitive) {
+	isInfix = !!isInfix;
 	isCaseSensitive = !!isCaseSensitive;
 	
-	var root = [null, {}, false]; //masterNode
-	var infixRoots = {};
+	var root = [null, {}, false]; //masterNode: object, char -> trieNode map, traverseToggle
+	var infixRoots = (isInfix) ? {} : null;
 
 	var cleanString = function( inStr ) {
 		if(!isCaseSensitive){
@@ -952,8 +955,7 @@ var getNewTrie = function(isCaseSensitive) {
 	var mapNewArray = function(nodeArr, chr) {
 		
 		if(nodeArr[0] == root) {
-			//return [root[1][chr]]; //prefix
-			return infixRoots[chr]; //infix
+			return isInfix ? infixRoots[chr] : [root[1][chr]];
 		}
 		
 		var retArray = [];
@@ -988,7 +990,9 @@ var getNewTrie = function(isCaseSensitive) {
 	
 	
 	/**
-	 * 
+	 * retrieves objects on the given array of trieNodes.
+	 * Also sets toggleSet and doesnt traverse already marked branches.
+	 * You must call this with root to ensure complete tree is toggled.
 	 */
 	var markAndRetrieve = function(array, trie, toggleSet) {  
 		var stack = [ trie ];
@@ -1021,12 +1025,14 @@ var getNewTrie = function(isCaseSensitive) {
 				if(chr in node) {
 					curNode = node[chr];
 				} else {
-					curNode = node[chr] = [null, {}, false];
-					//only add new curNodes
-					if(chr in infixRoots) { 
-						infixRoots[chr].push(curNode);
-					} else {
-						infixRoots[chr] = [curNode];
+					curNode = node[chr] = [null, {}, root[2]]; // match roots' toggle setting 
+
+					if(isInfix) { // only add curNodes once, when created.
+						if(chr in infixRoots) { 
+							infixRoots[chr].push(curNode);
+						} else {
+							infixRoots[chr] = [curNode];
+						}
 					}
 				}
 			}
@@ -1053,7 +1059,7 @@ var getNewTrie = function(isCaseSensitive) {
 				trie = trieNodeArray[arrName];
 				markAndRetrieve(matches, trie, toggleTo);
 			}
-			markAndRetrieve(misses, root, toggleTo);
+			markAndRetrieve(misses, root, toggleTo); //will ensure whole tree is toggled also.
 			
 			return { matches : matches, misses : misses };
 		}
@@ -1078,6 +1084,7 @@ $.extend($.ui.ufd, {
 		logSelector: "#log", // selector string to write log into, if present.
 		mimicCSS: ["marginLeft","marginTop","marginRight","marginBottom"], //copy these properties to widget. Width auto-copied unless min/manual.
 
+		infix: true, //infix search, not prefix 
 		log: false, // log to firebug console (if available) and logSelector (if it exists)
 		submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
 		triggerSelected: true, // selected option of the selectbox will be the initial value of the combo
