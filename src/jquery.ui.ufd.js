@@ -993,7 +993,7 @@ InfixTrie.prototype.find = function(key) { // string
  */
 InfixTrie.prototype.mapNewArray = function(nodeArr, chr) {
 	
-	if(nodeArr[0] == this.root) {
+	if(nodeArr && nodeArr[0] == this.root) {
 		return this.isInfix ? this.infixRoots[chr] : [this.root[1][chr]];
 	}
 	

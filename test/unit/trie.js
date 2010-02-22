@@ -3,18 +3,16 @@ module("trie");
 
 
 
-test("trie", function() {
+test("trie-many-prefix", function() {
 
 	var dataSource = {
 			"cab": {},
-			"cat": {},
 			"car": {},
+			"cat": {},
 			"catch": {}
 	};
 	
 	var trie = new $.ui.ufd.getNewTrie(false, true);
-	
-	console.log(trie);
 	
 	for(key in dataSource){
 		//console.log(key + " : " + dataSource[key]);
@@ -23,31 +21,80 @@ test("trie", function() {
 	
 	//start testing
 	var result = trie.find("");
-	equals( result.matches.length, 4, "Matches match" );
-	equals( result.misses.length, 0, "Misses match" );
+	equals( result.matches.length, 4, "Empty string matches all" );
+	equals( result.misses.length, 0, "Empty string misses all" );
 
 	
 	var result = trie.find("ca");
-	equals( result.matches.length, 4, "Matches match" );
-	equals( result.misses.length, 0, "Misses match" );
+	equals( result.matches.length, 4, "Common to all prefix" );
+	equals( result.misses.length, 0, "Common to all misses none" );
 
 	var result = trie.find("cat");
-	equals( result.matches.length, 2, "Matches match" );
-	equals( result.misses.length, 2, "Misses match" );
+	equals( result.matches.length, 2, "partial match with exact match" );
+	equals( result.misses.length, 2, "partial match with exact match, misses" );
 
 	var result = trie.find("cab");
-	equals( result.matches.length, 1, "Matches match" );
-	equals( result.misses.length, 3, "Misses match" );
+	equals( result.matches.length, 1, "Exact match" );
+	equals( result.misses.length, 3, "Exact match, no misses" );
 	
 	var result = trie.find("cata");
-	equals( result.matches.length, 0, "Matches match" );
-	equals( result.misses.length, 4, "Misses match" );
+	equals( result.matches.length, 0, "Prefix with missing suffix" );
+	equals( result.misses.length, 4, "Prefix with missing suffix, misses" );
 
+	var result = trie.find("catamarang");
+	equals( result.matches.length, 0, "Prefix with missing suffix - longer" );
+	equals( result.misses.length, 4, "Prefix with missing suffix - longer, misses" );
+	
+	
 	var result = trie.find("catch");
 	ok( testResult(result, "catch", dataSource), "double check" );
 	
 	
 });
+
+test("trie-multiple-items", function() {
+
+	var dataSource = {
+			"car": {},
+			"car": {},
+			"car": {},
+			"cat": {},
+			"cat": {},
+			"cat": {},
+			"catamarang": {},
+	};
+	
+	var trie = new $.ui.ufd.getNewTrie(false, true);
+	
+	for(key in dataSource){
+		//console.log(key + " : " + dataSource[key]);
+		trie.add(key, dataSource[key]);
+	}
+	
+	//start testing
+	var result = trie.find("c");
+	equals( result.matches.length, 3, "Multiple items prefix" );
+	equals( result.misses.length, 0, "Multiple items prefix" );
+
+	
+	var result = trie.find("car");
+	equals( result.matches.length, 1, "Multiple items exact match" );
+	equals( result.misses.length, 2, "Multiple items exact match, misses" );
+
+	var result = trie.find("cat");
+	equals( result.matches.length, 2, "Multiple items exact match with longer option" );
+	equals( result.misses.length, 1, "Multiple items exact match with longer option, misses" );
+	
+	var result = trie.find("catamarang");
+	equals( result.matches.length, 1, "Multiple items exact match." );
+	equals( result.misses.length, 2, "Multiple items exact match, misses" );
+
+	var result = trie.find("car-boat");
+	equals( result.matches.length, 0, "Multiple items overshoot" );
+	equals( result.misses.length, 3, "Multiple items overshoot, misses" );
+	
+});
+
 
 /*
  * match or miss array, key, data
