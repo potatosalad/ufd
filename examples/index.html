@@ -16,7 +16,7 @@
     <link type="text/css" rel="stylesheet" href="autosnippet/css/SyntaxHighlighter.css"></link>
 	
 	<!-- required dependency -->
-	<script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+	<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
 	<script type="text/javascript" src="js/ui.core.js"></script>
 	<!--  if you want iE6 not to poke select boxes thru your dropdowns, you need ... -->
 	<script type="text/javascript" src="js/jquery.bgiframe.min.js"></script>
@@ -41,7 +41,7 @@
 	These example pages demonstrate UFD features, and how to get them on your site. 
 	UFD is pronounced EWE-EFF-D, or OOF-D if you are feeling onomatopaeic.</p>
     
-	<p>First try a vanilla (no-options) UFD.  It works like a normal dropdown, but you can start typing to filter.</p>
+	<p><em>First</em>, try a vanilla (no-options) UFD.  It works like a normal dropdown, but you can start typing to filter:</p>
 
 	<div name="autosnippet:basic-combo:yes">
 		<label for="basic-combo">Choose a country:</label>
@@ -55,19 +55,20 @@
 
 		<script type="text/javascript" >
 			$(function () {
-				$("#basic-combo").ufd();
+				$("#basic-combo").ufd({log:true});
 			});    
 		</script>
     </div>
     <div name="basic-combo"></div>
 
 	
-	<p>Select page</p>
+	<p>What are you interested in seeing?</p>
 	
 	<ul>
 		<li><a href="events.html">Event handling and propagation</a></li>
 		<li><a href="testCases.html">Test Cases</a></li>
 		<li><a href="performanceTest.html">Performance Tests</a></li>
+		<li><a href="http://code.google.com/p/ufd/"><em>Take me to the homepage!</em></a></li>
 	</ul>
 
   </body>

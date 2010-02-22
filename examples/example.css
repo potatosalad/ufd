@@ -13,3 +13,8 @@ hr {
 em {
 	font-weight: bold;
 }
+
+#log {
+	height: 100px;
+	overflow: scroll;
+}

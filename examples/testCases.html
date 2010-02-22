@@ -41,19 +41,6 @@
 	 -->
 	
 	<style type="text/css">
-		body {
-			font-family: arial, helvetica, sans-serif;
-		}
-		h1,h2,h3,h4,h5,h6 {
-			color: #00a;
-		}
-		hr {
-			color: red;
-		}
-		#log {
-			height: 100px;
-			overflow: scroll;
-		}
 	</style>
  </head>
  <body>
@@ -281,6 +268,27 @@
 	</div>
       
       
+    <div>
+    	<h2>Emphasis on special regexp</h2>
+		<script type="text/javascript" >
+		$(function () {
+			 $("#regexp").ufd({log: true, addEmphasis: true});
+		});
+	    </script>
+
+	    <p>  </p>
+	    
+      <label for="regexp">Emphasis with regexp chars</label><br />
+      <select id="regexp" name="regexp">
+			<option value="1">([\\\^\$*+[\]?{}.=!:(|)])([\\\^\$*+[\]?{}.=!:(|)])</option>
+			<option value="2"> ( [ \ \ \ ^ \ $ * + [ \ ] ? { } . = ! : ( | ) ] ) </option>
+     </select>
+      <br/>
+
+
+      <hr/>
+	</div>
+
 
       
     <div>

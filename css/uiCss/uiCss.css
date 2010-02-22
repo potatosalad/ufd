@@ -16,6 +16,7 @@
 .ufd.uiCss button {
     width: 22px;
     height: 22px;
+    border: 0px !important;
 }
 
 #ufd-container .uiCss div.list-wrapper {

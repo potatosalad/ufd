@@ -408,18 +408,18 @@ $.widget(widgetName, {
 	},
 	
 	emphasis: function(array, isAddEmphasis, searchText ) {
-		//console.time("em");
 		
 		var searchTextLength = searchText.length || 0;
 		var options = this.selectbox.get(0).options;
-		var tritem, index, indexB, li, text;
+		var tritem, index, indexB, li, text, stPattern, escapedST;
+		isAddEmphasis = (isAddEmphasis && searchTextLength > 0); // don't add emphasis to 0-length  
 		
-		var wrappedSearchText = "<em>" + searchText + "</em>";
-		var stPattern = new RegExp(
-				searchText.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g,"\\$1"), // http://xkr.us/js/regexregex
-				"gi");
+		if(isAddEmphasis) {
+			escapedST = searchText.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g,"\\$1"); // http://xkr.us/js/regexregex 
+			stPattern = new RegExp("(" + escapedST + ")", "gi"); // $1
+		}
+		// console.time("em");
 		
-		isAddEmphasis = (isAddEmphasis && searchTextLength); // don't add emphasis to 0-length  
 		index = array.length;
 		while(index--) {
 			tritem = array[index];
@@ -428,15 +428,14 @@ $.widget(widgetName, {
 				li = tritem[indexB];
 				text = $.trim(options[li.getAttribute("name")].text);
 				if (isAddEmphasis) {
-					
-					li.innerHTML = text.replace(stPattern, wrappedSearchText);
+					li.innerHTML = text.replace(stPattern, "<em>$1</em>");
 				} else {
 					li.innerHTML = text;
 				}
 			}
 		}
 		
-		//console.timeEnd("em");
+		// console.timeEnd("em");
 	},
 
 	// attempt update of master - returns true if update good or already set correct. 
@@ -489,7 +488,7 @@ $.widget(widgetName, {
 		this.disable();
 		this.setDimensions();
 
-		this.trie = getNewTrie(this.options.infix, this.options.caseSensitive);
+		this.trie = new InfixTrie(this.options.infix, this.options.caseSensitive);
 		this.trie.matches = [];
 		this.trie.misses = [];
 
@@ -537,12 +536,8 @@ $.widget(widgetName, {
 		// console.timeEnd("kids");
 		// console.time("tidy");
 
-		if(this.options.triggerSelected){
-			this.setInputFromMaster();
-		} else {
-			this.input.val(""); 
-		}
-
+		this.setInputFromMaster();
+		
 		this.enable();
 		// console.timeEnd("tidy");
 
@@ -637,15 +632,12 @@ $.widget(widgetName, {
 		this.listScroll.height(height); 
 		this.listWrapper.height(height); 
 
-		var doDropUp = false;
 		var offset = this.input.offset();
-		if(this.options.allowDropUp) {
-			var listSpace = height; 
-			var inputHeight = this.wrapper.height();
-			var bottomPos = offset.top + inputHeight + listSpace;
-			var maxShown = $(window).height() + $(document).scrollTop();
-			doDropUp = (bottomPos > maxShown);
-		}
+		var listSpace = height; 
+		var inputHeight = this.wrapper.height();
+		var bottomPos = offset.top + inputHeight + listSpace;
+		var maxShown = $(window).height() + $(document).scrollTop();
+		var doDropUp = (bottomPos > maxShown);
 
 		var top;
 		if (doDropUp) {
@@ -863,7 +855,7 @@ $.widget(widgetName, {
 		}
 		return ddc;
 	},
-
+	
 	log: function(msg) {
 		if(!this.options.log) return;
 
@@ -924,7 +916,6 @@ $.widget(widgetName, {
 	isDisabled: false
 
 });
-window.InfixTrie = getNewTrie;
 
 /****************************************************************************
  * Trie + infix extension implementation for fast prefix or infix searching
@@ -934,138 +925,146 @@ window.InfixTrie = getNewTrie;
 /**
  * Constructor
  */
-var getNewTrie = function(isInfix, isCaseSensitive) {
-	isInfix = !!isInfix;
-	isCaseSensitive = !!isCaseSensitive;
+var InfixTrie = function(isInfix, isCaseSensitive){
 	
-	var root = [null, {}, false]; //masterNode: object, char -> trieNode map, traverseToggle
-	var infixRoots = (isInfix) ? {} : null;
-
-	var cleanString = function( inStr ) {
-		if(!isCaseSensitive){
-			inStr = inStr.toLowerCase();
-		}
-		//invalid char clean here
-		return inStr;
-	}
-	
-	/**
-	 * Take an array of nodes, and construct new array of children nodes along the given chr.
-	 */
-	var mapNewArray = function(nodeArr, chr) {
-		
-		if(nodeArr[0] == root) {
-			return isInfix ? infixRoots[chr] : [root[1][chr]];
-		}
-		
-		var retArray = [];
-		var aLen = nodeArr.length;
-		var thisNodesArray;
-		for (var i = 0; i < aLen; i++) {
-			thisNodesArray = nodeArr[i][1];
-			if(thisNodesArray.hasOwnProperty(chr)){
-				retArray.push(thisNodesArray[chr]);
-			}
-		}
-	
-		return retArray;
-	};
-	
-	/**
-	 * Find array of trieNodes that match the infix key 
-	 */
-	var findNodeArray = function(key) {
-		key = cleanString(key);
-		var retArray = [root];
-		var kLen = key.length;
-		var chr;
-	
-		for (var i = 0; i < kLen; i++) {
-			chr = key.charAt(i);
-			retArray = mapNewArray(retArray, chr);
-		}
-
-		return retArray;
-	};
-	
-	
-	/**
-	 * retrieves objects on the given array of trieNodes.
-	 * Also sets toggleSet and doesnt traverse already marked branches.
-	 * You must call this with root to ensure complete tree is toggled.
-	 */
-	var markAndRetrieve = function(array, trie, toggleSet) {  
-		var stack = [ trie ];
-		while (stack.length > 0) {
-			var thisTrie = stack.pop();
-			if (thisTrie[2] == toggleSet) continue; //already traversed
-			thisTrie[2] = toggleSet;
-			if (thisTrie[0]) array.unshift(thisTrie[0]);
-			for (chr in thisTrie[1]) {
-				if (thisTrie[1].hasOwnProperty(chr)) {
-					stack.push(thisTrie[1][chr]);
-				}
-			}
-		}
-	}	
-	
-	return {
-		/**
-		 * Add (String, Object) to store 
-		 */
-		add : function( key, object ) {
-			key = cleanString(key);
-			var curNode = root;
-			var kLen = key.length; 
-			var chr, node;
-		
-			for(var i = 0; i < kLen; i++) {
-				chr = key.charAt(i);
-				node = curNode[1];
-				if(chr in node) {
-					curNode = node[chr];
-				} else {
-					curNode = node[chr] = [null, {}, root[2]]; // match roots' toggle setting 
-
-					if(isInfix) { // only add curNodes once, when created.
-						if(chr in infixRoots) { 
-							infixRoots[chr].push(curNode);
-						} else {
-							infixRoots[chr] = [curNode];
-						}
-					}
-				}
-			}
-		
-			if(curNode[0]) curNode[0].push(object);
-			else curNode[0] = [object];
-			return true;
-		},
-		
-		/**
-		 * Get object with two properties:
-		 * 	matches: array of all objects not matching entire key (String) 
-		 * 	misses:  array of all objects exactly matching the key (String)
-		 * 
-		 */
-		find : function(key) { // string 
-			var trieNodeArray = findNodeArray(key);
-			var toggleTo = !root[2];
-			var matches = [];
-			var misses = [];
-			var trie;
-		
-			for(arrName in trieNodeArray){
-				trie = trieNodeArray[arrName];
-				markAndRetrieve(matches, trie, toggleTo);
-			}
-			markAndRetrieve(misses, root, toggleTo); //will ensure whole tree is toggled also.
-			
-			return { matches : matches, misses : misses };
-		}
-	}
+	this.isInfix = !!isInfix;
+	this.isCaseSensitive = !!isCaseSensitive;
+	this.root = [null, {}, false]; //masterNode: object, char -> trieNode map, traverseToggle
+	this.infixRoots = (isInfix) ? {} : null;
 };
 
+/**
+ * Add (String, Object) to store 
+ */
+InfixTrie.prototype.add = function( key, object ) {
+	key = this.cleanString(key);
+
+	var kLen = key.length; 
+	var curNode = this.root;
+	var chr, node;
+
+	for(var i = 0; i < kLen; i++) {
+		chr = key.charAt(i);
+		node = curNode[1];
+		if(chr in node) {
+			curNode = node[chr];
+		} else {
+			curNode = node[chr] = [null, {}, this.root[2]]; // match roots' toggle setting 
+
+			if(this.isInfix) { // only add curNodes once, when created.
+				if(chr in this.infixRoots) { 
+					this.infixRoots[chr].push(curNode);
+				} else {
+					this.infixRoots[chr] = [curNode];
+				}
+			}
+		}
+	}
+
+	if(curNode[0]) curNode[0].push(object);
+	else curNode[0] = [object];
+	return true;
+},
+
+/**
+ * Get object with two properties:
+ * 	matches: array of all objects not matching entire key (String) 
+ * 	misses:  array of all objects exactly matching the key (String)
+ * 
+ */
+InfixTrie.prototype.find = function(key) { // string 
+	var trieNodeArray = this.findNodeArray(key);
+	var toggleTo = !this.root[2];
+	var matches = [];
+	var misses = [];
+	var trie;
+
+	for(arrName in trieNodeArray){
+		trie = trieNodeArray[arrName];
+		this.markAndRetrieve(matches, trie, toggleTo);
+	}
+	this.markAndRetrieve(misses, this.root, toggleTo); //will ensure whole tree is toggled.
+	
+	return { matches : matches, misses : misses };
+}
+
+/**
+ * Take an array of nodes, and construct new array of children nodes along the given chr.
+ */
+InfixTrie.prototype.mapNewArray = function(nodeArr, chr) {
+	
+	if(nodeArr[0] == this.root) {
+		return this.isInfix ? this.infixRoots[chr] : [this.root[1][chr]];
+	}
+	
+	var retArray = [];
+	var aLen = nodeArr.length;
+	var thisNodesArray;
+	for (var i = 0; i < aLen; i++) {
+		thisNodesArray = nodeArr[i][1];
+		if(thisNodesArray.hasOwnProperty(chr)){
+			retArray.push(thisNodesArray[chr]);
+		}
+	}
+
+	return retArray;
+};
+
+/**
+ * Find array of trieNodes that match the infix key 
+ */
+InfixTrie.prototype.findNodeArray = function(key) {
+	var key = this.cleanString(key);
+	var retArray = [this.root];
+	var kLen = key.length;
+	var chr;
+
+	for (var i = 0; i < kLen; i++) {
+		chr = key.charAt(i);
+		retArray = this.mapNewArray(retArray, chr);
+	}
+
+	return retArray;
+};
+
+
+/**
+ * retrieves objects on the given array of trieNodes.
+ * Also sets toggleSet and doesnt traverse already marked branches.
+ * You must call this with root to ensure complete tree is toggled.
+ */
+InfixTrie.prototype.markAndRetrieve = function(array, trie, toggleSet) {  
+	var stack = [ trie ];
+	while (stack.length > 0) {
+		var thisTrie = stack.pop();
+		if (thisTrie[2] == toggleSet) continue; //already traversed
+		thisTrie[2] = toggleSet;
+		if (thisTrie[0]) array.unshift(thisTrie[0]);
+		for (chr in thisTrie[1]) {
+			if (thisTrie[1].hasOwnProperty(chr)) {
+				stack.push(thisTrie[1][chr]);
+			}
+		}
+	}
+}	
+
+/**
+ * Conform case as needed. Clean invalid characters ?
+ */
+InfixTrie.prototype.cleanString = function( inStr ) {
+	if(!this.isCaseSensitive){
+		inStr = inStr.toLowerCase();
+	}
+	//invalid char clean here
+	return inStr;
+}
+
+/**
+ * Expose for testing
+ */
+$.ui.ufd.getNewTrie = function(isCaseSensitive, isInfix){
+	return new InfixTrie(isCaseSensitive, isInfix);
+}
 
 /* end InfixTrie */	
 
@@ -1075,7 +1074,7 @@ var getNewTrie = function(isInfix, isCaseSensitive) {
 $.extend($.ui.ufd, {
 	version: "@VERSION",
 	getter: "", //for methods that are getters, not chainables
-	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class property
+	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class attribute
 	
 	defaults: {
 		skin: "plain", // skin name 
@@ -1085,16 +1084,14 @@ $.extend($.ui.ufd, {
 		mimicCSS: ["marginLeft","marginTop","marginRight","marginBottom"], //copy these properties to widget. Width auto-copied unless min/manual.
 
 		infix: true, //infix search, not prefix 
-		log: false, // log to firebug console (if available) and logSelector (if it exists)
-		submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
-		triggerSelected: true, // selected option of the selectbox will be the initial value of the combo
-		caseSensitive: false, // case sensitive search 
-		allowDropUp: true, // if true, the options list will be placed above text input if flowing off bottom
-		allowLR: false, // show horizontal scrollbar
 		addEmphasis: false, // add <EM> tags around matches.
+		caseSensitive: false, // case sensitive search 
+		submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
+		homeEndForCursor: false, // should home/end affect dropdown or move cursor?
+		allowLR: false, // show horizontal scrollbar
 		calculateZIndex: false, // {max ancestor} + 1
 		useUiCss: false, // use jquery UI themeroller classes. 
-		homeEndForCursor: false, // should home/end affect dropdown or move cursor?
+		log: false, // log to firebug console (if available) and logSelector (if it exists)
 
 		listMaxHeight: 200, // CSS value takes precedence
 		minWidth: 50, // don't autosize smaller then this.
