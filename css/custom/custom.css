@@ -21,10 +21,20 @@
 	background-color: gray; 
 }
 
+.ufd.custom input.focus {
+	border-color: red; 
+}
+
 .ufd.custom button {
     width: 17px;
     height: 22px;
     background: black;
+    border: 1px solid black;
+    border-left: 0px;
+}
+
+.ufd.custom button.focus {
+	border-color: red; 
 }
 
 .ufd.custom button.hover {
@@ -42,7 +52,7 @@
 /* dropdown */
 
 #ufd-container .custom div.list-wrapper {
-    border: 1px solid black;
+    border: 1px solid red;
 }
 
 #ufd-container .custom div.list-scroll {

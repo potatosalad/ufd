@@ -273,6 +273,9 @@ $.widget(widgetName, {
 		// this.log("real input focus");
 		this.internalFocus = true;
 		this._triggerEventOnMaster("focus");
+		this.wrapper.addClass(this.options.css.inputFocus);
+		this.input.addClass(this.options.css.inputFocus);
+		this.button.addClass(this.options.css.inputFocus);
 		this.filter(true); //show all
 		this.inputFocus();
 		this.showList();
@@ -282,6 +285,9 @@ $.widget(widgetName, {
 		// this.log("real loose focus (blur)");
 		this.internalFocus = false;
 		this.hideList();  
+		this.wrapper.removeClass(this.options.css.inputFocus);
+		this.input.removeClass(this.options.css.inputFocus);
+		this.button.removeClass(this.options.css.inputFocus);
 		this.tryToSetMaster();
 		this._triggerEventOnMaster("blur");
 	},
@@ -1139,6 +1145,7 @@ $.extend($.ui.ufd, {
 			//skin: "plain", // if not set, will inherit options.skin
 			input: "",
 			inputDisabled: "disabled",
+			inputFocus: "focus",
 
 			button: "",
 			buttonIcon: "icon",

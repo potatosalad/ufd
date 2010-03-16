@@ -20,11 +20,18 @@
     background-color: gray !important;
 }
 
+.ufd.plain input.focus {
+}
+
 .ufd.plain button {
     width: 17px;
     height: 19px;
     background: url(icon.gif) no-repeat 0px 0px;
 }
+
+.ufd.plain button.focus {
+}
+
 
 .ufd.plain button.hover {
 	background-position: -17px 0px;
