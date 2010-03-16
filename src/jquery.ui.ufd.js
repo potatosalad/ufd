@@ -606,6 +606,8 @@ $.widget(widgetName, {
 			newSelectWidth = this.options.manualWidth; 
 		} else if (newSelectWidth < this.options.minWidth) {
 			newSelectWidth = this.options.minWidth;
+		} else if (this.options.maxWidth && (newSelectWidth > this.options.maxWidth) ) {
+			newSelectWidth = this.options.maxWidth;
 		}
 
 		var buttonWidth = this.button.outerWidth();
@@ -1126,6 +1128,7 @@ $.extend($.ui.ufd, {
 
 		listMaxVisible: 10, // number of visible items
 		minWidth: 50, // don't autosize smaller then this.
+		maxWidth: null, // null, or don't autosize larger then this.
 		manualWidth: null, //override selectbox width; set explicit width
 		viewAhead: 1, // items ahead to keep in view when cursor scrolling
 		pageLength: 10, // number of visible items jumped on pgup/pgdown.
