@@ -100,8 +100,9 @@
 		<script type="text/javascript" >
 		$(function () {
 			$("select.sizeDemo1").ufd();
-			$("select.sizeDemo2").ufd({minimumSize: 20});
-			$("select.sizeDemo3").ufd({manualWidth: 300});
+			$("select.sizeDemo2").ufd({minWidth: 100});
+			$("select.sizeDemo3").ufd({manualWidth: 100});
+			$("select.sizeDemo4").ufd({maxWidth: 100});
 		});    
 	    </script>
 
@@ -118,21 +119,27 @@
       </select>
 	  <br/>
       <br/>
-	  <label>Content less then minimum size of 20px</label>  
+	  <label>Content less then minWidth of 100px</label>  
 	  <br/>
       <select class="sizeDemo2">
         <option value=""></option>
       </select>
 	  <br/>
       <br/>
-	  <label>manualWidth @ 300px</label>  
+	  <label>manualWidth @ 100px</label>  
 	  <br/>
       <select class="sizeDemo3">
         <option value="AL">a</option>
       </select>
 	  <br/>
       <br/>
-	<hr/>
+	  <label>Content more then maxWidth of 100px</label>  
+	  <br/>
+      <select class="sizeDemo4">
+        <option value="AL">supercalifragilisticexpialadocious?</option>
+      </select>
+	  <br/>
+      <br/>	<hr/>
 	</div>
     
     <div>
@@ -289,7 +296,27 @@
       <hr/>
 	</div>
 
+        
+    <div>
+    	<h2>Empty select</h2>
+		<script type="text/javascript" >
+		$(function () {
+			 $("#null").ufd({log: true, addEmphasis: true}).html("").ufd("changeOptions");
+			 
+		});
+	    </script>
 
+	    <p>  </p>
+	    
+		<label for="null">Nothing!</label><br />
+      	<select id="null" name="null">
+		</select>
+      <br/>
+
+
+      <hr/>
+	</div>
+    
       
     <div>
     	<h2>zIndex correction on iE6</h2>

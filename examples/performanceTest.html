@@ -16,7 +16,7 @@
 	<link href="../css/plain/plain.css" rel="stylesheet" type="text/css" />
 	
 	<!-- required dependency -->
-	<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+	<script type="text/javascript" src="js/jquery-1.4.2.js"></script>
 	<script type="text/javascript" src="js/ui.core.js"></script>
 	
 	<!--  if you want iE6 not to poke select boxes thru your dropdowns, you need ... -->
@@ -72,7 +72,7 @@
 			
 			//init new UFD
 			
-			pt.ufd({addEmphasis: emphasis}); 
+			pt.ufd({addEmphasis: emphasis, log: true}); 
 			
 			var end = new Date().getTime();
 			
