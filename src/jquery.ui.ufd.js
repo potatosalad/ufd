@@ -411,7 +411,9 @@ $.widget(widgetName, {
 		var searchTextLength = searchText.length || 0;
 		var options = this.selectbox.get(0).options;
 		var tritem, index, indexB, li, text, stPattern, escapedST;
-		isAddEmphasis = (isAddEmphasis && searchTextLength > 0); // don't add emphasis to 0-length  
+		index = array.length;
+		
+		isAddEmphasis = (isAddEmphasis && searchTextLength > 0 && index > 1); // don't add emphasis to 0-length or single item  
 		
 		if(isAddEmphasis) {
 			escapedST = searchText.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g,"\\$1"); // http://xkr.us/js/regexregex 
@@ -421,7 +423,6 @@ $.widget(widgetName, {
 		// this.log("add emphasis? " + isAddEmphasis);
 		// console.time("em");
 		
-		index = array.length;
 		while(index--) {
 			tritem = array[index];
 			indexB = tritem.length;
