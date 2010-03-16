@@ -21,7 +21,6 @@
 
 #ufd-container .uiCss div.list-wrapper {
     border-width: 1px;
-    max-height: 200px; /* must set this explicitly, as height is manipulated */ 
 }
 
 #ufd-container .uiCss li {

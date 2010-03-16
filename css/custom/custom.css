@@ -43,9 +43,8 @@
 
 #ufd-container .custom div.list-wrapper {
     border: 1px solid black;
-    max-height: 160px; /* must set this explicitly, as height is manipulated */ 
-    
 }
+
 #ufd-container .custom div.list-scroll {
 }
 
