@@ -36,7 +36,6 @@ $.widget(widgetName, {
 		var selectName = this.selectbox.attr("name");
 		var suffixName = selectName + this.options.suffix;
 		var inputName = this.options.submitFreeText ? selectName : suffixName;
-
 		
 		if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
 		if(this.options.calculateZIndex) this.options.zIndexPopup = this._calculateZIndex();
@@ -86,7 +85,7 @@ $.widget(widgetName, {
 		var key, isKeyDown, isKeyPress,isKeyUp;
 		var css = this.options.css;
 		
-		this.log("initEvents");
+		// this.log("initEvents");
 
 		this.input.bind("keydown keypress keyup", function(event) {
 			// Key handling is tricky; here is great key guide: http://unixpapa.com/js/key.html
@@ -120,7 +119,7 @@ $.widget(widgetName, {
 			// Only some browsers fire keyUp on tab in, ignore if it happens 
 			if(!isKeyUp == ((key != keyCodes.TAB) && (key != keyCodes.ENTER)) ) return;
 
-			self.log("Key: " + key + " event: " + event.type);
+			// self.log("Key: " + key + " event: " + event.type);
 
 			self.lastKey = key;
 
@@ -175,12 +174,11 @@ $.widget(widgetName, {
 				self.stopEvent(e);
 				return;
 			}
-			self.log("input click: " + e.target);
+			// self.log("input click: " + e.target);
 			if (!self.listVisible()) { 
 				self.filter(true); //show all 
 				self.inputFocus();
 				self.showList();
-				self.scrollTo();
 			}          
 		}); 
 		this.input.bind("focus", function(e) {
@@ -188,7 +186,7 @@ $.widget(widgetName, {
 				self.stopEvent(e);
 				return;
 			}
-			self.log("input focus");
+			// self.log("input focus");
 			if(!self.internalFocus){
 				self.realFocusEvent();
 			}
@@ -203,7 +201,7 @@ $.widget(widgetName, {
 				self.stopEvent(e);
 				return;
 			}
-			self.log("button click: " + e.target);
+			// self.log("button click: " + e.target);
 			if (self.listVisible()) { 
 				self.hideList();
 				self.inputFocus();
@@ -212,7 +210,6 @@ $.widget(widgetName, {
 				self.filter(true); //show all 
 				self.inputFocus();
 				self.showList();
-				self.scrollTo();
 			}          
 		}); 
 
@@ -252,18 +249,18 @@ $.widget(widgetName, {
 
 		this.selectbox.bind("change." + widgetName, function(e) {
 			if(self.isUpdatingMaster){
-				self.log("master changed but we did the update");
+				// self.log("master changed but we did the update");
 				self.isUpdatingMaster = false;
 				return true;
 			}
-			self.log("master changed; reverting");
+			// self.log("master changed; reverting");
 			self.revertSelected();
 		});
 
 		// click anywhere else; keep reference for selective unbind
 		this._myDocClickHandler = function(e) {
 			if ((self.button.get(0) == e.target) || (self.input.get(0) == e.target)) return;
-			self.log("unfocus document click : " + e.target);
+			// self.log("unfocus document click : " + e.target);
 			if (self.internalFocus) self.realLooseFocusEvent();
 		};
 		$(document).bind("click." + widgetName, this._myDocClickHandler);
@@ -273,17 +270,16 @@ $.widget(widgetName, {
 	// pseudo events
 
 	realFocusEvent: function() {
-		this.log("real input focus");
+		// this.log("real input focus");
 		this.internalFocus = true;
 		this._triggerEventOnMaster("focus");
 		this.filter(true); //show all
 		this.inputFocus();
 		this.showList();
-		this.scrollTo();	    	
 	},
 
 	realLooseFocusEvent: function() {
-		this.log("real loose focus (blur)");
+		// this.log("real loose focus (blur)");
 		this.internalFocus = false;
 		this.hideList();  
 		this.tryToSetMaster();
@@ -305,7 +301,7 @@ $.widget(widgetName, {
 	// methods
 
 	inputFocus: function() {
-		this.log("inputFocus: restore input component focus");
+		// this.log("inputFocus: restore input component focus");
 		this.input.focus();
 
 		if (this.getCurrentTextValue().length) {
@@ -314,19 +310,19 @@ $.widget(widgetName, {
 	},
 
 	inputBlur: function() {
-		this.log("inputBlur: loose input component focus");
+		// this.log("inputBlur: loose input component focus");
 		this.input.blur();
 	},	 
 
 	showList: function() {
-		this.log("showlist");
+		// this.log("showlist");
 		if(this.listVisible()) return;
 		this.listWrapper.removeClass(this.css.hidden);
 		this.setListDisplay();
 	},
 
 	hideList: function() {
-		this.log("hide list");
+		// this.log("hide list");
 		if(!this.listVisible()) return;
 		this.listWrapper.addClass(this.css.hidden);
 		this.listItems.removeClass(this.css.hidden);   
@@ -338,7 +334,7 @@ $.widget(widgetName, {
 	 * if doDelay, will delay execution to allow re-entry to cancel.
 	 */
 	filter: function(showAll, doDelay) {
-		this.log("filter: " );
+		// this.log("filter: " );
 		var self = this;
 
 		//cancel any pending
@@ -350,7 +346,7 @@ $.widget(widgetName, {
 		var searchText = self.getCurrentTextValue();
 
 		var search = function() {
-			self.log("filter search");
+			// self.log("filter search");
 			// console.time("filter search");
 			var mm = self.trie.find(searchText); // search!
 			self.trie.matches = mm.matches;
@@ -363,7 +359,7 @@ $.widget(widgetName, {
 		};
 
 		var screenUpdate = function() {
-			self.log("screen update");
+			// self.log("screen update");
 
 			// console.time("screenUpdate");
 			var active = self.getActive(); //get item before class-overwrite
@@ -390,15 +386,14 @@ $.widget(widgetName, {
 				self.setActive(active.get(0));  
 
 			} else if(self.trie.matches.length) {
-				var firstmatch = self.trie.matches[0];
-				self.setActive(firstmatch[0]); //first instance of first match
+				var firstmatch = self.listItems.filter(":visible:first");
+				self.setActive(firstmatch);
 
 			} else { 
 				self.setActive(null);
 			}
 			// console.timeEnd("screenUpdate");
 
-			this.hasEmphasis = true;
 
 			self.setListDisplay();
 		};
@@ -421,8 +416,9 @@ $.widget(widgetName, {
 		if(isAddEmphasis) {
 			escapedST = searchText.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g,"\\$1"); // http://xkr.us/js/regexregex 
 			stPattern = new RegExp("(" + escapedST + ")", "gi"); // $1
+			this.hasEmphasis = true;
 		}
-		this.log("add emphasis? " + isAddEmphasis);
+		// this.log("add emphasis? " + isAddEmphasis);
 		// console.time("em");
 		
 		index = array.length;
@@ -444,9 +440,9 @@ $.widget(widgetName, {
 	},
 	
 	removeEmphasis : function() {
-		this.log("remove emphasis");
+		// this.log("remove emphasis");
 		if(!this.hasEmphasis){
-			this.log("no emphasis to remove");
+			// this.log("no emphasis to remove");
 			return;
 		}
 		// console.time("rem");
@@ -467,7 +463,7 @@ $.widget(widgetName, {
 
 	// attempt update of master - returns true if update good or already set correct. 
 	tryToSetMaster: function() {
-		this.log("t.s.m");
+		// this.log("t.s.m");
 
 		var optionIndex = null;
 		var active = this.getActive();
@@ -475,12 +471,12 @@ $.widget(widgetName, {
 			optionIndex = active.attr("name"); //sBox pointer index
 		}
 		if (optionIndex == null || optionIndex == "" || optionIndex < 0) {
-			this.log("no active, master not set.");
+			// this.log("no active, master not set.");
 			if (this.options.submitFreeText) {
 				return false;
 				
 			} else { 
-				this.log("Not freetext and no active set; revert.");
+				// this.log("Not freetext and no active set; revert.");
 				this.revertSelected();
 				return false;
 			}
@@ -496,20 +492,20 @@ $.widget(widgetName, {
 			if(optionIndex != curIndex){
 				this.isUpdatingMaster = true;
 				sBox.selectedIndex = optionIndex;
-				this.log("master selectbox set to: " + option.text);
+				// this.log("master selectbox set to: " + option.text);
 				this._triggerEventOnMaster("change");
 
 			} // else already correctly set, no change
 			return true;
 			
 		} // else have a non-matched freetext
-		this.log("unmatched freetext, master not set.");
+		// this.log("unmatched freetext, master not set.");
 		
 		return false;
 	},
 
 	_populateFromMaster: function() {
-		this.log("populate from master select");
+		// this.log("populate from master select");
 		// console.time("prep");
 
 		this.disable();
@@ -530,7 +526,7 @@ $.widget(widgetName, {
 		var thisOpt,loopCountdown,index;
 
 		loopCountdown = options.length;
-		this.log("loopCountDown: " + loopCountdown);
+		// this.log("loopCountDown: " + loopCountdown);
 		index = 0;
 		while(loopCountdown--) {
 			thisOpt = options[index++];
@@ -548,9 +544,9 @@ $.widget(widgetName, {
 
 		// console.timeEnd("build");
 
-		this.listItems = $("li", this.list);
 		// console.time("kids");
 		var theLiSet = this.list.get(0).getElementsByTagName('LI'); // much faster array then .childElements !
+		this.listItems = $(theLiSet);
 
 		loopCountdown = theLiSet.length;
 		index = 0;
@@ -623,21 +619,21 @@ $.widget(widgetName, {
 		this.listWrapper.width(newSelectWidth - listWrapBP);
 		this.listScroll.width(newSelectWidth - listWrapBP);
 
-		this.log(newSelectWidth + " : " + inputWidth + " : " + 
-				buttonWidth + " : " + (newSelectWidth - listWrapBP));
+		/* this.log(newSelectWidth + " : " + inputWidth + " : " + 
+				buttonWidth + " : " + (newSelectWidth - listWrapBP)); */
 		// console.timeEnd("4");
 
 	},
 
 	setInputFromMaster: function() {
-		var selectedIndex = this.selectbox.get(0).selectedIndex;
+		var selectNode = this.selectbox.get(0);
 		var val = "";
 		try {
-			val = selectNode.options[selectedIndex].text;
+			val = selectNode.options[selectNode.selectedIndex].text;
 		} catch(e) {
 			//must have no items!
 		}
-		this.log("setting input to: " + val);
+		//this.log("setting input to: " + val);
 		this.input.val(val);
 	},
 
@@ -652,7 +648,7 @@ $.widget(widgetName, {
 		// console.time("listDisplay");
 		if(!this.itemHeight) { // caclulate only once
 			this.itemHeight = this.listItems.filter("li:first").outerHeight();
-			this.log("listItemHeight: " + this.itemHeight);
+			// this.log("listItemHeight: " + this.itemHeight);
 		}
 		var visibleCount = this.visibleCount;
 
@@ -666,7 +662,7 @@ $.widget(widgetName, {
 			this.listScroll.css(this.overflowCSS, "hidden");
 		}
 		
-		this.log("height set to: " + height);
+		// this.log("height set to: " + height);
 		this.listScroll.height(height); 
 		this.listWrapper.height(height); 
 		
@@ -689,6 +685,7 @@ $.widget(widgetName, {
 		}
 		this.listWrapper.css("left", offset.left);
 		this.listWrapper.css("top", top );			
+		this.scrollTo();
 
 		// console.timeEnd("listDisplay");
 		
@@ -697,27 +694,27 @@ $.widget(widgetName, {
 
 	//returns active (hovered) element of the dropdown list
 	getActive: function() {
-		this.log("get active");
+		// this.log("get active");
 		if(this.selectedLi == null) return $([]);
 		return $(this.selectedLi); 
 	},
 
 	//highlights the item given
 	setActive: function(activeItem) {
-		this.log("setActive");
+		// this.log("setActive");
 		$(this.selectedLi).removeClass(this.css.liActive);
 		this.selectedLi = activeItem;
 		$(this.selectedLi).addClass(this.css.liActive);
 	},
 
 	selectFirst: function() {
-		this.log("selectFirst");
+		// this.log("selectFirst");
 		var toSelect = this.listItems.filter(":not(.invisible):first");
 		this.afterSelect( toSelect );
 	},
 
 	selectLast: function() {
-		this.log("selectFirst");
+		// this.log("selectFirst");
 		var toSelect = this.listItems.filter(":not(.invisible):last");
 		this.afterSelect( toSelect );
 	},
@@ -725,7 +722,7 @@ $.widget(widgetName, {
 
 	//highlights list item before currently active item
 	selectPrev: function(isPageLength) {
-		this.log("hilightprev");
+		// this.log("hilightprev");
 		var count = isPageLength ? this.options.pageLength : 1;
 		var toSelect = this.searchRelativeVisible(false, count);
 		this.afterSelect( toSelect );
@@ -733,7 +730,7 @@ $.widget(widgetName, {
 	
 	//highlights item of the dropdown list next to the currently active item
 	selectNext: function(isPageLength) {
-		this.log("hilightnext");
+		// this.log("hilightnext");
 		var count = isPageLength? this.options.pageLength : 1;
 		var toSelect = this.searchRelativeVisible(true, count);
 		this.afterSelect( toSelect );
@@ -750,7 +747,7 @@ $.widget(widgetName, {
 	},		
 
 	searchRelativeVisible: function(isSearchDown, count) {
-		this.log("searchRelative: " + isSearchDown + " : " + count);
+		// this.log("searchRelative: " + isSearchDown + " : " + count);
 		
 		var active = this.getActive();
 		if (!active.length) {
@@ -774,7 +771,7 @@ $.widget(widgetName, {
 	
 	//scrolls list wrapper to active
 	scrollTo: function() {
-		this.log("scrollTo");
+		// this.log("scrollTo");
 		if ("scroll" != this.listScroll.css(this.overflowCSS)) return;
 		var active = this.getActive();
 		if(!active.length) return;
@@ -796,13 +793,13 @@ $.widget(widgetName, {
 			top = scrollTop + activePos - listHeight + activeHeight + viewAheadGap;
 		}
 		else return; // no need to scroll
-		this.log("top: " + top);
+		// this.log("top: " + top);
 		this.listScroll.scrollTop(top);
 	},		
 
 	getCurrentTextValue: function() {
 		var input = $.trim(this.input.val()); 
-		this.log("Using input value: " + input);
+		// this.log("Using input value: " + input);
 		return input;
 	},
 
@@ -830,12 +827,12 @@ $.widget(widgetName, {
 
 	listVisible: function() {
 		var isVisible = !this.listWrapper.hasClass(this.css.hidden);
-		this.log("is list visible?: " + isVisible);
+		// this.log("is list visible?: " + isVisible);
 		return isVisible;
 	},
 
 	disable: function() {
-		this.log("disable");
+		// this.log("disable");
 
 		this.hideList();
 		this.isDisabled = true;
@@ -845,7 +842,7 @@ $.widget(widgetName, {
 	},
 
 	enable: function() {
-		this.log("enable");
+		// this.log("enable");
 
 		this.isDisabled = false;
 		this.button.removeClass(this.css.buttonDisabled);
@@ -874,7 +871,7 @@ $.widget(widgetName, {
 	},
 
 	selectAll: function() {
-		this.log("Select All");
+		// this.log("Select All");
 		this.input.get(0).select();
 		//this.selection(this.input.get(0), 0, this.input.val().length);
 	},
@@ -895,7 +892,7 @@ $.widget(widgetName, {
 		if(window.console && window.console.log) {  // firebug logger
 			console.log(msg);
 		}
-		if(this.logNode && this.logNode.length) {
+		if( this.logNode &&  this.logNode.length) {
 			this.logNode.prepend("<div>" + msg + "</div>");
 		}
 	},
@@ -911,12 +908,12 @@ $.widget(widgetName, {
 	},
 
 	changeOptions: function() {
-		this.log("changeOptions");
+		// this.log("changeOptions");
 		this._populateFromMaster();
 	},		
 
 	destroy: function() {
-		this.log("called destroy");
+		// this.log("called destroy");
 		$.widget.prototype.destroy.apply(this, arguments); // default destroy
 
 		if(this.selectIsWrapped) { //unwrap
