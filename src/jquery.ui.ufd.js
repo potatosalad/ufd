@@ -391,13 +391,11 @@ $.widget(widgetName, {
 			if(!oldActiveHidden && active.length && self.trie.matches.length){
 				self.setActive(active.get(0));  
 
-			} else if(self.trie.matches.length) {
+			} else {
 				var firstmatch = self.listItems.filter(":visible:first");
-				self.setActive(firstmatch);
+				self.setActive(firstmatch.get(0));
 
-			} else { 
-				self.setActive(null);
-			}
+			} 
 			// console.timeEnd("screenUpdate");
 
 
@@ -514,7 +512,7 @@ $.widget(widgetName, {
 	_populateFromMaster: function() {
 		// this.log("populate from master select");
 		// console.time("prep");
-
+		var isEnabled = !this.selectbox.filter("[disabled]").length; //remember incoming state
 		this.disable();
 		this.setDimensions();
 
@@ -567,8 +565,9 @@ $.widget(widgetName, {
 		
 		this.visibleCount = theLiSet.length;
 		this.setInputFromMaster();
+		this.selectedLi = null;
 		
-		this.enable();
+		if(isEnabled) this.enable();
 		// console.timeEnd("tidy");
 
 	},
@@ -577,15 +576,27 @@ $.widget(widgetName, {
 		// console.time("1");
 
 		this.wrapper.addClass(this.css.hidden);
-		if(this.selectIsWrapped) { //unwrap
+		if(this.selectIsWrapped && (!this.options.manualWidth || this.options.unwrapForCSS)) { // unwrap
 			this.wrapper.before(this.selectbox);
+			this.selectIsWrapped = false;
 		}
 
 		// console.timeEnd("1");
 		// console.time("2");
 
-		//get dimensions un-wrapped, in case of % width etc.
-		this.originalSelectboxWidth = this.selectbox.outerWidth(); 
+		//match original width
+		var newSelectWidth;
+		if(this.options.manualWidth) {
+			newSelectWidth = this.options.manualWidth; 
+		} else {
+			newSelectWidth = this.selectbox.outerWidth();
+			if (newSelectWidth < this.options.minWidth) {
+				newSelectWidth = this.options.minWidth;
+			} else if (this.options.maxWidth && (newSelectWidth > this.options.maxWidth) ) {
+				newSelectWidth = this.options.maxWidth;
+			}
+		}
+		
 		var props = this.options.mimicCSS;
 		for(propPtr in props){
 			var prop = props[propPtr];
@@ -595,23 +606,16 @@ $.widget(widgetName, {
 		// console.timeEnd("2");
 		// console.time("2.5");
 
-		this.wrapper.get(0).appendChild(this.selectbox.get(0)); //wrap
+		if(!this.selectIsWrapped) { // wrap
+			this.wrapper.get(0).appendChild(this.selectbox.get(0));
+			this.selectIsWrapped = true;
+		}
+		
+		this.wrapper.removeClass(this.css.hidden);
 
 		// console.timeEnd("2.5");
 		// console.time("3");
 
-		this.wrapper.removeClass(this.css.hidden);
-		this.selectIsWrapped = true;
-
-		//match original width
-		var newSelectWidth = this.originalSelectboxWidth;
-		if(this.options.manualWidth) {
-			newSelectWidth = this.options.manualWidth; 
-		} else if (newSelectWidth < this.options.minWidth) {
-			newSelectWidth = this.options.minWidth;
-		} else if (this.options.maxWidth && (newSelectWidth > this.options.maxWidth) ) {
-			newSelectWidth = this.options.maxWidth;
-		}
 
 		var buttonWidth = this.button.outerWidth();
 		var inputBP = this.input.outerWidth() - this.input.width();
@@ -846,6 +850,7 @@ $.widget(widgetName, {
 		this.button.addClass(this.css.buttonDisabled);
 		this.input.addClass(this.css.inputDisabled);
 		this.input.attr("disabled", "disabled");
+		this.selectbox.attr("disabled", "disabled");
 	},
 
 	enable: function() {
@@ -855,6 +860,7 @@ $.widget(widgetName, {
 		this.button.removeClass(this.css.buttonDisabled);
 		this.input.removeClass(this.css.inputDisabled);
 		this.input.removeAttr("disabled");
+		this.selectbox.removeAttr("disabled");
 	},
 
 	/*
@@ -1129,11 +1135,12 @@ $.extend($.ui.ufd, {
 		calculateZIndex: false, // {max ancestor} + 1
 		useUiCss: false, // use jquery UI themeroller classes. 
 		log: false, // log to firebug console (if available) and logSelector (if it exists)
+		unwrapForCSS: false, // unwrap select on reload to get % right on units etc. unwrap causes flicker on reload in iE6
 
 		listMaxVisible: 10, // number of visible items
 		minWidth: 50, // don't autosize smaller then this.
 		maxWidth: null, // null, or don't autosize larger then this.
-		manualWidth: null, //override selectbox width; set explicit width
+		manualWidth: null, //override selectbox width; set explicit width - stops flicker on reload in iE6 (unless unwrapForCSS) as no unwrap needed
 		viewAhead: 1, // items ahead to keep in view when cursor scrolling
 		pageLength: 10, // number of visible items jumped on pgup/pgdown.
 		delayFilter: ($.support.style) ? 1 : 150, // msec to wait before starting filter (or get cancelled); long for IE 

@@ -17,6 +17,7 @@
 }
 
 .ufd.plain input.disabled {
+	color: black;
     background-color: gray !important;
 }
 

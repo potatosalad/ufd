@@ -19,6 +19,7 @@
 
 
 .ufd.sexy input.disabled {
+	color: black;
 	background-color: graytext;
 	background-image: none;
 }
