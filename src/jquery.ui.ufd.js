@@ -212,7 +212,22 @@ $.widget(widgetName, {
 				self.showList();
 			}          
 		}); 
-
+		
+		/*	
+		 * Swallow mouse scroll to prevent body scroll
+		 * thanks http://www.switchonthecode.com/tutorials/javascript-tutorial-the-scroll-wheel
+		*/
+		this.listScroll.bind("DOMMouseScroll mousewheel", function(e) {
+			self.stopEvent(e);
+			e = e ? e : window.event;
+			var normal = e.detail ? e.detail * -1 : e.wheelDelta / 40;
+			
+			
+			var curST = self.listScroll.scrollTop();
+			var newScroll = curST + ((normal > 0) ? -1 * self.itemHeight : 1 * self.itemHeight);
+			self.listScroll.scrollTop(newScroll);
+		});
+		
 		this.listWrapper.bind("mouseover mouseout click", function(e) {
 			if ( "LI" == e.target.nodeName.toUpperCase() ) {
 				if(self.setActiveTimeout) { //cancel pending selectLI -> active
@@ -780,12 +795,12 @@ $.widget(widgetName, {
 		return active;
 	},
 	
-	//scrolls list wrapper to active
+	//scrolls list wrapper to active: true if scroll occured
 	scrollTo: function() {
 		// this.log("scrollTo");
-		if ("scroll" != this.listScroll.css(this.overflowCSS)) return;
+		if ("scroll" != this.listScroll.css(this.overflowCSS)) return false;
 		var active = this.getActive();
-		if(!active.length) return;
+		if(!active.length) return false;
 		
 		var activePos = Math.floor(active.position().top);
 		var activeHeight = active.outerHeight(true);
@@ -803,9 +818,10 @@ $.widget(widgetName, {
 		} else if( (activePos + activeHeight) >= (listHeight - viewAheadGap) ) { // off bottom
 			top = scrollTop + activePos - listHeight + activeHeight + viewAheadGap;
 		}
-		else return; // no need to scroll
+		else return false; // no need to scroll
 		// this.log("top: " + top);
 		this.listScroll.scrollTop(top);
+		return true; // we did scroll.
 	},		
 
 	getCurrentTextValue: function() {
@@ -816,6 +832,8 @@ $.widget(widgetName, {
 
 
 	stopEvent: function(e) {
+		e = e ? e : window.event;
+		e.cancel = true;
 		e.cancelBubble = true;
 		e.returnValue = false;
 		if (e.stopPropagation) {e.stopPropagation(); }
@@ -1055,7 +1073,12 @@ InfixTrie.prototype.findNodeArray = function(key) {
 InfixTrie.prototype.mapNewArray = function(nodeArr, chr) {
 	
 	if(nodeArr.length && nodeArr[0] == this.root) {
-		return this.isInfix ? this.infixRoots[chr] : [this.root[1][chr]];
+		if(this.isInfix) {
+			return (this.infixRoots[chr] || []); // return empty array if undefined  
+		} else {
+			var prefixRoot = this.root[1][chr];
+			return (prefixRoot) ? [prefixRoot] : [];
+		}
 	}
 	
 	var retArray = [];
