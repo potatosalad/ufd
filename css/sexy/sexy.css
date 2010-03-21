@@ -5,8 +5,9 @@
 */
 
 .ufd.sexy {
-    height: 22px;
+    height: 20px;
     background-color: #B5B8C8; /* http://blog.toolman.geek.nz/2009/12/annoying-ie6-bug-of-day.html */
+    border: 1px solid #B5B8C8;
 }
 
 .ufd.sexy input {
@@ -14,7 +15,7 @@
 	line-height: 18px  !important;
     padding: 1px 3px;
     background: #fff url(text-bg.gif) repeat-x 0 0;
-    border: 1px solid #B5B8C8;
+    border: 0px;
 }
 
 
@@ -26,27 +27,34 @@
 
 
 .ufd.sexy button {
-    width: 17px;
+    width: 16px;
     height: 21px;
-    background: url(icon.gif) no-repeat 0 0;
+    background: url(icon.gif) no-repeat 0px -1px;
+    margin-left: 1px;
 }
 
 .ufd.sexy button.hover {
-	background-position: -17px 0px;
+	background-position: -17px -1px;
 }
 
 .ufd.sexy button.mouseDown {
-	background-position: -34px 0px;
+	background-position: -34px -1px;
 }
 
 .ufd.sexy button.disabled {
-	background-position: -51px 0px !important; 
+	background-position: -51px -1px !important; 
 }
 
-#ufd-container .sexy div.list-wrapper {
+#ufd-container .sexy div.list-scroll {
 
     border: 1px solid #B5B8C8;
+    border-top-width: 0px;
     background-color: #FFFFFF;
+}
+
+#ufd-container .sexy div.list-wrapper-up div.list-scroll {
+    border-top-width: 1px;
+    border-bottom-width: 0px;
 }
 
 #ufd-container .sexy li {

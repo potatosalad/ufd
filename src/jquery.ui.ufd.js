@@ -228,7 +228,7 @@ $.widget(widgetName, {
 			self.listScroll.scrollTop(newScroll);
 		});
 		
-		this.listWrapper.bind("mouseover mouseout click", function(e) {
+		this.listScroll.bind("mouseover mouseout click", function(e) {
 			if ( "LI" == e.target.nodeName.toUpperCase() ) {
 				if(self.setActiveTimeout) { //cancel pending selectLI -> active
 					clearTimeout(self.setActiveTimeout);
@@ -288,7 +288,7 @@ $.widget(widgetName, {
 		// this.log("real input focus");
 		this.internalFocus = true;
 		this._triggerEventOnMaster("focus");
-		this.wrapper.addClass(this.options.css.inputFocus);
+		this.wrapper.addClass(this.options.css.skin + "-" + this.options.css.inputFocus); // for ie6 support
 		this.input.addClass(this.options.css.inputFocus);
 		this.button.addClass(this.options.css.inputFocus);
 		this.filter(true); //show all
@@ -300,7 +300,7 @@ $.widget(widgetName, {
 		// this.log("real loose focus (blur)");
 		this.internalFocus = false;
 		this.hideList();  
-		this.wrapper.removeClass(this.options.css.inputFocus);
+		this.wrapper.removeClass(this.options.css.skin + "-" + this.options.css.inputFocus);
 		this.input.removeClass(this.options.css.inputFocus);
 		this.button.removeClass(this.options.css.inputFocus);
 		this.tryToSetMaster();
@@ -625,28 +625,31 @@ $.widget(widgetName, {
 			this.wrapper.get(0).appendChild(this.selectbox.get(0));
 			this.selectIsWrapped = true;
 		}
-		
-		this.wrapper.removeClass(this.css.hidden);
 
+		this.wrapper.removeClass(this.css.hidden);
+		this.listWrapper.removeClass(this.css.hidden);
+		
 		// console.timeEnd("2.5");
 		// console.time("3");
 
 
-		var buttonWidth = this.button.outerWidth();
-		var inputBP = this.input.outerWidth() - this.input.width();
+		var buttonWidth = this.button.outerWidth(true);
+		var wrapperBP = this.wrapper.outerWidth() - this.wrapper.width();
+		var inputBP = this.input.outerWidth(true) - this.input.width();
+		var listScrollBP = this.listScroll.outerWidth() - this.listScroll.width();
 		var inputWidth = newSelectWidth - buttonWidth - inputBP;
-		var listWrapBP = this.listWrapper.outerWidth() - this.listWrapper.width();
-
 		// console.timeEnd("3");
 		// console.time("4");
 
 		this.input.width(inputWidth);
 		this.wrapper.width(newSelectWidth);
-		this.listWrapper.width(newSelectWidth - listWrapBP);
-		this.listScroll.width(newSelectWidth - listWrapBP);
+		this.listWrapper.width(newSelectWidth + wrapperBP);
+		this.listScroll.width(newSelectWidth + wrapperBP - listScrollBP);
 
-		/* this.log(newSelectWidth + " : " + inputWidth + " : " + 
-				buttonWidth + " : " + (newSelectWidth - listWrapBP)); */
+		console.log(newSelectWidth + " : " + inputWidth + " : " + 
+				buttonWidth + " : " + listScrollBP); 
+		
+		this.listWrapper.addClass(this.css.hidden);
 		// console.timeEnd("4");
 
 	},
@@ -657,7 +660,7 @@ $.widget(widgetName, {
 		try {
 			val = selectNode.options[selectNode.selectedIndex].text;
 		} catch(e) {
-			//must have no items!
+			//must have no items!BP
 		}
 		//this.log("setting input to: " + val);
 		this.input.val(val);
@@ -673,43 +676,45 @@ $.widget(widgetName, {
 
 		// console.time("listDisplay");
 		if(!this.itemHeight) { // caclulate only once
-			this.itemHeight = this.listItems.filter("li:first").outerHeight();
+			this.itemHeight = this.listItems.filter("li:first").outerHeight(true);
 			// this.log("listItemHeight: " + this.itemHeight);
 		}
-		var visibleCount = this.visibleCount;
-
 		var height;
 		
-		if (visibleCount > this.options.listMaxVisible) {
+		if (this.visibleCount > this.options.listMaxVisible) {
 			height = this.options.listMaxVisible * this.itemHeight;
 			this.listScroll.css(this.overflowCSS, "scroll");
 		} else {
-			height = visibleCount * this.itemHeight; 
+			height = this.visibleCount * this.itemHeight; 
 			this.listScroll.css(this.overflowCSS, "hidden");
 		}
 		
 		// this.log("height set to: " + height);
 		this.listScroll.height(height); 
-		this.listWrapper.height(height); 
+		var outerHeight = this.listScroll.outerHeight();
+		this.listWrapper.height(outerHeight); 
+
+		//height set, now position
 		
-		var offset = this.input.offset();
-		
-		var listSpace = height; 
-		var inputHeight = this.wrapper.height();
-		var bottomPos = offset.top + inputHeight + listSpace;
+		var offset = this.wrapper.offset();
+		var wrapperOuterHeight = this.wrapper.outerHeight();
+		var bottomPos = offset.top + wrapperOuterHeight + outerHeight;
 		
 		var maxShown = $(window).height() + $(document).scrollTop();
 		var doDropUp = (bottomPos > maxShown);
 
+		
+		var left = offset.left;
 		var top;
+		
 		if (doDropUp) {
 			this.listWrapper.addClass(this.css.listWrapperUp);
-			top = (offset.top - this.listScroll.height() - 1) ;
+			top = (offset.top - outerHeight) ;
 		} else {
 			this.listWrapper.removeClass(this.css.listWrapperUp);
-			top = (offset.top + this.input.outerHeight() - 1);
+			top = (offset.top + wrapperOuterHeight);
 		}
-		this.listWrapper.css("left", offset.left);
+		this.listWrapper.css("left", left);
 		this.listWrapper.css("top", top );			
 		this.scrollTo();
 
@@ -1059,9 +1064,21 @@ InfixTrie.prototype.findNodeArray = function(key) {
 	var kLen = key.length;
 	var chr;
 	
+	this.cache = this.cache || {};
+	var thisCache = this.cache;
+	
 	for (var i = 0; i < kLen; i++) {
 		chr = key.charAt(i);
-		retArray = this.mapNewArray(retArray, chr);
+		if(thisCache.chr == chr) {
+			retArray = thisCache.hit;
+			
+		} else {		
+			retArray = this.mapNewArray(retArray, chr);
+			thisCache.chr = chr;
+			thisCache.hit = retArray;
+			thisCache.next = {};
+		}
+		thisCache = thisCache.next; 
 	}
 	
 	return retArray;
