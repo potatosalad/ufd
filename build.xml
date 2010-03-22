@@ -84,6 +84,21 @@
 		</delete>
     	
         <echo message="${OUT_MIN} created." />
+    	
+    	<echo message="bookmarklet.js being 'min'ified to destination" />
+		<apply executable="java" parallel="false" verbose="true" dest="${DIST_DIR}">
+			<fileset file="src/bookmarklet.js"/>
+			<arg line="-jar" />
+			<arg path="build/google-compiler-20091218.jar" />
+			<arg value="--warning_level" />
+			<arg value="QUIET" />
+			<arg value="--js_output_file" />
+			<targetfile />
+			<arg value="--js" />
+			<mapper type="glob" from="*.js" to="*.min.js" />
+		</apply>
+    	<echo message="bookmarklet.min.js created." />
+    	
     </target>	
 	
 	<target name="zip" depends="create">

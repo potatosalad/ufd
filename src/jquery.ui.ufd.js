@@ -646,8 +646,8 @@ $.widget(widgetName, {
 		this.listWrapper.width(newSelectWidth + wrapperBP);
 		this.listScroll.width(newSelectWidth + wrapperBP - listScrollBP);
 
-		console.log(newSelectWidth + " : " + inputWidth + " : " + 
-				buttonWidth + " : " + listScrollBP); 
+		/* console.log(newSelectWidth + " : " + inputWidth + " : " + 
+				buttonWidth + " : " + listScrollBP); */ 
 		
 		this.listWrapper.addClass(this.css.hidden);
 		// console.timeEnd("4");
@@ -950,7 +950,6 @@ $.widget(widgetName, {
 
 	destroy: function() {
 		// this.log("called destroy");
-		$.widget.prototype.destroy.apply(this, arguments); // default destroy
 
 		if(this.selectIsWrapped) { //unwrap
 			this.wrapper.before(this.selectbox);
@@ -965,11 +964,14 @@ $.widget(widgetName, {
 		// see ticket; http://dev.jqueryui.com/ticket/5005
 		// code fixes <= 1.7.2 ; expect bug will be fixed in 1.7.3
 		if($.ui.version <= "1.7.2") { 
-			this.element.unbind("setData." + widgetName); 
-			this.element.unbind("getData." + widgetName);
+			this.selectbox.unbind("setData." + widgetName); 
+			this.selectbox.unbind("getData." + widgetName);
 			// will remove all events sorry, might have other side effects but needed
-			this.element.unbind("remove"); 
+			this.selectbox.unbind("remove"); 
 		}
+		$.widget.prototype.destroy.apply(this, arguments); // default destroy
+		this.selectbox = null;
+		
 	},
 	
 	
