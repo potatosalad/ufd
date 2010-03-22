@@ -2,7 +2,9 @@
 <Module>
   <ModulePrefs title="UFD bookmarklet gaget" /> 
   <Content type="html"><![CDATA[
+	<div>
 	<a href="javascript:(function(){var%20c=document.getElementsByTagName('head')[0],g=20,a=['http://ufd.googlecode.com/svn/tags/0.5/src/jquery.ui.ufd.js'],d=['http://ufd.googlecode.com/svn/tags/0.5/css/ufd-base.css','http://ufd.googlecode.com/svn/tags/0.5/css/plain/plain.css'],e=false;if(typeof%20jQuery=='undefined'){e=true;a.unshift('http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js');a.unshift('http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js')}else%20jQuery.ui||a.unshift('http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js');%20for(scriptPtr%20in%20a){var%20b=document.createElement('SCRIPT');b.type='text/javascript';b.src=a[scriptPtr]+'?noCache='+Math.random();c.appendChild(b)}for(cssPtr%20in%20d){a=document.createElement('LINK');a.rel='stylesheet';a.type='text/css';a.media='screen';a.href=d[cssPtr];c.appendChild(a)}var%20f=function(){if(typeof%20jQuery=='undefined'||typeof%20jQuery.ui=='undefined'||typeof%20jQuery.ui.ufd=='undefined')g--?setTimeout(function(){f()},250):alert('failed%20to%20intialize%20UFD%20bookmarklet%20sorry.');else{e&amp;&amp;jQuery.noConflict();%20jQuery('select:not([multiple])').ufd()}};f()})();">Bookmarklet</a>
+	</div>
   ]]>
   </Content> 
 </Module>
