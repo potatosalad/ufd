@@ -6,7 +6,8 @@
 
 .ufd.uiCss {
     height: 22px;
-    border-width: 1px;
+    border-width: 1px; 
+    border-style: solid;
 }
 
 .ufd.uiCss input {
@@ -19,8 +20,9 @@
     border: 0px !important;
 }
 
-#ufd-container .uiCss div.list-wrapper {
-    border-width: 1px;
+#ufd-container .uiCss div.list-scroll {
+    border-width: 1px; 
+    border-style: solid;
 }
 
 #ufd-container .uiCss li {

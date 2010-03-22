@@ -646,9 +646,8 @@ $.widget(widgetName, {
 		this.listWrapper.width(newSelectWidth + wrapperBP);
 		this.listScroll.width(newSelectWidth + wrapperBP - listScrollBP);
 
-		/* console.log(newSelectWidth + " : " + inputWidth + " : " + 
-				buttonWidth + " : " + listScrollBP); */ 
-		
+/*		console.log(newSelectWidth + " : " + inputWidth + " : " + 
+				buttonWidth + " : " + listScrollBP + " : " + wrapperBP); */ 
 		this.listWrapper.addClass(this.css.hidden);
 		// console.timeEnd("4");
 
