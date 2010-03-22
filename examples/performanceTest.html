@@ -42,10 +42,10 @@
 	<script type="text/javascript" >
 	$(function () {
 		
-		var pt = $("#perfTest").ufd();
 		
 		$("#charButton").click(function(){
 			var start = new Date().getTime();
+			var pt = $("#perfTest");
 
 			// unwrap and revert to standard select
 			pt.ufd("destroy"); 
@@ -56,7 +56,7 @@
 
 				// build HTML string				
 			var nodeBuilder = [];
-			nodeBuilder.push('<select>');
+			nodeBuilder.push('<select id="perfTest">');
 			for (;charCount > 0; charCount--){
 				var rs = randomString();
 				nodeBuilder.push('<option>' + rs + "</option>");
