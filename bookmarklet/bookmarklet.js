@@ -60,7 +60,7 @@
 				
 			if (!(typeof jQuery=='undefined' || typeof jQuery.ui=='undefined'|| typeof jQuery.ui.ufd=='undefined')) {
 				if(newJQ) jQuery.noConflict(); 	/* don't inhabit $ if we are injecting jQuery 	 */
-				jQuery("select:not([multiple]):visible").ufd();
+				jQuery("select:not([multiple]):visible").ufd({addEmphasis: true});
 			} else {
 				alert("Sorry, UFD didn't manage to initalize properly.");
 			}
