@@ -1168,7 +1168,7 @@ $.extend($.ui.ufd, {
 		suffix: "_ufd", // suffix for pseudo-dropdown text input name attr.  
 		dropDownID: "ufd-container", // ID for a root-child node for storing dropdown lists. avoids ie6 zindex issues by being at top of tree.
 		logSelector: "#log", // selector string to write log into, if present.
-		mimicCSS: ["marginLeft","marginTop","marginRight","marginBottom"], //copy these properties to widget. Width auto-copied unless min/manual.
+		mimicCSS: ["float", "marginLeft","marginTop","marginRight","marginBottom"], //copy these properties to widget. Width auto-copied unless min/manual.
 
 		infix: true, //infix search, not prefix 
 		addEmphasis: false, // add <EM> tags around matches.
