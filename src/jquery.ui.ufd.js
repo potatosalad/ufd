@@ -614,6 +614,7 @@ $.widget(widgetName, {
 		
 		var props = this.options.mimicCSS;
 		for(propPtr in props){
+			if(!props.hasOwnProperty(propPtr)) continue;
 			var prop = props[propPtr];
 			this.wrapper.css(prop, this.selectbox.css(prop)); // copy property from selectbox to wrapper
 		}
@@ -1048,6 +1049,8 @@ InfixTrie.prototype.find = function(key) { // string
 	var trie;
 
 	for(arrName in trieNodeArray){
+		if(!trieNodeArray.hasOwnProperty(arrName)) continue;
+		
 		trie = trieNodeArray[arrName];
 		this.markAndRetrieve(matches, trie, toggleTo);
 	}
