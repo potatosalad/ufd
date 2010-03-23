@@ -2,7 +2,7 @@
  * This script is bootstrapped by the bookmarklet gaget code. 
  */
 
-javascript:(function() {
+(function() {
 	
 	var head = document.getElementsByTagName('head')[0];
 	
@@ -54,7 +54,8 @@ javascript:(function() {
 	}	
 	
 	function load() {
-		if ((!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')) {
+		if ((!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete') && !this.visited) {
+			this.visited == true;
 			if(--itemCount) return; /* haven't loaded all yet. */
 				
 			if (!(typeof jQuery=='undefined' || typeof jQuery.ui=='undefined'|| typeof jQuery.ui.ufd=='undefined')) {
