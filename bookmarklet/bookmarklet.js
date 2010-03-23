@@ -55,7 +55,7 @@
 	
 	function load() {
 		if ((!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete') && !this.visited) {
-			this.visited == true;
+			this.visited = true;
 			if(--itemCount) return; /* haven't loaded all yet. */
 				
 			if (!(typeof jQuery=='undefined' || typeof jQuery.ui=='undefined'|| typeof jQuery.ui.ufd=='undefined')) {
