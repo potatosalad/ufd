@@ -614,8 +614,8 @@ $.widget(widgetName, {
 		
 		var props = this.options.mimicCSS;
 		for(propPtr in props){
-			if(!props.hasOwnProperty(propPtr)) continue;
 			var prop = props[propPtr];
+			if(!props.hasOwnProperty(propPtr) || typeof  prop === 'function') continue;
 			this.wrapper.css(prop, this.selectbox.css(prop)); // copy property from selectbox to wrapper
 		}
 
@@ -1049,9 +1049,9 @@ InfixTrie.prototype.find = function(key) { // string
 	var trie;
 
 	for(arrName in trieNodeArray){
-		if(!trieNodeArray.hasOwnProperty(arrName)) continue;
-		
 		trie = trieNodeArray[arrName];
+		if(!trieNodeArray.hasOwnProperty(arrName) || typeof trie === 'function') continue;
+		
 		this.markAndRetrieve(matches, trie, toggleTo);
 	}
 	this.markAndRetrieve(misses, this.root, toggleTo); //will ensure whole tree is toggled.
