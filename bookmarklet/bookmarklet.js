@@ -12,52 +12,59 @@ javascript:(function() {
 	var svnRoot = "http://ufd.googlecode.com/svn/" + versionToUse;
 	var googRoot = "http://ajax.googleapis.com/ajax/libs";
 	
-	var newJQ = false;
+	getCSS(svnRoot + "/css/ufd-base.css");
+	getCSS(svnRoot + "/css/plain/plain.css");
 
-	/* check if jQuery / UI are present */
+	var newJQ = false;
+	var itemCount = 1;
+
+	/* inject jQuery / UI if not present */
 	if(typeof jQuery === 'undefined') {
 		newJQ = true;
+		itemCount = 3;
 		getScript(googRoot + "/jquery/1.4.2/jquery.min.js");
 		getScript(googRoot + "/jqueryui/1.7.2/jquery-ui.min.js");
+		
 	} else if( !(jQuery.ui) ) {
+		itemCount = 2;
 		getScript(googRoot + "/jqueryui/1.7.2/jquery-ui.min.js");
+		
 	}
 	
-	/* get script: */
-	getScript(svnRoot + "/src/jquery.ui.ufd.js", function() {
-		if (!(typeof jQuery=='undefined' || typeof jQuery.ui=='undefined'|| typeof jQuery.ui.ufd=='undefined')) {
-			if(newJQ) jQuery.noConflict(); 	/* don't inhabit $ if we are injecting jQuery 	 */
-			jQuery("select:not([multiple]):visible").ufd();
-		} else {
-			alert("Sorry, UFD didn't manage to initalize properly.");
-		}
-	});
+	getScript(svnRoot + "/src/jquery.ui.ufd.js");
 	
-	/* get css: */
-	var csses = [ svnRoot + "/css/ufd-base.css", svnRoot + "/css/plain/plain.css" ];
-	for(cssPtr in csses){
+	/* helpers */
+	
+	function getCSS(url) {
 		var css = document.createElement('LINK');
 		css.rel = 'stylesheet';
 		css.type = 'text/css';
 		css.media = 'screen';
-		css.href = csses[cssPtr];
-		
+		css.href = url;
 		head.appendChild(css);
 	}	
 	
 	
-	/* thanks http://www.learningjquery.com/2009/04/better-stronger-safer-jquerify-bookmarklet */
-	function getScript(url, fn) {
+	function getScript(url) {
 		var script = document.createElement('script');
 		script.src = url;
 		script.type = 'text/javascript';
-		if(fn) { /* Attach handlers for all browsers */
-			script.onload = script.onreadystatechange = function() {
-				if ((!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')) fn();
-			};
-		}
+		script.onload = script.onreadystatechange = load;
 		head.appendChild(script);
 	}	
+	
+	function load() {
+		if ((!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')) {
+			if(--itemCount) return; /* haven't loaded all yet. */
+				
+			if (!(typeof jQuery=='undefined' || typeof jQuery.ui=='undefined'|| typeof jQuery.ui.ufd=='undefined')) {
+				if(newJQ) jQuery.noConflict(); 	/* don't inhabit $ if we are injecting jQuery 	 */
+				jQuery("select:not([multiple]):visible").ufd();
+			} else {
+				alert("Sorry, UFD didn't manage to initalize properly.");
+			}
+		}
+	};
 	
 })();
 
