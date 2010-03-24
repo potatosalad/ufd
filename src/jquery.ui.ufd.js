@@ -279,6 +279,19 @@ $.widget(widgetName, {
 			if (self.internalFocus) self.realLooseFocusEvent();
 		};
 		$(document).bind("click." + widgetName, this._myDocClickHandler);
+		
+		// disabled / readonly handler
+		if(this.options.polling) {
+			this._myPollId = setInterval(function(e) {
+				if(self.selectbox[0].disabled == self.isDisabled) return;
+				if(self.selectbox[0].disabled) {
+					self.disable();
+				} else {
+					self.enable();
+				}
+				
+			}, self.options.polling);
+		}
 
 	},
 
@@ -957,6 +970,7 @@ $.widget(widgetName, {
 		
 		this.selectbox.unbind("change." + widgetName);
 		$(document).unbind("click." + widgetName, this._myDocClickHandler);
+		if(this._myPollId) clearInterval(this._myPollId );
 		//all other handlers are in these removed nodes.
 		this.wrapper.remove();
 		this.listWrapper.remove();
@@ -1181,6 +1195,7 @@ $.extend($.ui.ufd, {
 		log: false, // log to firebug console (if available) and logSelector (if it exists)
 		unwrapForCSS: false, // unwrap select on reload to get % right on units etc. unwrap causes flicker on reload in iE6
 
+		polling: 250, // poll msec to test disabled / readonly state of master. 0 to disable polling.  
 		listMaxVisible: 10, // number of visible items
 		minWidth: 50, // don't autosize smaller then this.
 		maxWidth: null, // null, or don't autosize larger then this.

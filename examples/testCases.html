@@ -181,13 +181,12 @@
 			var disabled = false;
 			
 			$("#disableToggle").bind("click", function() {
-				if(disabled){
-					s1.ufd("enable");
-					
-				} else {
-					s1.ufd("disable");
-				}
+				/* not needed unless polling is off
+				if(disabled) s1.ufd("enable");
+				else s1.ufd("disable");*/
+				
 				disabled = !disabled;
+				s1[0].disabled = disabled;
 			});
 
 			$("#changeOptions").bind("click", function() {
