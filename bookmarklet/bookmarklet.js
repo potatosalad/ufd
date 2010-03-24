@@ -1,7 +1,7 @@
 /*
  * This script is bootstrapped by the bookmarklet gaget code. 
  */
-javascript:
+
 (function() {
 	
 	var head = document.getElementsByTagName('head')[0];
