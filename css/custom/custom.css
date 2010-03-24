@@ -25,7 +25,8 @@ span.ufd.custom-focus {
 }
 
 .ufd.custom input.disabled {
-	background-color: gray; 
+	color: #777;
+    background-color: #eee !important;
 }
 
 .ufd.custom input.focus {

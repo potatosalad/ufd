@@ -23,8 +23,8 @@ span.ufd.plain-focus {
 }
 
 .ufd.plain input.disabled {
-	color: #ccc;
-    background-color: gray !important;
+	color: #777;
+    background-color: #eee !important;
 }
 
 .ufd.plain input.focus {
