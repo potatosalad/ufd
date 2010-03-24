@@ -44,6 +44,10 @@
 .ufd button {
 	position: relative;
 	float: left;
+	
+	-moz-box-sizing: content-box;
+	-ms-box-sizing: content-box;
+	-webkit-box-sizing: content-box;
 }
 
 .ufd button.disabled {
