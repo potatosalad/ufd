@@ -36,7 +36,15 @@ $.widget(widgetName, {
 		var selectName = this.selectbox.attr("name");
 		var suffixName = selectName + this.options.suffix;
 		var inputName = this.options.submitFreeText ? selectName : suffixName;
-		
+		var inputId = ""; // none unless master select has one
+
+		var sbId = this.selectbox.attr("id");
+
+		if(sbId) {
+			inputId = sbId + this.options.suffix;
+			this.labels = $("label[for='" + sbId + "']").attr("for", inputId);
+		}
+
 		if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
 		if(this.options.calculateZIndex) this.options.zIndexPopup = this._calculateZIndex();
 
@@ -47,9 +55,9 @@ $.widget(widgetName, {
 
 		this.wrapper = $([
 			'<span class="', css.wrapper, ' ', css.hidden, ' ', css.skin, '">',
-				'<input type="text" autocomplete="off" value="" class="', css.input, '" name="', inputName, '"/>',
+				'<input type="text" id="',inputId,'" class="', css.input, '" name="', inputName, '"/>',
 				'<button type="button" tabindex="-1" class="', css.button, '"><div class="', css.buttonIcon, '"/></button>',
-				//   <select .../> goes here
+			//   <select .../> goes here
 			'</span>'
 		].join(''));
 		this.dropdown = $([
@@ -71,6 +79,8 @@ $.widget(widgetName, {
 		this.listScroll = this.listWrapper.children(":first");
 		
 		if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
+		
+
 
 		this._populateFromMaster();
 		this._initEvents();
@@ -221,7 +231,6 @@ $.widget(widgetName, {
 			self.stopEvent(e);
 			e = e ? e : window.event;
 			var normal = e.detail ? e.detail * -1 : e.wheelDelta / 40;
-			
 			
 			var curST = self.listScroll.scrollTop();
 			var newScroll = curST + ((normal > 0) ? -1 * self.itemHeight : 1 * self.itemHeight);
@@ -967,6 +976,9 @@ $.widget(widgetName, {
 		if(this.selectIsWrapped) { //unwrap
 			this.wrapper.before(this.selectbox);
 		}
+		
+		this.labels.attr("for", this.selectbox.attr("id")); //revert label 'for' attributes.
+		this.labels = null;
 		
 		this.selectbox.unbind("change." + widgetName);
 		$(document).unbind("click." + widgetName, this._myDocClickHandler);
