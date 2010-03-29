@@ -53,7 +53,6 @@ javascript:(function() {
 	}
 	
 	function poll() {
-		alert("damn you ie");
 		if(!cssLoaded) { /* chck if both css has loaded */
 			var base = false, plain = false;
 			var ss = document.styleSheets;
