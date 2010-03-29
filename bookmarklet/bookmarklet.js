@@ -53,6 +53,7 @@ javascript:(function() {
 	}
 	
 	function poll() {
+		alert("damn you ie");
 		if(!cssLoaded) { /* chck if both css has loaded */
 			var base = false, plain = false;
 			var ss = document.styleSheets;
@@ -68,7 +69,6 @@ javascript:(function() {
 			typeof jQuery != 'undefined' && 
 			typeof jQuery.ui != 'undefined' && 
 			typeof jQuery.ui.ufd != 'undefined' ) {
-			alert("damn you ie");
 			/* don't re-wrap existing ufds! */
 			jQuery(":not(span.ufd) > select:not([multiple])").ufd({addEmphasis: true});
 			jQuery.noConflict(true); 	/* the injected jquery, ui and ufd no longer are available via window.jQuery or window.$ */
