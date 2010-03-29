@@ -7,7 +7,7 @@ javascript:(function() {
 	var head = document.getElementsByTagName('head')[0];
 	
 	var pollRetries = 10;
-	var pollWait = 100; 
+	var pollWait = 200; 
 	
 	var versionToUse = "trunk"; 
 	/*var versionToUse = "tags/0.6"; */
@@ -68,7 +68,7 @@ javascript:(function() {
 			typeof jQuery != 'undefined' && 
 			typeof jQuery.ui != 'undefined' && 
 			typeof jQuery.ui.ufd != 'undefined' ) {
-			
+			alert("damn you ie");
 			/* don't re-wrap existing ufds! */
 			jQuery(":not(span.ufd) > select:not([multiple])").ufd({addEmphasis: true});
 			jQuery.noConflict(true); 	/* the injected jquery, ui and ufd no longer are available via window.jQuery or window.$ */
