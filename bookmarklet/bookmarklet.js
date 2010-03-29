@@ -7,7 +7,7 @@ javascript:(function() {
 	var head = document.getElementsByTagName('head')[0];
 	
 	var pollRetries = 10;
-	var pollWait = 20; 
+	var pollWait = 100; 
 	
 	var versionToUse = "trunk"; 
 	/*var versionToUse = "tags/0.6"; */
@@ -53,8 +53,22 @@ javascript:(function() {
 	}
 	
 	function poll() {
+		if(!cssLoaded) { /* chck if both css has loaded */
+			var base = false, plain = false;
+			var ss = document.styleSheets;
+			for (var i = 0; i < ss.length; i++) {
+			    var url = ss[i].href || "";
+			    base = base || (url.search("ufd-base.css") > 0);
+			    plain = plain || (url.search("plain.css") > 0);
+			}
+			cssLoaded = (base && plain);
+		}
 		
-		if (!(typeof jQuery=='undefined' || typeof jQuery.ui=='undefined' || typeof jQuery.ui.ufd=='undefined')) {
+		if (cssLoaded == true && 
+			typeof jQuery != 'undefined' && 
+			typeof jQuery.ui != 'undefined' && 
+			typeof jQuery.ui.ufd != 'undefined' ) {
+			
 			/* don't re-wrap existing ufds! */
 			jQuery(":not(span.ufd) > select:not([multiple])").ufd({addEmphasis: true});
 			jQuery.noConflict(true); 	/* the injected jquery, ui and ufd no longer are available via window.jQuery or window.$ */
