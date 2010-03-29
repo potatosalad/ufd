@@ -2,9 +2,12 @@
  * This script is bootstrapped by the bookmarklet gaget code. 
  */
 
-(function() {
+javascript:(function() {
 	
 	var head = document.getElementsByTagName('head')[0];
+	
+	var pollRetries = 10;
+	var pollWait = 20; 
 	
 	var versionToUse = "trunk"; 
 	/*var versionToUse = "tags/0.6"; */
@@ -12,6 +15,7 @@
 	var svnRoot = "http://ufd.googlecode.com/svn/" + versionToUse;
 	var googRoot = "http://ajax.googleapis.com/ajax/libs";
 	
+	var cssLoaded = false;
 	getCSS(svnRoot + "/css/ufd-base.css");
 	getCSS(svnRoot + "/css/plain/plain.css");
 
@@ -43,16 +47,25 @@
 		if ((!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete') && !this.visited) {
 			this.visited = true;
 			if(--itemCount) return; /* haven't loaded all yet. */
-				
-			if (!(typeof jQuery=='undefined' || typeof jQuery.ui=='undefined'|| typeof jQuery.ui.ufd=='undefined')) {
-				jQuery("select:not([multiple]):visible").ufd({addEmphasis: true});
-				jQuery.noConflict(true); 	/* the injected jquery, ui and ufd no longer are available via window.jQuery or window.$ */
-			} else {
-				alert("Sorry, UFD didn't manage to initalize properly.");
-			}
+			
+			setTimeout(poll, 1); /* straight away first time */
 		}
-	};
+	}
 	
+	function poll() {
+		
+		if (!(typeof jQuery=='undefined' || typeof jQuery.ui=='undefined' || typeof jQuery.ui.ufd=='undefined')) {
+			/* don't re-wrap existing ufds! */
+			jQuery(":not(span.ufd) > select:not([multiple])").ufd({addEmphasis: true});
+			jQuery.noConflict(true); 	/* the injected jquery, ui and ufd no longer are available via window.jQuery or window.$ */
+			
+		} else if(--pollRetries) {
+			setTimeout(poll, pollWait); 
+			
+		} else {
+			alert("Sorry, UFD didn't manage to initalize properly.");
+		}
+	}
 })();
 
 
