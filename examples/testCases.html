@@ -205,6 +205,13 @@
 			$("#create").bind("click", function() {
 				s1.ufd({ log: true});
 			});
+
+			var shCont = $("#shContainer");
+			$("#showHide").toggle(
+				function(){ shCont.hide(); },
+				function(){ shCont.show(); }
+			);
+			
 		});    
 	    </script>
 
@@ -218,6 +225,9 @@
 	   <button id="destroy" type="button">revert to native (destroy)</button><br/>
 	   <button id="disableToggle" type="button">Toggle (disable|enable)</button><br/>
 	   <button id="changeOptions" type="button">add new option & reload (changeOptions)</button><br/>
+	   <button id="showHide" type="button">Toggle visiblity of container </button><br/>
+	    
+	   <div id="shContainer">
 	    
       <label for="functions-combo">Choose a country:</label><br />
       <select id="functions-combo" name="functions-combo">
@@ -244,6 +254,7 @@
 			<option value="3Anguilla">Anguilla</option>
 			
 	</select>
+	   </div>
       <br/>
 
 

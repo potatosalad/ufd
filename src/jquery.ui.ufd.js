@@ -289,14 +289,13 @@ $.widget(widgetName, {
 		};
 		$(document).bind("click." + widgetName, this._myDocClickHandler);
 		
-		// master disabled polling
+		// polling for disabled, dimensioned
 		if(this.options.polling) {
 			this._myPollId = setInterval(function() {
-				if(self.selectbox[0].disabled == self.isDisabled) return; // fast as possible
-				if(self.selectbox[0].disabled) {
-					self.disable();
-				} else {
-					self.enable();
+				// fast as possible
+				if(!self.dimensioned) self.setDimensions();
+				if(self.selectbox[0].disabled != self.isDisabled) { 
+					(self.selectbox[0].disabled) ? self.disable() : self.enable();
 				}
 				
 			}, self.options.polling);
@@ -551,7 +550,6 @@ $.widget(widgetName, {
 		// console.time("prep");
 		var isEnabled = !this.selectbox.filter("[disabled]").length; //remember incoming state
 		this.disable();
-		this.setDimensions();
 
 		this.trie = new InfixTrie(this.options.infix, this.options.caseSensitive);
 		this.trie.matches = [];
@@ -604,22 +602,32 @@ $.widget(widgetName, {
 		this.setInputFromMaster();
 		this.selectedLi = null;
 		
+		this.dimensioned = false;
+		this.setDimensions();
+		
 		if(isEnabled) this.enable();
 		// console.timeEnd("tidy");
 
 	},
 
+	/*
+	 * This method is called by the poller, so needs to return quickly when not dimensioning
+	 */
 	setDimensions: function() {
-		// console.time("1");
+		// if a new UFD (unwrapped) and selectbox is invisible, we cant dimension 
+		if(!this.selectIsWrapped && !this.selectbox.filter(":visible").length) {
+			return;
+		}
+		// if pre-exising UFD needs redimensioning, but is not visible
+		if(this.selectIsWrapped && !this.wrapper.filter(":visible").length){
+			return;
+		}
 
 		this.wrapper.addClass(this.css.hidden);
 		if(this.selectIsWrapped && (!this.options.manualWidth || this.options.unwrapForCSS)) { // unwrap
 			this.wrapper.before(this.selectbox);
 			this.selectIsWrapped = false;
 		}
-
-		// console.timeEnd("1");
-		// console.time("2");
 
 		//match original width
 		var newSelectWidth;
@@ -641,9 +649,6 @@ $.widget(widgetName, {
 			this.wrapper.css(prop, this.selectbox.css(prop)); // copy property from selectbox to wrapper
 		}
 
-		// console.timeEnd("2");
-		// console.time("2.5");
-
 		if(!this.selectIsWrapped) { // wrap
 			this.wrapper.get(0).appendChild(this.selectbox.get(0));
 			this.selectIsWrapped = true;
@@ -652,17 +657,11 @@ $.widget(widgetName, {
 		this.wrapper.removeClass(this.css.hidden);
 		this.listWrapper.removeClass(this.css.hidden);
 		
-		// console.timeEnd("2.5");
-		// console.time("3");
-
-
 		var buttonWidth = this.button.outerWidth(true);
 		var wrapperBP = this.wrapper.outerWidth() - this.wrapper.width();
 		var inputBP = this.input.outerWidth(true) - this.input.width();
 		var listScrollBP = this.listScroll.outerWidth() - this.listScroll.width();
 		var inputWidth = newSelectWidth - buttonWidth - inputBP;
-		// console.timeEnd("3");
-		// console.time("4");
 
 		this.input.width(inputWidth);
 		this.wrapper.width(newSelectWidth);
@@ -672,7 +671,8 @@ $.widget(widgetName, {
 /*		console.log(newSelectWidth + " : " + inputWidth + " : " + 
 				buttonWidth + " : " + listScrollBP + " : " + wrapperBP); */ 
 		this.listWrapper.addClass(this.css.hidden);
-		// console.timeEnd("4");
+		
+		this.dimensioned = true;
 
 	},
 
@@ -857,7 +857,6 @@ $.widget(widgetName, {
 		return input;
 	},
 
-
 	stopEvent: function(e) {
 		e = e ? e : window.event;
 		e.cancel = true;
@@ -908,38 +907,18 @@ $.widget(widgetName, {
 		this.selectbox.removeAttr("disabled");
 	},
 
-	/*
-		  Select input text: inspired by jCarousel src
-	 */
-	selection: function(field, start, end) {
-		if( field.createTextRange ){
-			var selRange = field.createTextRange();
-			selRange.collapse(true);
-			selRange.moveStart("character", start);
-			selRange.moveEnd("character", end);
-			selRange.select();
-		} else if( field.setSelectionRange ){
-			field.setSelectionRange(start, end);
-		} else {
-			if( field.selectionStart ){
-				field.selectionStart = start;
-				field.selectionEnd = end;
-			}
-		}
-	},
-
 	selectAll: function() {
 		// this.log("Select All");
 		this.input.get(0).select();
-		//this.selection(this.input.get(0), 0, this.input.val().length);
 	},
 
 	getDropdownContainer: function() {
 		var ddc = $("#" + this.options.dropDownID);
 		if(!ddc.length) { //create
-			ddc = $("<div></div>").appendTo("body").
-				css("height", 0).
-				attr("id", this.options.dropDownID);
+			ddc = $("<div></div>")
+				.appendTo("body")
+				.css("height", 0)
+				.attr("id", this.options.dropDownID);
 		}
 		return ddc;
 	},
@@ -1002,6 +981,7 @@ $.widget(widgetName, {
 	
 	
 	//internal state
+	dimensioned: false, // polling flag indicating that setDimensions needs to be called.
 	selectIsWrapped: false,
 	internalFocus: false, 
 	lastKey: null,
@@ -1207,7 +1187,7 @@ $.extend($.ui.ufd, {
 		log: false, // log to firebug console (if available) and logSelector (if it exists)
 		unwrapForCSS: false, // unwrap select on reload to get % right on units etc. unwrap causes flicker on reload in iE6
 
-		polling: 250, // poll msec to test disabled / readonly state of master. 0 to disable polling.  
+		polling: 250, // poll msec to test disabled, dimensioned state of master. 0 to disable polling, but needed for (initially) hidden fields. 
 		listMaxVisible: 10, // number of visible items
 		minWidth: 50, // don't autosize smaller then this.
 		maxWidth: null, // null, or don't autosize larger then this.
