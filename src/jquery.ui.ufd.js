@@ -470,9 +470,9 @@ $.widget(widgetName, {
 				li = tritem[indexB];
 				text = $.trim(options[li.getAttribute("name")].text);
 				if (isAddEmphasis) {
-					li.innerHTML = text.replace(stPattern, "<em>$1</em>");
+					li.innerHTML = text.replace(stPattern, "<em>$1</em>").replace("&", "&amp;");
 				} else {
-					li.innerHTML = text;
+					li.innerHTML = text.replace("&", "&amp;");
 				}
 			}
 		}
