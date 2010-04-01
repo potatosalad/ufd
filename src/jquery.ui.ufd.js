@@ -19,7 +19,13 @@ $.widget(widgetName, {
 	// options: provided by framework
 	// element: provided by framework
 
-	_init: function() {
+	_init: function() { //1.7 init
+		// in 1.8 this method is  "default functionality" which we dont have; here for 1.7 support
+		if(!this.created) this._create();
+	},
+	
+	_create: function() { //1.8 init
+		this.created = true;
 		if (this.element[0].tagName.toLowerCase() != "select") {
 			this.destroy();
 			return false;
@@ -966,15 +972,18 @@ $.widget(widgetName, {
 		this.wrapper.remove();
 		this.listWrapper.remove();
 		
-		// see ticket; http://dev.jqueryui.com/ticket/5005
-		// code fixes <= 1.7.2 ; expect bug will be fixed in 1.7.3
-		if($.ui.version <= "1.7.2") { 
+		if($.ui.version < "1.8") { 
+			// see ticket; http://dev.jqueryui.com/ticket/5005 - wasn't fixed 1.7.3
 			this.selectbox.unbind("setData." + widgetName); 
 			this.selectbox.unbind("getData." + widgetName);
 			// will remove all events sorry, might have other side effects but needed
-			this.selectbox.unbind("remove"); 
+			this.selectbox.unbind("remove");
+			
+			$.widget.prototype.destroy.apply(this, arguments); // default destroy
+			
+		} else { // 1.8+
+			$.Widget.prototype.destroy.apply(this, arguments); // default destroy
 		}
-		$.widget.prototype.destroy.apply(this, arguments); // default destroy
 		this.selectbox = null;
 		
 	},
@@ -987,6 +996,7 @@ $.widget(widgetName, {
 	lastKey: null,
 	selectedLi: null,
 	isUpdatingMaster: false,
+	created: false,
 	hasEmphasis: false,
 	isDisabled: false
 
@@ -1169,7 +1179,7 @@ $.extend($.ui.ufd, {
 	getter: "", //for methods that are getters, not chainables
 	classAttr: (($.support.style) ? "class" : "className"),  // IE6/7 class attribute
 	
-	defaults: {
+	defaults: { // 1.7 default options location, see below
 		skin: "plain", // skin name 
 		suffix: "_ufd", // suffix for pseudo-dropdown text input name attr.  
 		dropDownID: "ufd-container", // ID for a root-child node for storing dropdown lists. avoids ie6 zindex issues by being at top of tree.
@@ -1246,6 +1256,8 @@ $.extend($.ui.ufd, {
 		}
 	}
 });	
+
+$.ui.ufd.prototype.options = $.ui.ufd.defaults; // 1.8 default options location
 
 })(jQuery);
 /* END */
