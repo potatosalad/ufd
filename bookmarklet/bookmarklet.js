@@ -6,8 +6,8 @@ javascript:(function() {
 	
 	var head = document.getElementsByTagName('head')[0];
 	
-	var pollRetries = 10;
-	var pollWait = 200; 
+	var pollRetries = 40;
+	var pollWait = 500; 
 	
 	var versionToUse = "trunk"; 
 	/*var versionToUse = "tags/0.6"; */
