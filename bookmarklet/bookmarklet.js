@@ -48,7 +48,7 @@ javascript:(function() {
 			this.visited = true;
 			if(--itemCount) return; /* haven't loaded all yet. */
 			
-			setTimeout(poll, 1); /* straight away first time */
+			setTimeout(poll, 200); /* small wait first time for ie6; incase loaded but not complete */
 		}
 	}
 	
@@ -62,6 +62,7 @@ javascript:(function() {
 			    plain = plain || (url.search("plain.css") > 0);
 			}
 			cssLoaded = (base && plain);
+			setTimeout(poll, pollWait); //force another wait; images not yet loaded  
 		}
 		
 		if (cssLoaded == true && 
