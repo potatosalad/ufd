@@ -53,7 +53,7 @@ javascript:(function() {
 	}
 	
 	function poll() {
-		if(--pollRetries) {
+		if(!--pollRetries) {
 			alert("Sorry, UFD didn't manage to initalize properly.");
 			return;
 		} 
