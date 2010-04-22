@@ -27,7 +27,7 @@ javascript:(function() {
 	/* helpers */
 	
 	function getCSS(url) {
-		var css = document.createElement('LINK');
+		var css = document.createElement('link');
 		css.rel = 'stylesheet';
 		css.type = 'text/css';
 		css.media = 'screen';
@@ -44,16 +44,32 @@ javascript:(function() {
 	}	
 	
 	function load() {
-		if ((!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete') && !this.visited) {
+		if (!this.visited && (!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')) {
 			this.visited = true;
 			if(--itemCount) return; /* haven't loaded all yet. */
 			
-			setTimeout(poll, 200); /* small wait first time for ie6; incase loaded but not complete */
+			setTimeout(poll, (this.readyState  == 'loaded') ? 1000 : 1); /*  delay if loaded but not complete */
 		}
 	}
 	
 	function poll() {
-		if(!cssLoaded) { /* chck if both css has loaded */
+		if(--pollRetries) {
+			alert("Sorry, UFD didn't manage to initalize properly.");
+			return;
+		} 
+		
+		if (cssLoaded == true && 
+				typeof jQuery != 'undefined' && 
+				typeof jQuery.ui != 'undefined' && 
+				typeof jQuery.ui.ufd != 'undefined' ) {
+			/* don't re-wrap existing ufds! */
+			jQuery(":not(span.ufd) > select:not([multiple])").ufd({addEmphasis: true});
+			jQuery.noConflict(true); 	/* the injected jquery, ui and ufd no longer are available via window.jQuery or window.$ */
+			
+			return;
+		} 
+		
+		if(!cssLoaded) { /* check if both css has loaded */
 			var base = false, plain = false;
 			var ss = document.styleSheets;
 			for (var i = 0; i < ss.length; i++) {
@@ -62,23 +78,9 @@ javascript:(function() {
 			    plain = plain || (url.search("plain.css") > 0);
 			}
 			cssLoaded = (base && plain);
-			setTimeout(poll, pollWait); //force another wait; images not yet loaded  
-		}
+		} 
 		
-		if (cssLoaded == true && 
-			typeof jQuery != 'undefined' && 
-			typeof jQuery.ui != 'undefined' && 
-			typeof jQuery.ui.ufd != 'undefined' ) {
-			/* don't re-wrap existing ufds! */
-			jQuery(":not(span.ufd) > select:not([multiple])").ufd({addEmphasis: true});
-			jQuery.noConflict(true); 	/* the injected jquery, ui and ufd no longer are available via window.jQuery or window.$ */
-			
-		} else if(--pollRetries) {
-			setTimeout(poll, pollWait); 
-			
-		} else {
-			alert("Sorry, UFD didn't manage to initalize properly.");
-		}
+		setTimeout(poll, pollWait);
 	}
 })();
 
