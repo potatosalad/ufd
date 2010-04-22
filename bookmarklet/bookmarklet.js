@@ -47,8 +47,7 @@ javascript:(function() {
 		if (!this.visited && (!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')) {
 			this.visited = true;
 			if(--itemCount) return; /* haven't loaded all yet. */
-			
-			setTimeout(poll, (this.readyState  == 'loaded') ? 1000 : 1); /*  delay if loaded but not complete */
+			poll();
 		}
 	}
 	
@@ -73,9 +72,9 @@ javascript:(function() {
 			var base = false, plain = false;
 			var ss = document.styleSheets;
 			for (var i = 0; i < ss.length; i++) {
-			    var url = ss[i].href || "";
-			    base = base || (url.search("ufd-base.css") > 0);
-			    plain = plain || (url.search("plain.css") > 0);
+				var url = ss[i].href || "";
+				base = base || (url.search("ufd-base.css") > 0);
+				plain = plain || (url.search("plain.css") > 0);
 			}
 			cssLoaded = (base && plain);
 		} 
