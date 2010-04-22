@@ -15,7 +15,7 @@ javascript: (function() {
                 s = d.createElement('SCRIPT'),
                 i = 0;
             s.type = 'text/javascript';
-            s.src = 'http://ufd.googlecode.com/svn/tags/latest-stable-bookmarklet';
+            s.src = 'http://ufd.googlecode.com/svn/tags/latest-stable-bookmarklet.js'; //tag on bookmarklet.js
             d.getElementsByTagName('head')[0].appendChild(s);
             for(;i<w.frames.length;i++){
                 ifr(w.frames[i]);
