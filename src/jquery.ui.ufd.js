@@ -25,7 +25,9 @@ $.widget(widgetName, {
 	},
 	
 	_create: function() { //1.8 init
+		if(this.created) return;
 		this.created = true;
+		
 		if (this.element[0].tagName.toLowerCase() != "select") {
 			this.destroy();
 			return false;
@@ -40,18 +42,18 @@ $.widget(widgetName, {
 		this.logNode = $(this.options.logSelector);
 		this.overflowCSS = this.options.allowLR ? "overflow" : "overflowY";
 		var selectName = this.selectbox.attr("name");
-		var suffixName = selectName + this.options.suffix;
-		var inputName = this.options.submitFreeText ? selectName : suffixName;
+		var prefixName = selectName + this.options.prefix;
+		var inputName = this.options.submitFreeText ? selectName : prefixName;
 		var inputId = ""; // none unless master select has one
 
 		var sbId = this.selectbox.attr("id");
 
 		if(sbId) {
-			inputId = sbId + this.options.suffix;
+			inputId = this.options.prefix + sbId ;
 			this.labels = $("label[for='" + sbId + "']").attr("for", inputId);
 		}
 
-		if(this.options.submitFreeText) this.selectbox.attr("name", suffixName);
+		if(this.options.submitFreeText) this.selectbox.attr("name", prefixName);
 		if(this.options.calculateZIndex) this.options.zIndexPopup = this._calculateZIndex();
 
 		var css = this.options.css;
@@ -1083,7 +1085,7 @@ InfixTrie.prototype.findNodeArray = function(key) {
 	var retArray = [this.root];
 	var kLen = key.length;
 	var chr;
-	
+
 	this.cache = this.cache || {};
 	var thisCache = this.cache;
 	
@@ -1181,7 +1183,7 @@ $.extend($.ui.ufd, {
 	
 	defaults: { // 1.7 default options location, see below
 		skin: "plain", // skin name 
-		suffix: "_ufd", // suffix for pseudo-dropdown text input name attr.  
+		prefix: "ufd-", // prefix for pseudo-dropdown text input name attr.  
 		dropDownID: "ufd-container", // ID for a root-child node for storing dropdown lists. avoids ie6 zindex issues by being at top of tree.
 		logSelector: "#log", // selector string to write log into, if present.
 		mimicCSS: ["float", "tabindex", "marginLeft","marginTop","marginRight","marginBottom"], //copy these properties to widget. Width auto-copied unless min/manual.
