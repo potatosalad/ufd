@@ -42,7 +42,7 @@ $.widget(widgetName, {
 		this.logNode = $(this.options.logSelector);
 		this.overflowCSS = this.options.allowLR ? "overflow" : "overflowY";
 		var selectName = this.selectbox.attr("name");
-		var prefixName = selectName + this.options.prefix;
+		var prefixName = this.options.prefix + selectName;
 		var inputName = this.options.submitFreeText ? selectName : prefixName;
 		var inputId = ""; // none unless master select has one
 
