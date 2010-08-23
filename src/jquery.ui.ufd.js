@@ -197,7 +197,7 @@ $.widget(widgetName, {
 				self.filter(true); //show all 
 				self.inputFocus();
 				self.showList();
-			}          
+			}
 		}); 
 		this.input.bind("focus", function(e) {
 			if(self.isDisabled){
@@ -616,8 +616,25 @@ $.widget(widgetName, {
 		if(isEnabled) this.enable();
 		// console.timeEnd("tidy");
 
+        this._moveAttrs(this.selectbox, this.input, this.options.moveAttrs);
 	},
 
+	/*
+	 * cuts and pastes all listed attributes from the source to the destination
+	 */
+	_moveAttrs: function(src, dest, attrs) {
+		
+        for (var i = 0; i < attrs.length; ++i) {
+            var attr = attrs[i];
+            var value = src.attr(attr);
+            if (value) {
+                dest.attr(attr, value);
+                src.removeAttr(attr);
+            }
+        }
+		
+	},
+	
 	/*
 	 * This method is called by the poller, so needs to return quickly when not dimensioning
 	 */
@@ -964,6 +981,7 @@ $.widget(widgetName, {
 			this.wrapper.before(this.selectbox);
 		}
 		
+        this._moveAttrs(this.input, this.selectbox, this.options.moveAttrs); // restore moved attributes
 		this.labels.attr("for", this.selectbox.attr("id")); //revert label 'for' attributes.
 		this.labels = null;
 		
@@ -1187,6 +1205,8 @@ $.extend($.ui.ufd, {
 		dropDownID: "ufd-container", // ID for a root-child node for storing dropdown lists. avoids ie6 zindex issues by being at top of tree.
 		logSelector: "#log", // selector string to write log into, if present.
 		mimicCSS: ["float", "tabindex", "marginLeft","marginTop","marginRight","marginBottom"], //copy these properties to widget. Width auto-copied unless min/manual.
+        moveAttrs: ["tabindex", "title"], // attributes to move from select to text input
+		
 
 		infix: true, //infix search, not prefix 
 		addEmphasis: false, // add <EM> tags around matches.
