@@ -297,21 +297,48 @@
       
       
     <div>
-    	<h2>Emphasis on special regexp</h2>
+    	<h2>Special characters and emphasis</h2>
 		<script type="text/javascript" >
 		$(function () {
-			 $("#regexp").ufd({log: true, addEmphasis: true});
+			 $("#regexpEmp").ufd({log: true, addEmphasis: true});
+			 $("#regexp").ufd({log: true});
 		});
 	    </script>
 
 	    <p>  </p>
 	    
-      <label for="regexp">Emphasis with regexp chars</label><br />
+      <label for="regexpEmp">Emphasis with regexp chars and a tag</label><br />
+      <select id="regexpEmp" name="regexpEmp">
+			<option value="1">([\\\^\$*+[\]?{}.=!:(|)])([\\\^\$*+[\]?{}.=!:(|)])</option>
+			<option value="2"> ( [ \ \ \ ^ \ $ * + [ \ ] ? { } . = ! : ( | ) ] ) </option>
+			<option value="3"> &lt;tag&gt; </option>
+			<option value="4">([\\\^\$*+[\]?{}.=!:(|)])([\\\^\$*+[\]?{}.=!:(|)])</option>
+			<option value="5"> ( [ \ \ \ ^ \ $ * + [ \ ] ? { } . = ! : ( | ) ] ) </option>
+			<option value="6"> &lt;tag&gt;  &amp; </option>
+     </select>
+      <br/>
+     
+      <label for="regexp">Regexp chars and a tag</label><br />
       <select id="regexp" name="regexp">
 			<option value="1">([\\\^\$*+[\]?{}.=!:(|)])([\\\^\$*+[\]?{}.=!:(|)])</option>
 			<option value="2"> ( [ \ \ \ ^ \ $ * + [ \ ] ? { } . = ! : ( | ) ] ) </option>
+			<option value="3"> &lt;tag&gt; </option>
+			<option value="4">([\\\^\$*+[\]?{}.=!:(|)])([\\\^\$*+[\]?{}.=!:(|)])</option>
+			<option value="5"> ( [ \ \ \ ^ \ $ * + [ \ ] ? { } . = ! : ( | ) ] ) </option>
+			<option value="6"> &lt;tag&gt;  &amp; </option>
      </select>
       <br/>
+     
+      <label for="regexpRaw">Regexp chars and a tag</label><br />
+      <select id="regexpRaw" name="regexpRaw">
+			<option value="1">([\\\^\$*+[\]?{}.=!:(|)])([\\\^\$*+[\]?{}.=!:(|)])</option>
+			<option value="2"> ( [ \ \ \ ^ \ $ * + [ \ ] ? { } . = ! : ( | ) ] ) </option>
+			<option value="3"> &lt;tag&gt; </option>
+			<option value="4">([\\\^\$*+[\]?{}.=!:(|)])([\\\^\$*+[\]?{}.=!:(|)])</option>
+			<option value="5"> ( [ \ \ \ ^ \ $ * + [ \ ] ? { } . = ! : ( | ) ] ) </option>
+			<option value="6"> &lt;tag&gt;  &amp; </option>
+     </select>
+     <br/>
 
 
       <hr/>

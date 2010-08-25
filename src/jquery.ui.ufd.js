@@ -418,11 +418,9 @@ $.widget(widgetName, {
 				self.emphasis(self.trie.matches, true, searchText);
 			}
 			
-			self.overwriteClass(self.trie.matches,"" );
-			self.visibleCount = self.trie.matches.length;
+			self.visibleCount = self.overwriteClass(self.trie.matches, "" );
 			if(showAll || !self.trie.matches.length) {
-				self.overwriteClass(self.trie.misses, "" );
-				self.visibleCount += self.trie.misses.length;
+				self.visibleCount += self.overwriteClass(self.trie.misses, "" );
 				if (self.options.addEmphasis) {
 					self.emphasis(self.trie.misses, false, searchText);
 				}
@@ -453,18 +451,26 @@ $.widget(widgetName, {
 			search();
 		}
 	},
+
+	/*
+	 * replace chars with entity encoding
+	 */
+	_encodeString: function(toEnc) {
+		return $.trim(toEnc).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+	},
 	
 	emphasis: function(array, isAddEmphasis, searchText ) {
 		
+		var tritem, index, indexB, li, text, stPattern, escapedST;
 		var searchTextLength = searchText.length || 0;
 		var options = this.selectbox.get(0).options;
-		var tritem, index, indexB, li, text, stPattern, escapedST;
 		index = array.length;
 		
-		isAddEmphasis = (isAddEmphasis && searchTextLength > 0 && index > 1); // don't add emphasis to 0-length or single item  
+		isAddEmphasis = (isAddEmphasis && searchTextLength > 0); // don't add emphasis to 0-length  
 		
 		if(isAddEmphasis) {
-			escapedST = searchText.replace(/([\\\^\$*+[\]?{}.=!:(|)])/g,"\\$1"); // http://xkr.us/js/regexregex 
+			// html encode search string to match innerHTML then escape regexp chars; thanks http://xkr.us/js/regexregex 
+			escapedST = this._encodeString(searchText).replace(/([\\\^\$*+[\]?{}.=!:(|)])/g,"\\$1"); 
 			stPattern = new RegExp("(" + escapedST + ")", "gi"); // $1
 			this.hasEmphasis = true;
 		}
@@ -476,12 +482,8 @@ $.widget(widgetName, {
 			indexB = tritem.length;
 			while(indexB--) { // duplicate match array
 				li = tritem[indexB];
-				text = $.trim(options[li.getAttribute("name")].text);
-				if (isAddEmphasis) {
-					li.innerHTML = text.replace(stPattern, "<em>$1</em>").replace("&", "&amp;");
-				} else {
-					li.innerHTML = text.replace("&", "&amp;");
-				}
+				text = $.trim(options[li.getAttribute("name")].innerHTML);
+				li.innerHTML = isAddEmphasis ? text.replace(stPattern, "<em>$1</em>") : text;
 			}
 		}
 		
@@ -502,7 +504,7 @@ $.widget(widgetName, {
 		var li;
 		while(liCount--){
 			var li = theLiSet[liCount];
-			li.innerHTML = $.trim(options[li.getAttribute("name")].text);
+			li.innerHTML = $.trim(options[li.getAttribute("name")].innerHTML);
 		}
 		
 		
@@ -552,7 +554,7 @@ $.widget(widgetName, {
 		
 		return false;
 	},
-
+	
 	_populateFromMaster: function() {
 		// this.log("populate from master select");
 		// console.time("prep");
@@ -581,7 +583,7 @@ $.widget(widgetName, {
 			listBuilder.push('<li name="');
 			listBuilder.push(thisOpt.index);
 			listBuilder.push('">');
-			listBuilder.push($.trim(thisOpt.text));
+			listBuilder.push($.trim(thisOpt.innerHTML));
 			listBuilder.push('</li>');
 		}
 
@@ -600,7 +602,7 @@ $.widget(widgetName, {
 		index = 0;
 		while(loopCountdown--) {
 			thisOpt = options[index];
-			self.trie.add( $.trim(thisOpt.text), theLiSet[index++]);
+			self.trie.add( $.trim(thisOpt.text), theLiSet[index++]); //option.text not innerHTML for trie as we dont want escaping
 		} 
 
 		// console.timeEnd("kids");
@@ -893,16 +895,19 @@ $.widget(widgetName, {
 
 	overwriteClass: function(array,  classString ) { //fast attribute OVERWRITE
 		// console.time("overwriteClass");
-		var tritem, index, indexB;
-		index = array.length
+		var tritem, index, indexB, count = 0;
+		index = array.length;
 		while(index--) {
 			tritem = array[index];
 			indexB = tritem.length;
+			count += indexB;
+			console.log(tritem);
 			while(indexB--) { // duplicate match array
 				tritem[indexB].setAttribute($.ui.ufd.classAttr, classString);
 			}
 		}
 		// console.timeEnd("overwriteClass");
+		return count;
 	},
 
 	listVisible: function() {
