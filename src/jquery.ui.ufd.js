@@ -299,6 +299,7 @@ $.widget(widgetName, {
 		
 		// polling for disabled, dimensioned
 		if(this.options.polling) {
+			var self = this; // shadow self var - less lookup chain == faster
 			this._myPollId = setInterval(function() {
 				// fast as possible
 				if(!self.dimensioned) self.setDimensions();
@@ -901,7 +902,6 @@ $.widget(widgetName, {
 			tritem = array[index];
 			indexB = tritem.length;
 			count += indexB;
-			console.log(tritem);
 			while(indexB--) { // duplicate match array
 				tritem[indexB].setAttribute($.ui.ufd.classAttr, classString);
 			}
