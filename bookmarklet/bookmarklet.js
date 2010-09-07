@@ -76,7 +76,7 @@ javascript:(function() {
 				base = base || (url.search("ufd-base.css") > 0);
 				plain = plain || (url.search("plain.css") > 0);
 			}
-			cssLoaded = (base && plain);
+			cssLoaded = !!(base && plain);
 		} 
 		
 		setTimeout(poll, pollWait);
