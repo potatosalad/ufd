@@ -33,7 +33,7 @@ $.widget(widgetName, {
 			return false;
 		}
 
-		// console.time("init");
+		// this._timingMeasure(true, "init");
 		
 		this.options = $.extend(true, {}, this.options); //deep copy: http://dev.jqueryui.com/ticket/4366
 
@@ -93,7 +93,7 @@ $.widget(widgetName, {
 		this._populateFromMaster();
 		this._initEvents();
 
-		// console.timeEnd("init");
+		// this._timingMeasure(false, "init");
 	},
 
 
@@ -398,11 +398,11 @@ $.widget(widgetName, {
 
 		var search = function() {
 			// self.log("filter search");
-			// console.time("filter search");
+			// this._timingMeasure(true, "filter search");
 			var mm = self.trie.find(searchText); // search!
 			self.trie.matches = mm.matches;
 			self.trie.misses = mm.misses;
-			// console.timeEnd("filter search");
+			// this._timingMeasure(false, "filter search");
 
 			//yield then screen update
 			self.updateOnTimeout = setTimeout(function(){screenUpdate();}, self.options.delayYield); 
@@ -412,7 +412,7 @@ $.widget(widgetName, {
 		var screenUpdate = function() {
 			// self.log("screen update");
 
-			// console.time("screenUpdate");
+			// this._timingMeasure(true, "screenUpdate");
 			var active = self.getActive(); //get item before class-overwrite
 			
 			if (self.options.addEmphasis) {
@@ -439,7 +439,7 @@ $.widget(widgetName, {
 				self.setActive(firstmatch.get(0));
 
 			} 
-			// console.timeEnd("screenUpdate");
+			// this._timingMeasure(false, "screenUpdate");
 
 
 			self.setListDisplay();
@@ -477,7 +477,7 @@ $.widget(widgetName, {
 			this.hasEmphasis = true;
 		}
 		// this.log("add emphasis? " + isAddEmphasis);
-		//this._timingMeasure("em", true);
+		// this._timingMeasure(true, "em");
 		while(index--) {
 			tritem = array[index];
 			indexB = tritem.length;
@@ -487,18 +487,10 @@ $.widget(widgetName, {
 				li.innerHTML = isAddEmphasis ? text.replace(stPattern, "<em>$1</em>") : text;
 			}
 		}
-		//this._timingMeasure("em", false);
+		// this._timingMeasure(false, "em");
 	},
 
 	/*
-	_timingMeasure : function(label, isStart) {
-		if(isStart) {
-			console.time(label);
-		} else {
-			console.timeEnd(label);
-		}
-	},	
-	_tm : {},
 	_timingMeasure-agnostic : function(label, isStart) {
 		if(isStart) {
 			this._tm[label] = new Date().getTime();
@@ -508,15 +500,25 @@ $.widget(widgetName, {
 			alert(label + ": millis - " + dur);
 		}
 	},
+	_tm : {},
 	*/
-	
+	_timingMeasure_firebug : function(isStart, label) {
+		if(isStart) {
+			console.time(label);
+		} else {
+			console.timeEnd(label);
+		}
+	},	
+	_timingMeasure : function(isStart, label) {
+		this._timingMeasure_firebug(isStart, label);
+	},
 	removeEmphasis : function() {
 		// this.log("remove emphasis");
 		if(!this.hasEmphasis){
 			// this.log("no emphasis to remove");
 			return;
 		}
-		// console.time("rem");
+		// this._timingMeasure(true, "rem");
 		this.hasEmphasis = false;
 		var options = this.selectbox.get(0).options;
 		var theLiSet = this.list.get(0).getElementsByTagName('LI'); // much faster array then .childElements !
@@ -528,7 +530,7 @@ $.widget(widgetName, {
 		}
 		
 		
-		// console.timeEnd("rem");		
+		// this._timingMeasure(false, "rem");		
 		
 	},
 
@@ -577,7 +579,7 @@ $.widget(widgetName, {
 	
 	_populateFromMaster: function() {
 		// this.log("populate from master select");
-		// console.time("prep");
+		// this._timingMeasure(true, "prep");
 		var isEnabled = !this.selectbox.filter("[disabled]").length; //remember incoming state
 		this.disable();
 
@@ -588,8 +590,8 @@ $.widget(widgetName, {
 		var self = this;
 		var listBuilder = [];
 
-		// console.timeEnd("prep");
-		// console.time("build");
+		// this._timingMeasure(false, "prep");
+		// this._timingMeasure(true, "build");
 
 		listBuilder.push('<ul>');
 		var options = this.selectbox.get(0).options;
@@ -612,9 +614,9 @@ $.widget(widgetName, {
 		this.listScroll.html(listBuilder.join(''));
 		this.list = this.listScroll.find("ul:first");
 
-		// console.timeEnd("build");
+		// this._timingMeasure(false, "build");
 
-		// console.time("kids");
+		// this._timingMeasure(true, "kids");
 		var theLiSet = this.list.get(0).getElementsByTagName('LI'); // much faster array then .childElements !
 		this.listItems = $(theLiSet);
 
@@ -625,8 +627,8 @@ $.widget(widgetName, {
 			self.trie.add( $.trim(thisOpt.text), theLiSet[index++]); //option.text not innerHTML for trie as we dont want escaping
 		} 
 
-		// console.timeEnd("kids");
-		// console.time("tidy");
+		// this._timingMeasure(false, "kids");
+		// this._timingMeasure(true, "tidy");
 		
 		this.visibleCount = theLiSet.length;
 		this.setInputFromMaster();
@@ -636,7 +638,7 @@ $.widget(widgetName, {
 		this.setDimensions();
 		
 		if(isEnabled) this.enable();
-		// console.timeEnd("tidy");
+		// this._timingMeasure(false, "tidy");
 
         this._moveAttrs(this.selectbox, this.input, this.options.moveAttrs);
 	},
@@ -743,7 +745,7 @@ $.widget(widgetName, {
 	//corrects list wrapper's height depending on list items height
 	setListDisplay: function() {
 
-		// console.time("listDisplay");
+		// this._timingMeasure(true, "listDisplay");
 		if(!this.itemHeight) { // caclulate only once
 			this.itemHeight = this.listItems.filter("li:first").outerHeight(true);
 			// this.log("listItemHeight: " + this.itemHeight);
@@ -787,7 +789,7 @@ $.widget(widgetName, {
 		this.listWrapper.css("top", top );			
 		this.scrollTo();
 
-		// console.timeEnd("listDisplay");
+		// this._timingMeasure(false, "listDisplay");
 		
 		return height;
 	},
@@ -914,7 +916,7 @@ $.widget(widgetName, {
 	},
 
 	overwriteClass: function(array,  classString ) { //fast attribute OVERWRITE
-		// console.time("overwriteClass");
+		// this._timingMeasure(true, "overwriteClass");
 		var tritem, index, indexB, count = 0;
 		index = array.length;
 		while(index--) {
@@ -925,7 +927,7 @@ $.widget(widgetName, {
 				tritem[indexB].setAttribute($.ui.ufd.classAttr, classString);
 			}
 		}
-		// console.timeEnd("overwriteClass");
+		// this._timingMeasure(false, "overwriteClass");
 		return count;
 	},
 
