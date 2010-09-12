@@ -456,9 +456,10 @@ $.widget(widgetName, {
 	/*
 	 * replace chars with entity encoding
 	 */
+	_encodeDom: $('<div/>'),
 	_encodeString: function(toEnc) {
-		return $.trim(toEnc).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-	},
+		return $.trim(this._encodeDom.text(toEnc).html());	
+	},	
 	
 	emphasis: function(array, isAddEmphasis, searchText ) {
 		
@@ -476,8 +477,7 @@ $.widget(widgetName, {
 			this.hasEmphasis = true;
 		}
 		// this.log("add emphasis? " + isAddEmphasis);
-		// console.time("em");
-		
+		//this._timingMeasure("em", true);
 		while(index--) {
 			tritem = array[index];
 			indexB = tritem.length;
@@ -487,9 +487,28 @@ $.widget(widgetName, {
 				li.innerHTML = isAddEmphasis ? text.replace(stPattern, "<em>$1</em>") : text;
 			}
 		}
-		
-		// console.timeEnd("em");
+		//this._timingMeasure("em", false);
 	},
+
+	/*
+	_timingMeasure : function(label, isStart) {
+		if(isStart) {
+			console.time(label);
+		} else {
+			console.timeEnd(label);
+		}
+	},	
+	_tm : {},
+	_timingMeasure-agnostic : function(label, isStart) {
+		if(isStart) {
+			this._tm[label] = new Date().getTime();
+		} else {
+			var start = this._tm[label];
+			var dur = (new Date().getTime()) - start;
+			alert(label + ": millis - " + dur);
+		}
+	},
+	*/
 	
 	removeEmphasis : function() {
 		// this.log("remove emphasis");
@@ -1010,6 +1029,7 @@ $.widget(widgetName, {
 			$.Widget.prototype.destroy.apply(this, arguments); // default destroy
 		}
 		this.selectbox = null;
+		this._encodeDom = null;
 		
 	},
 	
