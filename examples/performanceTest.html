@@ -17,7 +17,7 @@
 	
 	<!-- required dependency -->
 	<script type="text/javascript" src="js/jquery-1.4.2.js"></script>
-	<script type="text/javascript" src="js/ui.core.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.8.js"></script>
 	
 	<!--  if you want iE6 not to poke select boxes thru your dropdowns, you need ... -->
 	<script type="text/javascript" src="js/jquery.bgiframe.min.js"></script>
@@ -26,7 +26,9 @@
 	<script type="text/javascript" src="../src/jquery.ui.ufd.js"></script>
 	<script type="text/javascript" src="../jquery.ui.ufd.js"></script>        
 	
-	
+    
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/base/jquery-ui.css" type="text/css" media="all" /> 
+	<link rel="stylesheet" href="http://static.jquery.com/ui/css/demo-docs-theme/ui.theme.css" type="text/css" media="all" /> 	
 	<!-- 
 		Firebug lite for iE: 
 		Useful to see logging in iE. Can also create a DOM node matching the logSelector option.
@@ -34,99 +36,291 @@
 		<script type='text/javascript' 
 	        src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
 	 -->
-
- </head>
- <body>
-	<h2>Performance test</h2>
+	
+	<!--  Dojo -->
+	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dijit/themes/tundra/tundra.css" />
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js" djConfig="parseOnLoad: true" ></script>
 
 	<script type="text/javascript" >
-	$(function () {
-		
-		
-		$("#charButton").click(function(){
-			var start = new Date().getTime();
-			var pt = $("#perfTest");
+    dojo.require("dijit.form.FilteringSelect");
+	
+	function randomString(length) {
+	    var chars = 'abcdefghilmnoprstu'.split('');
+	    var vowels = 'aeiou'.split('');
+	    
+	    if (! length) {
+	        length = Math.floor(Math.random() * (chars.length-1) ) + 1;
+	    }
+	    
+	    var str = '';
+	    for (var i = 0; i < length; i++) {
+		    if(i%2) str += vowels[Math.floor(Math.random() * vowels.length)];
+		    else str += chars[Math.floor(Math.random() * chars.length)];
+	    }
+	    return str;
+	}
 
-			// unwrap and revert to standard select
-			pt.ufd("destroy"); 
-			
-			// should be a number 0-10,000 unless  stress testing
-			var charCount = $("#charCount").val(); 
-			var emphasis = !! $("#emphasis").filter(":checked").length;
 
-				// build HTML string				
-			var nodeBuilder = [];
-			nodeBuilder.push('<select id="perfTest">');
-			for (;charCount > 0; charCount--){
-				var rs = randomString();
-				nodeBuilder.push('<option>' + rs + "</option>");
-			} 			
-			nodeBuilder.push('</select>');
-			
-			// HTML replace
-			var newPt = $(nodeBuilder.join('')).insertAfter(pt);
-			pt.remove();
-			pt = newPt;
+	// build HTML string				
+	function newSelect(listLength, selectId) {
+		var nodeBuilder = [];
+		nodeBuilder.push('<select id="');
+		nodeBuilder.push(selectId);
+		nodeBuilder.push('">');
+		for (;listLength > 0; listLength--){
+			var rs = randomString();
+			nodeBuilder.push('<option value="');
+			nodeBuilder.push(rs);
+			nodeBuilder.push('">');
+			nodeBuilder.push(rs);
+			nodeBuilder.push('</option>');
+		} 			
+		nodeBuilder.push('</select>');
+		// console.log(nodeBuilder.join(''));
+		return nodeBuilder.join('');
+	}
 
-			var mid = new Date().getTime();
-			
-			//init new UFD
-			
-			pt.ufd({addEmphasis: emphasis, log: true, skin: "sexy"}); 
-			
-			var end = new Date().getTime();
-			
-			alert("Random options + select built in " + (mid-start) + 
-					" msec. \n\n UFD constructed in  " +  (end-mid) + " msec.");
-			
-			return;
-		});
 
-		
-		function randomString(length) {
-		    var chars = 'abcdefghilmnoprstu'.split('');
-		    var vowels = 'aeiou'.split('');
-		    
-		    if (! length) {
-		        length = Math.floor(Math.random() * (chars.length-1) ) + 1;
-		    }
-		    
-		    var str = '';
-		    for (var i = 0; i < length; i++) {
-			    if(i%2) str += vowels[Math.floor(Math.random() * vowels.length)];
-			    else str += chars[Math.floor(Math.random() * chars.length)];
-		    }
-		    return str;
-		}
-		
-	});    
-    </script>
+	
+	</script>
+
+
+</head>
+<body class=" tundra ">
+	<h2>Performance Comparsions</h2>
+
     <p>
 		Lots of thought has been put into initialization and filter speed for UFD.  This demonstrates the initialisation time of UFD.  Type in a number of items to generate, and click the button.  
 		The UFD will be destroyed, a new select node with random string items will be inserted, and a new UFD will be initialized.
 	</p><p>			
-		Timing is split in 2: destroy, option string generation, dom node insert; then the actual initialization of the new UFD.
-		The latter is the relevant part, as the first is just generating dummy data!  
+		Timing is only the actual initialization of the new UFD, and excludes random string and select construction times.
 	</p><p>			
 		You can put any number, but keep it sane (&lt: 5,000) as initialization is proportional to list length, and CSS work on that many items isn't fast.  In Firefox 3.5, one 
 		developer has noted his initialization is roughly: 20msec + (itemCount/4)msec.  
 	</p>
     
-    <label for="charCount">
+    <label for="ufdItemCount">
     Number of &lt;option ... &gt; items to generate:
     </label>
-    <input type="text" id="charCount" value="1000"/>
-    <label for="emphasis">Show emphasis? : </label>
-    <input type="checkbox" id="emphasis" value="true"/>
+    <input type="text" id="ufdItemCount" value="1000"/>
     
-    <button type="button" id="charButton">Generate new options and update</button>
+    <label for="ufdEphasis">Show emphasis? : </label>
+    <input type="checkbox" id="ufdEmphasis" value="true"/>
+    
+    <button type="button" id="ufdButton">Generate new options and update</button>
     
     <br/>
     <br/>
     <br/>
 
-    <select id="perfTest"><option>only 1 item</option></select>
-      <hr/>
+    <select id="ufdPerfTest"><option>only 1 item</option></select>
+    <div id="ufdTiming"></div>
+    
+	<script type="text/javascript" >
+	$(function () {
+		
+		
+		$("#ufdButton").click(function(){
+			var pt = $("#ufdPerfTest");
+
+			// unwrap and revert to standard select
+			pt.ufd("destroy"); 
+			
+			// should be a number 0-10,000 unless  stress testing
+			var itemCount = $("#ufdItemCount").val(); 
+			var emphasis = !! $("#ufdEmphasis").filter(":checked").length;
+
+			// HTML replace
+
+			var newPt = $(newSelect(itemCount, "ufdPerfTest" )).insertAfter(pt);
+			pt.remove();
+			pt = newPt;
+				
+			//init new UFD
+			var start = new Date().getTime();
+			pt.ufd({addEmphasis: emphasis, log: true, skin: "sexy"}); 
+			$("#ufdTiming").text("Constructed in  " +  ((new Date().getTime())-start) + " msec.");
+			
+		});
+
+	});    
+    </script>
+	
+	<hr/>
+	
+	<p>There are a handful of other filtering implementations for you to compare. </p>    
+
+	<hr/>
+
+    
+    <h2>Dojo: Dijit.form.FilteringSelect</h2>
+	<p>
+	<a href="www.dojotoolkit.org/reference-guide/dijit/form/FilteringSelect.html#dijit-form-filteringselect">Dijit.form.FilteringSelect</a> is a comparable tool.
+	</p>
+
+    <label for="dojoItemCount">
+    Number of &lt;option ... &gt; items to generate:
+    </label>
+    <input type="text" id="dojoItemCount" value="1000"/>
+
+	<button type="button" id="dojoButton">Generate new options and update</button>
+	    
+    <br/>
+    <br/>
+    <br/>
+	
+	<select  id="dijitSelect" name="fruit"><option value="1">only 1 item</option></select>
+    <div id="dojoTiming"></div>
+    
+	<script type="text/javascript" >
+    
+	$(function () {
+		var dojoWidget = null;
+		var dojoTiming = $("#dojoTiming");
+		var dojoId = "dijitSelect";
+		
+		$("#dojoButton").click(function(){
+
+			// unwrap and destroy
+			if(dojoWidget != null) dojoWidget.destroyRecursive();
+			$("#"+dojoId).remove();
+			
+			// should be a number 0-10,000 unless  stress testing
+			var itemCount = $("#dojoItemCount").val(); 
+
+			// HTML replace
+			dojoId = dojoId + "1";
+			$(newSelect(itemCount, dojoId)).insertBefore(dojoTiming);
+
+			//init new dijit.form.filterigselect
+			var start = new Date().getTime();
+			dojoWidget = new dijit.form.FilteringSelect({
+				autocomplete: true,
+				style: "width: 150px;"
+			}, dojo.byId(dojoId));
+
+			dojoTiming.text("Constructed in  " +  ((new Date().getTime())-start) + " msec.");
+			
+		});
+
+	});    
+    </script>
+	<hr/>    
+    
+    
+    <p>			
+	</p>
+    
+    <label for="uiacItemCount">
+    Number of &lt;option ... &gt; items to generate:
+    </label>
+    <input type="text" id="uiacItemCount" value="1000"/>
+    
+    <label for="uiacEphasis">Show emphasis? : </label>
+    <input type="checkbox" id="uiacEmphasis" value="true"/>
+    
+    <button type="button" id="uiacButton">Generate new options and update</button>
+    
+    <br/>
+    <br/>
+    <br/>
+
+    <select id="uiacPerfTest"><option>only 1 item</option></select>
+    <div id="uiacTiming"></div>
+    
+	<script type="text/javascript" >
+	$(function () {
+
+	// from http://jqueryui.com/demos/autocomplete/#combobox
+		$.widget("ui.combobox", {
+			_create: function() {
+				console.log("yo");
+				var self = this;
+				var select = this.element.hide();
+				var input = $("<input>")
+					.insertAfter(select)
+					.autocomplete({
+						source: function(request, response) {
+							var matcher = new RegExp(request.term, "i");
+							response(select.children("option").map(function() {
+								var text = $(this).text();
+								if (this.value && (!request.term || matcher.test(text)))
+									return {
+										id: this.value,
+										label: text.replace(new RegExp("(?![^&;]+;)(?!<[^<>]*)(" + $.ui.autocomplete.escapeRegex(request.term) + ")(?![^<>]*>)(?![^&;]+;)", "gi"), "<strong>$1</strong>"),
+										value: text
+									};
+							}));
+						},
+						delay: 0,
+						change: function(event, ui) {
+							if (!ui.item) {
+								// remove invalid value, as it didn't match anything
+								$(this).val("");
+								return false;
+							}
+							select.val(ui.item.id);
+							self._trigger("selected", event, {
+								item: select.find("[value='" + ui.item.id + "']")
+							});
+							
+						},
+						minLength: 0
+					})
+					.addClass("ui-widget ui-widget-content ui-corner-left");
+				$("<button>&nbsp;</button>")
+				.attr("tabIndex", -1)
+				.attr("title", "Show All Items")
+				.insertAfter(input)
+				.button({
+					icons: {
+						primary: "ui-icon-triangle-1-s"
+					},
+					text: false
+				}).removeClass("ui-corner-all")
+				.addClass("ui-corner-right ui-button-icon")
+				.click(function() {
+					// close if already visible
+					if (input.autocomplete("widget").is(":visible")) {
+						input.autocomplete("close");
+						return;
+					}
+					// pass empty string as value to search for, displaying all results
+					input.autocomplete("search", "");
+					input.focus();
+				});
+			}
+		});
+
+		
+		
+		$("#uiacButton").click(function(){
+			var pt = $("#uiacPerfTest");
+
+			// unwrap and revert to standard select
+			pt.combobox("destroy"); 
+			
+			// should be a number 0-10,000 unless  stress testing
+			var itemCount = $("#uiacItemCount").val(); 
+
+			// HTML replace
+
+			var newPt = $(newSelect(itemCount, "uiacPerfTest" )).insertAfter(pt);
+			pt.remove();
+			pt = newPt;
+				
+			//init new uiac
+			var start = new Date().getTime();
+			pt.combobox(); 
+			$("#uiacTiming").text("Constructed in  " +  ((new Date().getTime())-start) + " msec.");
+			
+		});
+		
+	});    
+
+	
+	</script>
+    
     
   </body>
 </html> 
