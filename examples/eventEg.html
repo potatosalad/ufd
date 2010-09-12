@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us">
+
+<head>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<!-- 	
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
+-->
+</head>
+<body>
+	<h1>1.3.2</h1>
+ 
+	<button>fake blur</button>
+
+	<select><option>1</option><option>2</option></select>
+
+	<script type="text/javascript" >
+	$(function () {
+		
+	    // add/remove from http://ejohn.org/blog/flexible-javascript-events/ thanks
+	    var addEvent = function( obj, type, fn ) {
+	      if ( obj.attachEvent ) {
+	        obj['e'+type+fn] = fn;
+	        obj[type+fn] = function(){obj['e'+type+fn]( window.event );}
+	        obj.attachEvent( 'on'+type, obj[type+fn] );
+	      } else
+	        obj.addEventListener( type, fn, false );
+	    };
+	
+	    var theSelect = $("select");
+	    
+		// mount blur handler in agnostic way
+	    addEvent(theSelect[0], "blur", function(){alert("agnostic");});
+	    
+		// mount with jQuery 
+	    theSelect.blur(function(){alert("jQuery");return true;});
+	
+		// trigger a blur on button click
+		$("button").bind("click", function() {
+			theSelect.trigger("blur");
+			
+		});
+	});    
+	</script>
+</body>
+</html> 
