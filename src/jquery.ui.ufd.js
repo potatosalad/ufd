@@ -491,7 +491,7 @@ $.widget(widgetName, {
 	},
 
 	/*
-	_timingMeasure-agnostic : function(label, isStart) {
+	_timingMeasure_agnostic : function(label, isStart) {
 		if(isStart) {
 			this._tm[label] = new Date().getTime();
 		} else {
