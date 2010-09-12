@@ -113,6 +113,7 @@
 			$("select.sizeDemo2").ufd({minWidth: 100});
 			$("select.sizeDemo3").ufd({manualWidth: 100});
 			$("select.sizeDemo4").ufd({maxWidth: 100});
+			$("select.sizeDemo5").ufd({maxWidth: 100, listWidthFixed: false});
 		});    
 	    </script>
 
@@ -131,6 +132,10 @@
       <br/>
 	  <label>Content less then minWidth of 100px</label>  
 	  <br/>
+	  <select style="width: 100px;">
+        <option value=""></option>
+      </select>
+	  <br/>
       <select class="sizeDemo2">
         <option value=""></option>
       </select>
@@ -138,15 +143,31 @@
       <br/>
 	  <label>manualWidth @ 100px</label>  
 	  <br/>
+      <select style="width: 100px;">
+        <option value="AL">a</option>
+      </select>
+	  <br/>
       <select class="sizeDemo3">
         <option value="AL">a</option>
       </select>
 	  <br/>
       <br/>
-	  <label>Content more then maxWidth of 100px</label>  
+	  <label>Content more than maxWidth of 100px</label>  
+	  <br/>
+      <select style="width: 100px;">
+        <option value="AL">supercalifragilisticexpialadocious?</option>
+      </select>
 	  <br/>
       <select class="sizeDemo4">
         <option value="AL">supercalifragilisticexpialadocious?</option>
+      </select>
+	  <br/>
+      <br/>
+	  <label>maxWidth of 100px and listWidthFixed = false</label>  
+	  <br/>
+      <select class="sizeDemo5">
+        <option value="AL">supercalifragilisticexpialadocious?</option>
+        <option value="AL">short</option>
       </select>
 	  <br/>
       <br/>	<hr/>

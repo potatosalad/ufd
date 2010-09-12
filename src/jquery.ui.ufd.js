@@ -88,7 +88,12 @@ $.widget(widgetName, {
 		
 		if($.fn.bgiframe) this.listWrapper.bgiframe(); //ie6 !
 		
-
+		// check browser supports min-width, revert to fixed if no support - Looking at you, iE6...
+		if(!this.options.listWidthFixed){ 
+			this.listWrapper.css({"width": 50, "min-width": 100});
+			this.options.listWidthFixed = (this.listWrapper.width() < 100);
+			this.listWrapper.css({"width": null, "min-width": null});
+		}
 
 		this._populateFromMaster();
 		this._initEvents();
@@ -714,8 +719,10 @@ $.widget(widgetName, {
 
 		this.input.width(inputWidth);
 		this.wrapper.width(newSelectWidth);
-		this.listWrapper.width(newSelectWidth + wrapperBP);
-		this.listScroll.width(newSelectWidth + wrapperBP - listScrollBP);
+		
+		var cssWidth = this.options.listWidthFixed ? "width" : "min-width";
+		this.listWrapper.css(cssWidth, newSelectWidth + wrapperBP);
+		this.listScroll.css(cssWidth, newSelectWidth + wrapperBP - listScrollBP);
 
 /*		console.log(newSelectWidth + " : " + inputWidth + " : " + 
 				buttonWidth + " : " + listScrollBP + " : " + wrapperBP); */ 
@@ -1245,6 +1252,7 @@ $.extend($.ui.ufd, {
 		useUiCss: false, // use jquery UI themeroller classes. 
 		log: false, // log to firebug console (if available) and logSelector (if it exists)
 		unwrapForCSS: false, // unwrap select on reload to get % right on units etc. unwrap causes flicker on reload in iE6
+		listWidthFixed: true, // List width matches widget? If false, list can be wider to fit item width, but uses min-width so no iE6 support.  
 
 		polling: 250, // poll msec to test disabled, dimensioned state of master. 0 to disable polling, but needed for (initially) hidden fields. 
 		listMaxVisible: 10, // number of visible items
