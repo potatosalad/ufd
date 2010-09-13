@@ -9,8 +9,7 @@ javascript:(function() {
 	var pollRetries = 40;
 	var pollWait = 500; 
 	
-	var versionToUse = "trunk"; 
-	/*var versionToUse = "tags/0.6"; */
+	var versionToUse = "tags/0.6";
 	
 	var svnRoot = "http://ufd.googlecode.com/svn/" + versionToUse;
 	var googRoot = "http://ajax.googleapis.com/ajax/libs";
