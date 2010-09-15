@@ -7,20 +7,6 @@
 	<!--  css for demonstrations / examples  -->    
 	<link href="../examples/example.css" rel="stylesheet" type="text/css" />
 
-	<!--  base structure css  -->    
-	<link href="../css/ufd-base.css" rel="stylesheet" type="text/css" />
-	
-	<!--  plain css skin  -->    
-	<link href="../css/plain/plain.css" rel="stylesheet" type="text/css" />
-
-	<!-- required dependency -->
-	<script type="text/javascript" src="../examples/js/jquery-1.4.2.min.js"></script>
-	<script type="text/javascript" src="../examples/js/ui.core.js"></script>
-	<!--  if you want iE6 not to poke select boxes thru your dropdowns, you need ... -->
-	<script type="text/javascript" src="../examples/js/jquery.bgiframe.min.js"></script>
-	
-	<script type="text/javascript" src="../src/jquery.ui.ufd.js"></script>
-
  </head>
  <body>
 	<h1>UFD issue test:</h1>
@@ -50,28 +36,40 @@
 		again. There is no problem with other browsers.	
 	</pre>
 
+	<p>
+		Toolman: This seems to happen any time an input gets its disabled attribute touched in iE6-8.  
+		This example is minimalised down to raw JS with no included scripts.  It seems to need 
+		the input type="image"; an image type="submit" doesnt exhibit the same bug.
+	</p>
+
+	<span onclick="breakIE();" style="border: 1px solid black; padding 5px;">Click to break enter-to-submit on form</span>
+	
 	<form>
-		<input type="text"/>
+		<input type="text" id="first"/>
 		<br/>
 		<input type="text"/>
 		<br/>
-	
-	
-		<select id="basic-combo" name="basic-combo">
-			<option value="Afghanistan">Afghanistan</option><option value="Albania">Albania</option><option value="Algeria">Algeria</option>
-			<option value="Bahrain">Bahrain</option><option value="Bangladesh">Bangladesh</option><option value="Barbados">Barbados</option>
-			<option value="Cambodia">Cambodia</option><option value="Cameroon">Cameroon</option><option value="Canada">Canada</option>
-		</select>
+		<input type="text"/>
 		<br/>
-	
-		<input type="image" src="../css/plain/icon.gif" />
+		<input type="image" id="image" src="../css/plain/icon.gif" title="This is an image submit button"/>
 		<br/>
-	
 	
 		<script type="text/javascript" >
-			$(function () {
-				$("#basic-combo").ufd({log:true});
-			});    
+			var breakIE = function(){
+				var first = document.getElementById("first");
+				
+				first.setAttribute("disabled", true);
+				first.removeAttribute("disabled");
+
+				//same problem
+				
+				//first.setAttribute("disabled", true);
+				//first.setAttribute("disabled", false); 
+				
+				//first.disabled = true;
+				//first.disabled = false;
+				alert("broken!");
+			};
 		</script>
 	
 	</form>
