@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us">
+<head>
+	<title>UFD @VERSION demonstration index</title>
+
+	<!--  css for demonstrations / examples  -->    
+	<link href="../examples/example.css" rel="stylesheet" type="text/css" />
+
+	<!--  base structure css  -->    
+	<link href="../css/ufd-base.css" rel="stylesheet" type="text/css" />
+	
+	<!--  plain css skin  -->    
+	<link href="../css/plain/plain.css" rel="stylesheet" type="text/css" />
+
+	<!-- required dependency -->
+	<script type="text/javascript" src="../examples/js/jquery-1.4.2.min.js"></script>
+	<script type="text/javascript" src="../examples/js/ui.core.js"></script>
+	<!--  if you want iE6 not to poke select boxes thru your dropdowns, you need ... -->
+	<script type="text/javascript" src="../examples/js/jquery.bgiframe.min.js"></script>
+	
+	<script type="text/javascript" src="../src/jquery.ui.ufd.js"></script>
+
+ </head>
+ <body>
+	<h1>UFD issue test:</h1>
+	<a href="http://code.google.com/p/ufd/issues/detail?id=15">http://code.google.com/p/ufd/issues/detail?id=15</a>
+	
+	<pre>
+		I found out ufd is preventing from submitting html form with the Return 
+		key (in other plain text input elements) in IE 7 and 8 (don't know about 
+		6) when the submit button is an image (input type="image").
+		
+		E.g.
+		&lt;input type="text" .../>
+		&lt;ufd>
+		&lt;input type="image" src="..." />
+		=> won't work with the Return key pressed in the text input, the order of 
+		the elements doesn't seem to matter
+		
+		Digging into the code revealed these two lines in the "disable" method:
+		
+		this.input.attr("disabled", "disabled");
+		this.selectbox.attr("disabled", "disabled");
+		
+		When these two are commented, submitting with the Return key works fine. I 
+		see the fields are enabled at the and of the method but can't really say 
+		how it affects the method and why they have to be disabled. Also I cannot 
+		explain why it is an issue for IE, especially when the fields are enabled 
+		again. There is no problem with other browsers.	
+	</pre>
+
+	<form>
+		<input type="text"/>
+		<br/>
+		<input type="text"/>
+		<br/>
+	
+	
+		<select id="basic-combo" name="basic-combo">
+			<option value="Afghanistan">Afghanistan</option><option value="Albania">Albania</option><option value="Algeria">Algeria</option>
+			<option value="Bahrain">Bahrain</option><option value="Bangladesh">Bangladesh</option><option value="Barbados">Barbados</option>
+			<option value="Cambodia">Cambodia</option><option value="Cameroon">Cameroon</option><option value="Canada">Canada</option>
+		</select>
+		<br/>
+	
+		<input type="image" src="../css/plain/icon.gif" />
+		<br/>
+	
+	
+		<script type="text/javascript" >
+			$(function () {
+				$("#basic-combo").ufd({log:true});
+			});    
+		</script>
+	
+	</form>
+  </body>
+</html> 

@@ -3,9 +3,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us">
 
 <head>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-<!-- 	
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
+	<!-- 	
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+	<script type="text/javascript" src="../../jquery/dist/jquery.min.js"></script>
 -->
 </head>
 <body>
@@ -35,12 +36,26 @@
 	    
 		// mount with jQuery 
 	    theSelect.blur(function(){alert("jQuery");return true;});
-	
+
+		var externalTrigger = function(rawNode, eventName) {
+			// external to JQuery triggered event in iE
+			if( document.createEventObject ) { 
+				rawNode.fireEvent("on" + eventName);
+				
+			// external to JQuery triggered event in other browsers
+			} else if( document.createEvent ) {
+				var evObj = document.createEvent('HTMLEvents');
+				evObj.initEvent( eventName, true, true );
+				rawNode.dispatchEvent(evObj);
+			}
+		}
+		
 		// trigger a blur on button click
 		$("button").bind("click", function() {
+			//externalTrigger(theSelect[0], "blur");
 			theSelect.trigger("blur");
-			
 		});
+		
 	});    
 	</script>
 </body>
