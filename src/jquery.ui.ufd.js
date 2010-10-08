@@ -198,7 +198,8 @@ $.widget(widgetName, {
 				return;
 			}
 			// self.log("input click: " + e.target);
-			if (!self.listVisible()) { 
+			// tidy up this logic
+			if (!self.listVisible() && self.options.showListOnFocus) { 
 				self.filter(true); //show all 
 				self.inputFocus();
 				self.showList();
@@ -328,7 +329,9 @@ $.widget(widgetName, {
 		this.button.addClass(this.options.css.inputFocus);
 		this.filter(true); //show all
 		this.inputFocus();
-		this.showList();
+		if (this.options.showListOnFocus) {
+			this.showList();
+		}
 	},
 
 	realLooseFocusEvent: function() {
@@ -737,6 +740,7 @@ $.widget(widgetName, {
 		var val = "";
 		try {
 			val = selectNode.options[selectNode.selectedIndex].text;
+			//this.selectedLi = this.listItems.get(selectNode.selectedIndex);
 		} catch(e) {
 			//must have no items!BP
 		}
@@ -1253,7 +1257,8 @@ $.extend($.ui.ufd, {
 		log: false, // log to firebug console (if available) and logSelector (if it exists)
 		unwrapForCSS: false, // unwrap select on reload to get % right on units etc. unwrap causes flicker on reload in iE6
 		listWidthFixed: true, // List width matches widget? If false, list can be wider to fit item width, but uses min-width so no iE6 support.  
-
+		showListOnFocus: false, // if false, list only appears typing or dropdown button
+		
 		polling: 250, // poll msec to test disabled, dimensioned state of master. 0 to disable polling, but needed for (initially) hidden fields. 
 		listMaxVisible: 10, // number of visible items
 		minWidth: 50, // don't autosize smaller then this.
