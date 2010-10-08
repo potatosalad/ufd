@@ -41,9 +41,7 @@ $.widget(widgetName, {
 		this.selectbox = this.element;
 		this.logNode = $(this.options.logSelector);
 		this.overflowCSS = this.options.allowLR ? "overflow" : "overflowY";
-		var selectName = this.selectbox.attr("name");
-		var prefixName = this.options.prefix + selectName;
-		var inputName = this.options.submitFreeText ? selectName : prefixName;
+		var inputName = this.options.prefix + this.selectbox.attr("name");
 		var inputId = ""; // none unless master select has one
 
 		var sbId = this.selectbox.attr("id");
@@ -53,7 +51,6 @@ $.widget(widgetName, {
 			this.labels = $("label[for='" + sbId + "']").attr("for", inputId);
 		}
 
-		if(this.options.submitFreeText) this.selectbox.attr("name", prefixName);
 		if(this.options.calculateZIndex) this.options.zIndexPopup = this._calculateZIndex();
 
 		var css = this.options.css;
@@ -552,37 +549,25 @@ $.widget(widgetName, {
 			optionIndex = active.attr("name"); //sBox pointer index
 		}
 		if (optionIndex == null || optionIndex == "" || optionIndex < 0) {
-			// this.log("no active, master not set.");
-			if (this.options.submitFreeText) {
-				return false;
-				
-			} else { 
-				// this.log("Not freetext and no active set; revert.");
-				this.revertSelected();
-				return false;
-			}
+			this.revertSelected();
+			return false;
 		} // else optionIndex is set to activeIndex
 
 		var sBox = this.selectbox.get(0);			
 		var curIndex = sBox.selectedIndex;
 		var option = sBox.options[optionIndex];
 
-		if(!this.options.submitFreeText || this.input.val() == option.text){ //freetext only if exact match
-			this.input.val(option.text); // input may be only partially set
-			
-			if(optionIndex != curIndex){
-				this.isUpdatingMaster = true;
-				sBox.selectedIndex = optionIndex;
-				// this.log("master selectbox set to: " + option.text);
-				this._triggerEventOnMaster("change");
-
-			} // else already correctly set, no change
-			return true;
-			
-		} // else have a non-matched freetext
-		// this.log("unmatched freetext, master not set.");
+		this.input.val(option.text); // input may be only partially set
 		
-		return false;
+		if(optionIndex != curIndex){
+			this.isUpdatingMaster = true;
+			sBox.selectedIndex = optionIndex;
+			// this.log("master selectbox set to: " + option.text);
+			this._triggerEventOnMaster("change");
+
+		} // else already correctly set, no change
+		return true;
+		
 	},
 	
 	_populateFromMaster: function() {
@@ -1249,7 +1234,6 @@ $.extend($.ui.ufd, {
 		infix: true, //infix search, not prefix 
 		addEmphasis: false, // add <EM> tags around matches.
 		caseSensitive: false, // case sensitive search 
-		submitFreeText: false, // re[name] original select, give text input the selects' original [name], and allow unmatched entries  
 		homeEndForCursor: false, // should home/end affect dropdown or move cursor?
 		allowLR: false, // show horizontal scrollbar
 		calculateZIndex: false, // {max ancestor} + 1
