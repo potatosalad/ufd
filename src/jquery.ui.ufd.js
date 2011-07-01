@@ -195,8 +195,7 @@ $.widget(widgetName, {
 				return;
 			}
 			// self.log("input click: " + e.target);
-			// tidy up this logic
-			if (!self.listVisible() && self.options.showListOnFocus) { 
+			if (!self.listVisible()) { 
 				self.filter(true); //show all 
 				self.inputFocus();
 				self.showList();
@@ -1241,7 +1240,7 @@ $.extend($.ui.ufd, {
 		log: false, // log to firebug console (if available) and logSelector (if it exists)
 		unwrapForCSS: false, // unwrap select on reload to get % right on units etc. unwrap causes flicker on reload in iE6
 		listWidthFixed: true, // List width matches widget? If false, list can be wider to fit item width, but uses min-width so no iE6 support.  
-		showListOnFocus: false, // if false, list only appears typing or dropdown button
+		showListOnFocus: false, // if false, list only appears after typing or click
 		
 		polling: 250, // poll msec to test disabled, dimensioned state of master. 0 to disable polling, but needed for (initially) hidden fields. 
 		listMaxVisible: 10, // number of visible items
