@@ -37,22 +37,23 @@
 	</pre>
 
 	<p>
-		Toolman: This seems to happen any time an input gets its disabled attribute touched in iE6-8.  
-		This example is minimalised down to raw JS with no included scripts.  It seems to need 
-		the input type="image"; an image type="submit" doesnt exhibit the same bug.
+		Toolman: 
+		
+		This seems to happen in in iE6-8 if any regular input (text, checkbox etc) gets its disabled attribute touched, 
+		and the form has an input type="img". It seems to need the type="image"; an image type="submit" doesnt exhibit the same bug.
+		
+		You need at least 2+1 inputs (2 regular + 1 type="image"), it doesnt seem to happen with only 1+1.     
+		
+		This example is minimalised down to raw JS with no included scripts.  Try enter to confirm that it submits,
+		then "break" IE and try again.  
 	</p>
 
 	<span onclick="breakIE();" style="border: 1px solid black; padding 5px;">Click to break enter-to-submit on form</span>
 	
 	<form>
 		<input type="text" id="first"/>
-		<br/>
 		<input type="text"/>
-		<br/>
-		<input type="text"/>
-		<br/>
 		<input type="image" id="image" src="../css/plain/icon.gif" title="This is an image submit button"/>
-		<br/>
 	
 		<script type="text/javascript" >
 			var breakIE = function(){
