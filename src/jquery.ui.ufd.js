@@ -79,6 +79,7 @@ $.widget(widgetName, {
 		this.getDropdownContainer().append(this.dropdown);
 
 		this.input = this.wrapper.find("input");
+		if (!this.options.autocomplete) this.input.attr('autocomplete', 'off');
 		this.button = this.wrapper.find("button");
 		this.listWrapper = this.dropdown.children(":first").css("z-index", this.options.zIndexPopup);
 		this.listScroll = this.listWrapper.children(":first");
@@ -1241,6 +1242,7 @@ $.extend($.ui.ufd, {
 		unwrapForCSS: false, // unwrap select on reload to get % right on units etc. unwrap causes flicker on reload in iE6
 		listWidthFixed: true, // List width matches widget? If false, list can be wider to fit item width, but uses min-width so no iE6 support.  
 		showListOnFocus: false, // if false, list only appears after typing or click
+		autocomplete: false, // if false, this.input has autocomplete="off"
 		
 		polling: 250, // poll msec to test disabled, dimensioned state of master. 0 to disable polling, but needed for (initially) hidden fields. 
 		listMaxVisible: 10, // number of visible items
